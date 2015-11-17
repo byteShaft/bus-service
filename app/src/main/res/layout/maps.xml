@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-    <AnalogClock
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/analogClock"
-        android:layout_marginTop="76dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-</RelativeLayout>
+<fragment
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:id="@+id/map"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    </fragment>
+</LinearLayout>
