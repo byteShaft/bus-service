@@ -48,15 +48,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (AppGlobals.isVirgin()) {
-            System.exit(0);
-        } else {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
-            }
         }
     }
 
@@ -112,7 +108,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        selectDrawerItem(item,drawer);
+        selectDrawerItem(item, drawer);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
