@@ -22,9 +22,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
-        tx.replace(R.id.container, new MapsFragment());
-        tx.commit();
+//        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
+//        tx.replace(R.id.container, new MapsFragment());
+//        tx.commit();
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
