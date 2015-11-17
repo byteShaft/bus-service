@@ -1,10 +1,10 @@
 package com.byteshaft.busservice;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,6 +15,7 @@ import android.view.MenuItem;
 
 import com.byteshaft.busservice.fragments.AccountDetailsFragment;
 import com.byteshaft.busservice.fragments.MapsFragment;
+import com.byteshaft.busservice.utils.AppGlobals;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -25,6 +26,11 @@ public class MainActivity extends AppCompatActivity
 //        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
 //        tx.replace(R.id.container, new MapsFragment());
 //        tx.commit();
+
+        if (AppGlobals.isVirgin()) {
+            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(i);
+        }
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -42,11 +48,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        if (AppGlobals.isVirgin()) {
+            System.exit(0);
+        } else {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+            }
         }
     }
 
