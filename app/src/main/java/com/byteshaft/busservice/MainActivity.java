@@ -2,6 +2,7 @@ package com.byteshaft.busservice;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,6 +20,8 @@ import com.byteshaft.busservice.utils.AppGlobals;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    Fragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void selectDrawerItem(MenuItem menuItem, DrawerLayout drawerLayout) {
-        Fragment fragment = null;
+        fragment = null;
         Class fragmentClass;
         switch (menuItem.getItemId()) {
             case R.id.nav_map:
@@ -98,8 +101,13 @@ public class MainActivity extends AppCompatActivity
         }
         menuItem.setChecked(true);
         setTitle(menuItem.getTitle());
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container_main, fragment).commit();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.container_main, fragment).commit();
+            }
+        }, 300);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
