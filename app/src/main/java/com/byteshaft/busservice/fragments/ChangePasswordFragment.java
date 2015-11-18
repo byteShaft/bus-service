@@ -52,7 +52,7 @@ public class ChangePasswordFragment extends Fragment {
 
         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Creating Account...");
+        progressDialog.setMessage("Changing password...");
         progressDialog.show();
 
         String passwordOld = editTextPasswordOld.getText().toString();
@@ -64,10 +64,7 @@ public class ChangePasswordFragment extends Fragment {
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
                         onChangeSuccess();
-                        // onSignupFailed();
                         progressDialog.dismiss();
                     }
                 }, 2000);
@@ -120,4 +117,6 @@ public class ChangePasswordFragment extends Fragment {
 
         return valid;
     }
+
+
 }
