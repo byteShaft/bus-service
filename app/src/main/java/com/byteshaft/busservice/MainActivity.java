@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity
         menuItem.setChecked(true);
         setTitle(menuItem.getTitle());
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.container_main, fragment).commit();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
