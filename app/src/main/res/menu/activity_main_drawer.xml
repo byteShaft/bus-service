@@ -8,7 +8,7 @@
 
     <item android:title="Settings">
         <menu>
-            <item android:id="@+id/nav_my_profile"
+            <item android:id="@+id/nav_change_password"
                 android:icon="@drawable/user"
                 android:title="Change password"/>
             <item android:id="@+id/nav_my_route"

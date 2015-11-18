@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_map:
                 fragmentClass = MapsFragment.class;
                 break;
-            case R.id.nav_my_profile:
+            case R.id.nav_change_password:
                 fragmentClass = ChangePasswordFragment.class;
                 break;
             default:
