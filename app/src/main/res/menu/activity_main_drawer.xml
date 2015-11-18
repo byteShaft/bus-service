@@ -6,11 +6,14 @@
             android:icon="@android:drawable/ic_dialog_map"
             android:title="Maps" />
 
-    <item android:title="Setting">
+    <item android:title="Settings">
         <menu>
             <item android:id="@+id/nav_my_profile"
                 android:icon="@drawable/user"
-                android:title="Change details"/>
+                android:title="Change password"/>
+            <item android:id="@+id/nav_my_route"
+                android:icon="@android:drawable/ic_dialog_map"
+                android:title="Change route"/>
         </menu>
     </item>
 

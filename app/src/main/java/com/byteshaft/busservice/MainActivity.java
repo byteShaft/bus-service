@@ -13,7 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.byteshaft.busservice.fragments.AccountDetailsFragment;
+import com.byteshaft.busservice.fragments.ChangePasswordFragment;
 import com.byteshaft.busservice.fragments.MapsFragment;
 import com.byteshaft.busservice.utils.AppGlobals;
 
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity
                 fragmentClass = MapsFragment.class;
                 break;
             case R.id.nav_my_profile:
-                fragmentClass = AccountDetailsFragment.class;
+                fragmentClass = ChangePasswordFragment.class;
                 break;
             default:
                 fragmentClass = MapsFragment.class;
