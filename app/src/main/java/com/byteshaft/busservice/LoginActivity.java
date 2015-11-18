@@ -66,7 +66,7 @@ public class LoginActivity extends Activity {
                         onLoginSuccess();
                         progressDialog.dismiss();
                     }
-                }, 3000);
+                }, 2000);
     }
 
     public boolean validate() {
@@ -75,15 +75,15 @@ public class LoginActivity extends Activity {
         String username = editTextUsername.getText().toString();
         String password = editTextPassword.getText().toString();
 
-        if (username.trim().isEmpty() || username.length() < 4 || username.length() > 10) {
-            editTextUsername.setError("enter a valid username");
+        if (username.trim().isEmpty() || username.length() < 4) {
+            editTextUsername.setError("at least 4 characters");
             valid = false;
         } else {
             editTextUsername.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            editTextPassword.setError("enter a valid password");
+        if (password.trim().isEmpty() || password.length() < 4) {
+            editTextPassword.setError("at least 4 characters");
             valid = false;
         } else {
             editTextPassword.setError(null);
@@ -102,5 +102,4 @@ public class LoginActivity extends Activity {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
         buttonLogin.setEnabled(true);
     }
-
 }
