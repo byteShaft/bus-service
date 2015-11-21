@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <group android:checkableBehavior="single" >
+        <item android:id="@+id/nav_home"
+            android:icon="@mipmap/ic_home"
+            android:title="Home" />
         <item android:id="@+id/nav_map"
-            android:icon="@android:drawable/ic_dialog_map"
-            android:title="Maps" />
-
+            android:icon="@mipmap/ic_waypoint"
+            android:title="Route View" />
     <item android:title="Settings">
         <menu>
+            <item android:id="@+id/nav_schedule"
+                android:icon="@mipmap/ic_schedule"
+                android:title="Set Schedule"/>
             <item android:id="@+id/nav_change_password"
-                android:icon="@drawable/user"
-                android:title="Change password"/>
-            <item android:id="@+id/nav_my_route"
-                android:icon="@android:drawable/ic_dialog_map"
-                android:title="Change route"/>
+                android:icon="@mipmap/ic_key"
+                android:title="Change Password"/>
+            <item android:id="@+id/nav_logout"
+                android:icon="@mipmap/ic_exit"
+                android:title="Logout"/>
         </menu>
     </item>
-
-    <item android:title="Communicate">
-        <menu>
-            <item android:id="@+id/nav_share"
-                android:icon="@android:drawable/ic_menu_share"
-                android:title="Share" />
-            <item android:id="@+id/nav_send"
-                android:icon="@android:drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>
+        <item android:title="Communicate">
+            <menu>
+                <item android:id="@+id/nav_contact"
+                    android:icon="@mipmap/ic_contact"
+                    android:title="Contact"/>
+            </menu>
+        </item>
     </group>
-
 </menu>

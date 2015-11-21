@@ -12,6 +12,8 @@ public class AppGlobals extends Application {
     private static SharedPreferences sPreferences;
     private static final String VIRGIN_KEY = "virgin";
     private static final String USER_NAME = "user_name";
+    private static final String STUDENT_NAME = "student_name";
+
 
     @Override
     public void onCreate() {
@@ -32,11 +34,19 @@ public class AppGlobals extends Application {
         sPreferences.edit().putBoolean(VIRGIN_KEY, virgin).apply();
     }
 
-    public static String getName() {
+    public static String getUsername() {
         return sPreferences.getString(USER_NAME, null);
     }
 
-    public static void putName(String username) {
+    public static void putUsername(String username) {
         sPreferences.edit().putString(USER_NAME, username).apply();
+    }
+
+    public static String getStudentName() {
+        return sPreferences.getString(STUDENT_NAME, null);
+    }
+
+    public static void putStudentName(String studentName) {
+        sPreferences.edit().putString(STUDENT_NAME, studentName).apply();
     }
 }

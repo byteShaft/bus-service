@@ -17,6 +17,8 @@ public class LoginActivity extends Activity {
     EditText editTextUsername;
     EditText editTextPassword;
     Button buttonLogin;
+    String username;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +57,6 @@ public class LoginActivity extends Activity {
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
-        String username = editTextUsername.getText().toString();
-        String password = editTextPassword.getText().toString();
-
         // TODO: Implement authentication here.
 
         new android.os.Handler().postDelayed(
@@ -72,8 +71,8 @@ public class LoginActivity extends Activity {
     public boolean validate() {
         boolean valid = true;
 
-        String username = editTextUsername.getText().toString();
-        String password = editTextPassword.getText().toString();
+        username = editTextUsername.getText().toString();
+        password = editTextPassword.getText().toString();
 
         if (username.trim().isEmpty() || username.length() < 4) {
             editTextUsername.setError("at least 4 characters");
@@ -94,6 +93,7 @@ public class LoginActivity extends Activity {
 
     public void onLoginSuccess() {
         AppGlobals.setVirgin(false);
+        AppGlobals.putUsername(username);
         buttonLogin.setEnabled(true);
         finish();
     }
