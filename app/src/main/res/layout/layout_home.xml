@@ -1,14 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="28dp"
-        android:textStyle="bold"
-        android:text="HOME"
-        android:gravity="center"/>
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Taibah University"
+            android:textColor="#00796B"
+            android:textSize="28dp"
+            android:textStyle="bold"
+            android:typeface="serif" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bus Service"
+            android:textSize="26dp"
+            android:textStyle="bold"
+            android:typeface="serif" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_driver_route_cancelled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_route_cancelled" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Route Cancelled"
+                android:textColor="#B71C1C"
+                android:textSize="18dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Click to Restore"
+                android:textSize="14dp" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_driver_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="28dp">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_route_switch"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:padding="14dp"
+                android:text="Start Route" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_report_situation"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:padding="14dp"
+                android:text="Report a Situation" />
+        </LinearLayout>
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/tv_user_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="10dp"
+        android:text="User Type: Driver"
+        android:textSize="10dp"
+        android:textStyle="bold"
+        android:typeface="monospace" />
+
+</RelativeLayout>

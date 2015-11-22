@@ -1,5 +1,6 @@
 package com.byteshaft.busservice.fragments;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,17 +13,21 @@ import android.view.ViewGroup;
 
 import com.byteshaft.busservice.R;
 import com.esri.android.map.LocationDisplayManager;
+import com.esri.android.map.MapOptions;
 import com.esri.android.map.MapView;
-import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
 import com.esri.android.map.event.OnStatusChangedListener;
+
 
 public class MapsFragment extends Fragment {
 
     View convertView;
     FragmentManager fm;
     MapView mMapView = null;
+    Location mLocation = null;
     private Menu actionsMenu;
-    private boolean simpleMapView;
+    private boolean simpleMapView = true;
+    private final MapOptions mStreetsView = new MapOptions(MapOptions.MapType.STREETS);
+    private final MapOptions mSatelliteView = new MapOptions(MapOptions.MapType.SATELLITE);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,9 +39,7 @@ public class MapsFragment extends Fragment {
         mMapView = (MapView) convertView.findViewById(R.id.map);
         // Enable map to wrap around date line.
         mMapView.enableWrapAround(true);
-
-        mMapView.addLayer(new ArcGISTiledMapServiceLayer(
-                "http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"));
+        mMapView.setKeepScreenOn(true);
 
         mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
             @Override
@@ -45,9 +48,12 @@ public class MapsFragment extends Fragment {
                     LocationDisplayManager ldm = mMapView.getLocationDisplayManager();
                     ldm.setAutoPanMode(LocationDisplayManager.AutoPanMode.LOCATION);
                     ldm.start();
+                    mLocation = ldm.getLocation();
                 }
             }
         });
+
+
         return convertView;
     }
 
@@ -69,7 +75,6 @@ public class MapsFragment extends Fragment {
         mMapView.unpause();
     }
 
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -77,23 +82,26 @@ public class MapsFragment extends Fragment {
         actionsMenu = menu;
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_current_location:
 
-                return true;
-            case R.id.action_change_map:
-
-                if (simpleMapView) {
-                    setActionIcon(true);
-                    simpleMapView = false;
-                } else {
-                    setActionIcon(false);
-                    simpleMapView = true;
+                if (mLocation != null) {
+                    mMapView.centerAt(mLocation.getLatitude(), mLocation.getLongitude(), true);
                 }
 
+                return true;
+            case R.id.action_change_map:
+                if (simpleMapView) {
+                    mMapView.setMapOptions(mSatelliteView);
+                    setActionIcon(false);
+                    simpleMapView = false;
+                } else {
+                    mMapView.setMapOptions(mStreetsView);
+                    setActionIcon(true);
+                    simpleMapView = true;
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

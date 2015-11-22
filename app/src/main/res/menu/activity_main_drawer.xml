@@ -7,11 +7,11 @@
         <item android:id="@+id/nav_map"
             android:icon="@mipmap/ic_waypoint"
             android:title="Route View" />
+        <item android:id="@+id/nav_schedule"
+            android:icon="@mipmap/ic_schedule"
+            android:title="Set Schedule"/>
     <item android:title="Settings">
         <menu>
-            <item android:id="@+id/nav_schedule"
-                android:icon="@mipmap/ic_schedule"
-                android:title="Set Schedule"/>
             <item android:id="@+id/nav_change_password"
                 android:icon="@mipmap/ic_key"
                 android:title="Change Password"/>
