@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,10 +60,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
+        switch (v.getId()) {
 
             case R.id.layout_driver_route_cancelled:
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
@@ -97,7 +97,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         });
                 AlertDialog restoreRouteDialog = alertDialogBuilder.create();
                 restoreRouteDialog.show();
-            break;
+                break;
 
             case R.id.btn_report_situation:
                 final Dialog reportSituationDialog = new Dialog(getActivity());
@@ -119,13 +119,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 dialogButtonOk.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         reportSituationDialog.dismiss();
-
                         final ProgressDialog progressDialog = new ProgressDialog(getActivity());
                         progressDialog.setIndeterminate(true);
                         progressDialog.setMessage("Reporting Situation...");
                         progressDialog.show();
+
+                        int id= radioGroupReportSituation.getCheckedRadioButtonId();
+                        View radioButton = radioGroupReportSituation.findViewById(id);
+                        int radioIndex = radioGroupReportSituation.indexOfChild(radioButton);
+                        Log.i("BusService", "SituationReportingIndex: " + radioIndex);
 
                         // TODO: Implement reporting logic here.
 
@@ -139,7 +142,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     }
                 });
                 reportSituationDialog.show();
-            break;
+                break;
         }
     }
 }
