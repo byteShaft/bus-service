@@ -15,8 +15,9 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 
 import com.byteshaft.busservice.R;
+import com.byteshaft.busservice.utils.AppGlobals;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements View.OnClickListener {
 
     View convertView;
     Button buttonReportSituation;
@@ -32,14 +33,73 @@ public class HomeFragment extends Fragment {
 
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
+        layoutRouteCancelled.setOnClickListener(this);
+
+        setRouteStatus(AppGlobals.getRouteStatus());
 
         buttonStartStopRoute = (Button) convertView.findViewById(R.id.btn_route_switch);
+        buttonStartStopRoute.setOnClickListener(this);
 
         buttonReportSituation = (Button) convertView.findViewById(R.id.btn_report_situation);
-        buttonReportSituation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        buttonReportSituation.setOnClickListener(this);
 
+        return convertView;
+    }
+
+    private void setRouteStatus(boolean status) {
+        if (status) {
+            layoutDriverButtons.setVisibility(View.VISIBLE);
+            layoutRouteCancelled.setVisibility(View.GONE);
+            AppGlobals.putRouteStatus(true);
+        } else {
+            layoutDriverButtons.setVisibility(View.GONE);
+            layoutRouteCancelled.setVisibility(View.VISIBLE);
+            layoutRouteCancelled.invalidate();
+            AppGlobals.putRouteStatus(false);
+        }
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+
+            case R.id.layout_driver_route_cancelled:
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        getActivity());
+                alertDialogBuilder.setTitle("Restore Route");
+                alertDialogBuilder
+                        .setMessage("Are you sure?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setMessage("Restoring Route...");
+                                progressDialog.show();
+
+                                // TODO: Implement restoration logic here.
+
+                                new android.os.Handler().postDelayed(
+                                        new Runnable() {
+                                            public void run() {
+                                                setRouteStatus(true);
+                                                progressDialog.dismiss();
+                                            }
+                                        }, 2000);
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog restoreRouteDialog = alertDialogBuilder.create();
+                restoreRouteDialog.show();
+            break;
+
+            case R.id.btn_report_situation:
                 final Dialog reportSituationDialog = new Dialog(getActivity());
                 reportSituationDialog.setContentView(R.layout.layout_report_dialog);
                 reportSituationDialog.setTitle("Choose a Situation");
@@ -72,56 +132,14 @@ public class HomeFragment extends Fragment {
                         new android.os.Handler().postDelayed(
                                 new Runnable() {
                                     public void run() {
-                                        layoutDriverButtons.setVisibility(View.GONE);
-                                        layoutRouteCancelled.setVisibility(View.VISIBLE);
+                                        setRouteStatus(false);
                                         progressDialog.dismiss();
                                     }
                                 }, 2000);
                     }
                 });
-
-                layoutRouteCancelled.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                                getActivity());
-                        alertDialogBuilder.setTitle("Restore Route");
-                        alertDialogBuilder
-                                .setMessage("Are you sure?")
-                                .setCancelable(false)
-                                .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-
-                                        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-                                        progressDialog.setIndeterminate(true);
-                                        progressDialog.setMessage("Restoring Route...");
-                                        progressDialog.show();
-
-                                        // TODO: Implement restoration logic here.
-
-                                        new android.os.Handler().postDelayed(
-                                                new Runnable() {
-                                                    public void run() {
-                                                        layoutDriverButtons.setVisibility(View.VISIBLE);
-                                                        layoutRouteCancelled.setVisibility(View.GONE);
-                                                        progressDialog.dismiss();
-                                                    }
-                                                }, 2000);
-                                    }
-                                })
-                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
-                    }
-                });
                 reportSituationDialog.show();
-            }
-        });
-        return convertView;
+            break;
+        }
     }
 }
