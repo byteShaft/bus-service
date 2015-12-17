@@ -2,7 +2,9 @@ package com.byteshaft.busservice;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,13 +13,12 @@ import android.widget.Toast;
 
 import com.byteshaft.busservice.utils.AppGlobals;
 
-
 public class LoginActivity extends Activity {
 
     EditText editTextUsername;
     EditText editTextPassword;
     Button buttonLogin;
-    String username;
+    public static String username;
     String password;
 
     @Override
@@ -32,6 +33,8 @@ public class LoginActivity extends Activity {
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                username = editTextUsername.getText().toString();
+                password = editTextPassword.getText().toString();
                 login();
             }
         });
@@ -59,6 +62,8 @@ public class LoginActivity extends Activity {
 
         // TODO: Implement authentication here.
 
+        // TODO: fetch Route Status here.
+
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
@@ -71,11 +76,12 @@ public class LoginActivity extends Activity {
     public boolean validate() {
         boolean valid = true;
 
-        username = editTextUsername.getText().toString();
-        password = editTextPassword.getText().toString();
-
         if (username.trim().isEmpty() || username.length() < 4) {
             editTextUsername.setError("at least 4 characters");
+            valid = false;
+        } else if (!username.startsWith("dvr") && !username.startsWith("sdt")) {
+            editTextUsername.setError("invalid username");
+            Log.i("username", username);
             valid = false;
         } else {
             editTextUsername.setError(null);
@@ -95,11 +101,34 @@ public class LoginActivity extends Activity {
         AppGlobals.setVirgin(false);
         AppGlobals.putUsername(username);
         buttonLogin.setEnabled(true);
-        finish();
+        setUserType();
+        launchHomeFragment();
     }
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
         buttonLogin.setEnabled(true);
+    }
+
+    public void launchHomeFragment() {
+        Intent startIntent = new Intent(LoginActivity.this, MainActivity.class);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        LoginActivity.this.startActivity(startIntent);
+    }
+
+    public void setUserType() {
+        if (TextUtils.equals(username.substring(0,3), "dvr")) {
+            AppGlobals.putUserType(1);
+        } else if (TextUtils.equals(username.substring(0,3), "sdt")){
+            AppGlobals.putUserType(0);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!AppGlobals.isVirgin()) {
+            finish();
+        }
     }
 }

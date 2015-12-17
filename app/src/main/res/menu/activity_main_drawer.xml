@@ -22,6 +22,9 @@
     </item>
         <item android:title="Communicate">
             <menu>
+                <item android:id="@+id/nav_twitter"
+                    android:icon="@mipmap/ic_twitter"
+                    android:title="Taibah Tweets"/>
                 <item android:id="@+id/nav_contact"
                     android:icon="@mipmap/ic_contact"
                     android:title="Contact"/>
