@@ -21,6 +21,10 @@ public class ChangePasswordFragment extends Fragment {
     EditText editTextPasswordRepeat;
     Button buttonDone;
 
+    String passwordOld;
+    String passwordNew;
+    String passwordRepeat;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,10 +59,6 @@ public class ChangePasswordFragment extends Fragment {
         progressDialog.setMessage("Changing password...");
         progressDialog.show();
 
-        String passwordOld = editTextPasswordOld.getText().toString();
-        String passwordNew = editTextPasswordNew.getText().toString();
-        String passwordRepeat = editTextPasswordRepeat.getText().toString();
-
         // TODO: Implement password change logic here.
 
         new android.os.Handler().postDelayed(
@@ -83,19 +83,22 @@ public class ChangePasswordFragment extends Fragment {
     public boolean validate() {
         boolean valid = true;
 
-        String passwordOld = editTextPasswordOld.getText().toString();
-        String passwordNew = editTextPasswordNew.getText().toString();
-        String passwordRepeat = editTextPasswordRepeat.getText().toString();
+        passwordOld = editTextPasswordOld.getText().toString();
+        passwordNew = editTextPasswordNew.getText().toString();
+        passwordRepeat = editTextPasswordRepeat.getText().toString();
 
         if (passwordOld.trim().isEmpty() || passwordOld.length() < 4 ) {
             editTextPasswordOld.setError("at least 4 characters");
             valid = false;
         } else {
-            editTextPasswordOld.setError(null);
+                editTextPasswordOld.setError(null);
         }
 
         if (passwordNew.trim().isEmpty() || passwordNew.length() < 4 ) {
             editTextPasswordNew.setError("at least 4 characters");
+            valid = false;
+        } else if (passwordOld.contains(" ")) {
+            editTextPasswordOld.setError("must not contain a white space");
             valid = false;
         } else {
             editTextPasswordNew.setError(null);
@@ -116,7 +119,6 @@ public class ChangePasswordFragment extends Fragment {
         }
 
         return valid;
+
     }
-
-
 }

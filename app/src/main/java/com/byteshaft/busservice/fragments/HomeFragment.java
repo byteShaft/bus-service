@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.byteshaft.busservice.R;
 import com.byteshaft.busservice.utils.AppGlobals;
@@ -26,16 +27,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     RadioGroup radioGroupReportSituation;
     RelativeLayout layoutDriverButtons;
     RelativeLayout layoutRouteCancelled;
+    TextView tvUserType;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_home, null);
 
+        tvUserType = (TextView) convertView.findViewById(R.id.tv_user_type);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
 
+        setAppView();
         setRouteStatus(AppGlobals.getRouteStatus());
 
         buttonStartStopRoute = (Button) convertView.findViewById(R.id.btn_route_switch);
@@ -49,14 +53,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private void setRouteStatus(boolean status) {
         if (status) {
-            layoutDriverButtons.setVisibility(View.VISIBLE);
+            if (AppGlobals.getUserType() == 1) {
+                layoutDriverButtons.setVisibility(View.VISIBLE);
+            }
             layoutRouteCancelled.setVisibility(View.GONE);
             AppGlobals.putRouteStatus(true);
         } else {
-            layoutDriverButtons.setVisibility(View.GONE);
+            if (AppGlobals.getUserType() == 1) {
+                layoutDriverButtons.setVisibility(View.GONE);
+            }
             layoutRouteCancelled.setVisibility(View.VISIBLE);
-            layoutRouteCancelled.invalidate();
+//            layoutRouteCancelled.invalidate();
             AppGlobals.putRouteStatus(false);
+        }
+    }
+
+    public void setAppView() {
+        if (AppGlobals.getUserType() == 1) {
+            layoutDriverButtons.setVisibility(View.VISIBLE);
+            tvUserType.setText("UserType: Driver");
+
+        } else if (AppGlobals.getUserType() == 0) {
+            layoutDriverButtons.setVisibility(View.GONE);
+            tvUserType.setText("UserType: Student");
         }
     }
 

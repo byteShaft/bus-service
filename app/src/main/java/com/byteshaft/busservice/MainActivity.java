@@ -22,6 +22,7 @@ import com.byteshaft.busservice.fragments.ContactFragment;
 import com.byteshaft.busservice.fragments.HomeFragment;
 import com.byteshaft.busservice.fragments.MapsFragment;
 import com.byteshaft.busservice.fragments.ScheduleFragment;
+import com.byteshaft.busservice.fragments.TwitterFragment;
 import com.byteshaft.busservice.utils.AppGlobals;
 
 public class MainActivity extends AppCompatActivity
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity
         if (AppGlobals.isVirgin()) {
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);
+            return;
         }
 
         FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-
     }
 
 
@@ -89,6 +90,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_logout:
                 logoutCheck = true;
                 showLogoutDialog();
+                break;
+            case R.id.nav_twitter:
+                fragmentClass = TwitterFragment.class;
                 break;
             case R.id.nav_contact:
                 fragmentClass = ContactFragment.class;
@@ -164,5 +168,11 @@ public class MainActivity extends AppCompatActivity
                         finish();
                     }
                 }, 2000);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
     }
 }

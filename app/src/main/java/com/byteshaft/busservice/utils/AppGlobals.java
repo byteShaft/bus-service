@@ -14,6 +14,7 @@ public class AppGlobals extends Application {
     private static final String USER_NAME = "user_name";
     private static final String STUDENT_NAME = "student_name";
     private static final String ROUTE_STATUS = "route_status";
+    private static final String STUDENT_TYPE = "student_type";
 
     @Override
     public void onCreate() {
@@ -51,6 +52,14 @@ public class AppGlobals extends Application {
     }
     public static boolean getRouteStatus() {
         return sPreferences.getBoolean(ROUTE_STATUS, true);
+    }
+
+    public static int getUserType() {
+        return sPreferences.getInt(STUDENT_TYPE, 0);
+    }
+
+    public static void putUserType(int userType) {
+        sPreferences.edit().putInt(STUDENT_TYPE, userType).apply();
     }
 
     public static void putRouteStatus(boolean status) {
