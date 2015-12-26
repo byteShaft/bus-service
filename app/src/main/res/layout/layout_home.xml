@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/layout_heading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
@@ -18,8 +19,51 @@
             android:textSize="18dp"
             android:textStyle="bold"
             android:typeface="serif" />
-
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_route_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:layout_below="@+id/layout_heading"
+        android:visibility="visible">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Arrival Time: "
+                android:textStyle="bold"
+                android:textSize="18dp" />
+            <TextView
+                android:id="@+id/tv_arrival_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10:00 AM"
+                android:layout_marginLeft="60dp"
+                android:textSize="26dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="Departure Time: "
+                android:textStyle="bold"
+                android:textSize="18dp" />
+            <TextView
+                android:id="@+id/tv_departure_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="02:00 PM"
+                android:layout_marginLeft="60dp"
+                android:textSize="26dp" />
+        </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/layout_driver_route_cancelled"
@@ -98,5 +142,4 @@
         android:textSize="10dp"
         android:textStyle="bold"
         android:typeface="monospace" />
-
 </RelativeLayout>

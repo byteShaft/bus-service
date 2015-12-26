@@ -12,13 +12,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.byteshaft.busservice.utils.AppGlobals;
+import com.byteshaft.busservice.utils.Helpers;
 
 public class LoginActivity extends Activity {
 
     EditText editTextUsername;
     EditText editTextPassword;
     Button buttonLogin;
-    public static String username;
+    String username;
     String password;
 
     @Override
@@ -55,10 +56,7 @@ public class LoginActivity extends Activity {
 
         buttonLogin.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
+        Helpers.showProgressDialog(LoginActivity.this, "Authenticating...");
 
         // TODO: Implement authentication here.
 
@@ -68,7 +66,7 @@ public class LoginActivity extends Activity {
                 new Runnable() {
                     public void run() {
                         onLoginSuccess();
-                        progressDialog.dismiss();
+                        Helpers.dismissProgressDialog();
                     }
                 }, 2000);
     }
@@ -81,7 +79,6 @@ public class LoginActivity extends Activity {
             valid = false;
         } else if (!username.startsWith("dvr") && !username.startsWith("sdt")) {
             editTextUsername.setError("invalid username");
-            Log.i("username", username);
             valid = false;
         } else {
             editTextUsername.setError(null);

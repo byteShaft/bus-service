@@ -24,6 +24,7 @@ import com.byteshaft.busservice.fragments.MapsFragment;
 import com.byteshaft.busservice.fragments.ScheduleFragment;
 import com.byteshaft.busservice.fragments.TwitterFragment;
 import com.byteshaft.busservice.utils.AppGlobals;
+import com.byteshaft.busservice.utils.Helpers;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -57,6 +58,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
+
+        if (AppGlobals.getUserType() == 1) {
+            navigationView.getMenu().getItem(2).setVisible(false);
+        }
     }
 
     @Override
@@ -68,7 +73,6 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
 
     public void selectDrawerItem(MenuItem menuItem) {
         boolean logoutCheck = false;
@@ -116,7 +120,6 @@ public class MainActivity extends AppCompatActivity
                     fragmentManager.beginTransaction().replace(R.id.container_main, fragment).commit();
                 }
             }, 300);
-
         }
     }
 
@@ -153,10 +156,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void logout() {
-        final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Logging Out...");
-        progressDialog.show();
+
+        Helpers.showProgressDialog(MainActivity.this, "Logging Out...");
 
         // TODO: Implement logout logic here.
 
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity
                 new Runnable() {
                     public void run() {
                         AppGlobals.setVirgin(true);
-                        progressDialog.dismiss();
+                        Helpers.dismissProgressDialog();
                         finish();
                     }
                 }, 2000);
