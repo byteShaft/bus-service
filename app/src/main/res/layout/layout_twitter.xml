@@ -4,17 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView android:id="@id/android:empty"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+        <ImageView
+            android:id="@+id/iv_tweets_icon"
+            android:layout_width="60dp"
+            android:layout_height="60dp"/>
+        <TextView
+            android:id="@+id/tv_twitter_account_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="30dp"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:typeface="serif"/>
+    </LinearLayout>
+
+    <ListView android:id="@+id/lv_tweets"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal|center_vertical"
-        android:text="No Tweets"/>
-
-    <ListView android:id="@id/android:list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="#e1e8ed"
-        android:dividerHeight="1dp"
-        android:drawSelectorOnTop="false"/>
+        android:clickable="false"
+        android:divider="@null"/>
 </LinearLayout>

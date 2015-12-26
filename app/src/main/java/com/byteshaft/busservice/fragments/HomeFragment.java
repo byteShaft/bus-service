@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.byteshaft.busservice.R;
 import com.byteshaft.busservice.utils.AppGlobals;
+import com.byteshaft.busservice.utils.Helpers;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
@@ -27,6 +28,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     RadioGroup radioGroupReportSituation;
     RelativeLayout layoutDriverButtons;
     RelativeLayout layoutRouteCancelled;
+    RelativeLayout layoutRouteInfo;
     TextView tvUserType;
 
     @Nullable
@@ -38,6 +40,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
+
+        layoutRouteInfo = (RelativeLayout) convertView.findViewById(R.id.layout_route_info);
 
         setAppView();
         setRouteStatus(AppGlobals.getRouteStatus());
@@ -57,13 +61,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 layoutDriverButtons.setVisibility(View.VISIBLE);
             }
             layoutRouteCancelled.setVisibility(View.GONE);
+            layoutRouteInfo.setVisibility(View.VISIBLE);
             AppGlobals.putRouteStatus(true);
         } else {
             if (AppGlobals.getUserType() == 1) {
                 layoutDriverButtons.setVisibility(View.GONE);
             }
             layoutRouteCancelled.setVisibility(View.VISIBLE);
-//            layoutRouteCancelled.invalidate();
+            layoutRouteInfo.setVisibility(View.GONE);
             AppGlobals.putRouteStatus(false);
         }
     }
@@ -76,6 +81,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         } else if (AppGlobals.getUserType() == 0) {
             layoutDriverButtons.setVisibility(View.GONE);
             tvUserType.setText("UserType: Student");
+            layoutRouteCancelled.setClickable(false);
         }
     }
 
@@ -93,10 +99,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
 
-                                final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-                                progressDialog.setIndeterminate(true);
-                                progressDialog.setMessage("Restoring Route...");
-                                progressDialog.show();
+                                Helpers.showProgressDialog(getActivity(), "Restoring Route...");
 
                                 // TODO: Implement restoration logic here.
 
@@ -104,7 +107,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                         new Runnable() {
                                             public void run() {
                                                 setRouteStatus(true);
-                                                progressDialog.dismiss();
+                                                Helpers.dismissProgressDialog();
                                             }
                                         }, 2000);
                             }
@@ -139,10 +142,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onClick(View v) {
                         reportSituationDialog.dismiss();
-                        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-                        progressDialog.setIndeterminate(true);
-                        progressDialog.setMessage("Reporting Situation...");
-                        progressDialog.show();
+
+                        Helpers.showProgressDialog(getActivity(), "Reporting Situation...");
 
                         int id= radioGroupReportSituation.getCheckedRadioButtonId();
                         View radioButton = radioGroupReportSituation.findViewById(id);
@@ -155,7 +156,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 new Runnable() {
                                     public void run() {
                                         setRouteStatus(false);
-                                        progressDialog.dismiss();
+                                        Helpers.dismissProgressDialog();
                                     }
                                 }, 2000);
                     }

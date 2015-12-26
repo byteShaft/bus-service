@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.byteshaft.busservice.R;
+import com.byteshaft.busservice.utils.Helpers;
 
 public class ChangePasswordFragment extends Fragment {
 
@@ -37,14 +38,14 @@ public class ChangePasswordFragment extends Fragment {
         buttonDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signup();
+                change();
             }
         });
 
         return mBaseView;
     }
 
-    public void signup() {
+    public void change() {
         Log.d("BusService", "PasswordChange");
 
         if (!validate()) {
@@ -54,10 +55,7 @@ public class ChangePasswordFragment extends Fragment {
 
         buttonDone.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Changing password...");
-        progressDialog.show();
+        Helpers.showProgressDialog(getActivity(), "Changing password...");
 
         // TODO: Implement password change logic here.
 
@@ -65,7 +63,7 @@ public class ChangePasswordFragment extends Fragment {
                 new Runnable() {
                     public void run() {
                         onChangeSuccess();
-                        progressDialog.dismiss();
+                        Helpers.dismissProgressDialog();
                     }
                 }, 2000);
     }
@@ -76,7 +74,7 @@ public class ChangePasswordFragment extends Fragment {
     }
 
     public void onChangeFailed() {
-        Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Password Change failed", Toast.LENGTH_LONG).show();
         buttonDone.setEnabled(true);
     }
 
@@ -119,6 +117,5 @@ public class ChangePasswordFragment extends Fragment {
         }
 
         return valid;
-
     }
 }
