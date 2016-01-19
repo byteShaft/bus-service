@@ -15,9 +15,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url 'http://esri.bintray.com/arcgis'
-        }
+//        maven {
+////            url 'http://esri.bintray.com/arcgis'
+//        }
     }
 }
 

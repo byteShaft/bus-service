@@ -12,46 +12,41 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.byteshaft.busservice.R;
-import com.esri.android.map.LocationDisplayManager;
-import com.esri.android.map.MapOptions;
-import com.esri.android.map.MapView;
-import com.esri.android.map.event.OnStatusChangedListener;
-
 
 public class MapsFragment extends Fragment {
 
     View convertView;
     FragmentManager fm;
-    MapView mMapView = null;
-    Location mLocation = null;
-    private Menu actionsMenu;
-    private boolean simpleMapView = true;
-    private final MapOptions mStreetsView = new MapOptions(MapOptions.MapType.STREETS);
-    private final MapOptions mSatelliteView = new MapOptions(MapOptions.MapType.SATELLITE);
+//    MapView mMapView = null;
+//    Location mLocation = null;
+//    private Menu actionsMenu;
+//    private boolean simpleMapView = true;
+//    private final MapOptions mStreetsView = new MapOptions(MapOptions.MapType.STREETS);
+//    private final MapOptions mSatelliteView = new MapOptions(MapOptions.MapType.SATELLITE);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
-        fm = getChildFragmentManager();
-
-        // Retrieve the map and initial extent from XML layout
-        mMapView = (MapView) convertView.findViewById(R.id.map);
-        // Enable map to wrap around date line.
-        mMapView.enableWrapAround(true);
-        mMapView.setKeepScreenOn(true);
-
-        mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
-            @Override
-            public void onStatusChanged(Object o, STATUS status) {
-                if (o == mMapView && status == STATUS.INITIALIZED) {
-                    LocationDisplayManager ldm = mMapView.getLocationDisplayManager();
-                    ldm.setAutoPanMode(LocationDisplayManager.AutoPanMode.LOCATION);
-                    ldm.start();
-                    mLocation = ldm.getLocation();
-                }
-            }
-        });
+//        fm = getChildFragmentManager();
+//
+//        // Retrieve the map and initial extent from XML layout
+//        mMapView = (MapView) convertView.findViewById(R.id.map);
+//        // Enable map to wrap around date line.
+//        mMapView.enableWrapAround(true);
+//        mMapView.setKeepScreenOn(true);
+//
+//        mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
+//            @Override
+//            public void onStatusChanged(Object o, STATUS status) {
+//                if (o == mMapView && status == STATUS.INITIALIZED) {
+//                    LocationDisplayManager ldm = mMapView.getLocationDisplayManager();
+//                    ldm.setAutoPanMode(LocationDisplayManager.AutoPanMode.LOCATION);
+//                    ldm.start();
+//                    mLocation = ldm.getLocation();
+//                }
+//            }
+//        });
 
 
         return convertView;
@@ -66,42 +61,42 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mMapView.pause();
+//        mMapView.pause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mMapView.unpause();
+//        mMapView.unpause();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.main, menu);
-        actionsMenu = menu;
+//        actionsMenu = menu;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_current_location:
-
-                if (mLocation != null) {
-                    mMapView.centerAt(mLocation.getLatitude(), mLocation.getLongitude(), true);
-                }
-
-                return true;
-            case R.id.action_change_map:
-                if (simpleMapView) {
-                    mMapView.setMapOptions(mSatelliteView);
-                    setActionIcon(false);
-                    simpleMapView = false;
-                } else {
-                    mMapView.setMapOptions(mStreetsView);
-                    setActionIcon(true);
-                    simpleMapView = true;
-                }
+//
+//                if (mLocation != null) {
+//                    mMapView.centerAt(mLocation.getLatitude(), mLocation.getLongitude(), true);
+//                }
+//
+//                return true;
+//            case R.id.action_change_map:
+//                if (simpleMapView) {
+//                    mMapView.setMapOptions(mSatelliteView);
+//                    setActionIcon(false);
+//                    simpleMapView = false;
+//                } else {
+//                    mMapView.setMapOptions(mStreetsView);
+//                    setActionIcon(true);
+//                    simpleMapView = true;
+//                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -109,14 +104,14 @@ public class MapsFragment extends Fragment {
     }
 
     private void setActionIcon(boolean simpleMap) {
-        MenuItem item = actionsMenu.findItem(R.id.action_change_map);
-        if (actionsMenu != null) {
-            if (simpleMap) {
-                item.setIcon(R.mipmap.ic_map_satellite);
-            } else {
-                item.setIcon(R.mipmap.ic_map_simple);
-            }
-        }
+//        MenuItem item = actionsMenu.findItem(R.id.action_change_map);
+//        if (actionsMenu != null) {
+//            if (simpleMap) {
+//                item.setIcon(R.mipmap.ic_map_satellite);
+//            } else {
+//                item.setIcon(R.mipmap.ic_map_simple);
+//            }
+//        }
     }
 
 }

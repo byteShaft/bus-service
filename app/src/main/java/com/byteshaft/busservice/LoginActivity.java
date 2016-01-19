@@ -47,7 +47,6 @@ public class LoginActivity extends Activity {
     }
 
     public void login() {
-        Log.d("BusService", "Login");
 
         if (!validate()) {
             onLoginFailed();
@@ -74,10 +73,10 @@ public class LoginActivity extends Activity {
     public boolean validate() {
         boolean valid = true;
 
-        if (username.trim().isEmpty() || username.length() < 4) {
-            editTextUsername.setError("at least 4 characters");
+        if (username.trim().isEmpty() || username.length() < 6) {
+            editTextUsername.setError("at least 6 characters");
             valid = false;
-        } else if (!username.startsWith("dvr") && !username.startsWith("sdt")) {
+        } else if (!username.startsWith("dvr") && !username.startsWith("sdt") && !username.startsWith("adn")) {
             editTextUsername.setError("invalid username");
             valid = false;
         } else {
@@ -115,8 +114,10 @@ public class LoginActivity extends Activity {
 
     public void setUserType() {
         if (TextUtils.equals(username.substring(0,3), "dvr")) {
-            AppGlobals.putUserType(1);
+            AppGlobals.putUserType(2);
         } else if (TextUtils.equals(username.substring(0,3), "sdt")){
+            AppGlobals.putUserType(1);
+        } else if (TextUtils.equals(username.substring(0,3), "adn")){
             AppGlobals.putUserType(0);
         }
     }
