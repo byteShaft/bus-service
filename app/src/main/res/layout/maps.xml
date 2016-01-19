@@ -42,13 +42,8 @@
                 android:textColor="#ffffff"/>
         </LinearLayout>
     </LinearLayout>
-        <com.esri.android.map.MapView
-            android:id="@+id/map"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/layout_one"
-            mapoptions.MapType="Streets"
-            mapoptions.ZoomLevel="16"
-            mapoptions.center="24.480909, 39.545631">
-        </com.esri.android.map.MapView>
+
+    <!--MapView Here-->
+
+
 </RelativeLayout>

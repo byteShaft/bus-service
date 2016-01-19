@@ -21,6 +21,39 @@
             android:typeface="serif" />
     </LinearLayout>
 
+
+    <LinearLayout
+        android:id="@+id/layout_admin_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/layout_heading"
+        android:orientation="vertical"
+        android:layout_margin="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active Routes"
+            android:textSize="16dp"
+            android:textStyle="bold"/>
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </ListView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="Cancelled Routes"
+            android:textSize="16dp"
+            android:textStyle="bold"/>
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </ListView>
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/layout_route_info"
         android:layout_width="wrap_content"
@@ -28,7 +61,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
         android:layout_below="@+id/layout_heading"
-        android:visibility="visible">
+        android:visibility="gone">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
