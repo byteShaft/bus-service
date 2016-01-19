@@ -10,6 +10,15 @@
         <item android:id="@+id/nav_schedule"
             android:icon="@mipmap/ic_schedule"
             android:title="Set Schedule"/>
+        <item android:id="@+id/nav_manage_drivers"
+            android:icon="@mipmap/ic_manage_drivers"
+            android:title="Manage Drivers"/>
+        <item android:id="@+id/nav_manage_routes"
+            android:icon="@mipmap/ic_manage_routes"
+            android:title="Manage Routes"/>
+        <item android:id="@+id/nav_manage_students"
+            android:icon="@mipmap/ic_manage_students"
+            android:title="Manage Students"/>
     <item android:title="Settings">
         <menu>
             <item android:id="@+id/nav_change_password"
