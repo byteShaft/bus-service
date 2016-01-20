@@ -2,15 +2,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
     <item
-        android:id="@+id/action_change_map"
-        android:title="Change View"
-        android:icon="@mipmap/ic_map_satellite"
+        android:id="@+id/action_add_button"
+        android:title="Add"
+        android:icon="@mipmap/ic_add_manage"
         android:orderInCategory="100"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_current_location"
-        android:title="Current Location"
-        android:icon="@mipmap/ic_action_current_location"
+        android:id="@+id/action_done_button"
+        android:title="Done"
+        android:icon="@mipmap/ic_done_manage"
         android:orderInCategory="100"
         app:showAsAction="always" />
 </menu>
