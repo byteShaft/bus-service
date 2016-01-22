@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 
 
-
 public class Helpers {
 
     private static ProgressDialog progressDialog;
