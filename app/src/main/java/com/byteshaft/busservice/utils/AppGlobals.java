@@ -2,9 +2,14 @@ package com.byteshaft.busservice.utils;
 
 
 import android.app.Application;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentTransaction;
+
+import com.byteshaft.busservice.R;
 
 public class AppGlobals extends Application {
 
@@ -64,5 +69,12 @@ public class AppGlobals extends Application {
 
     public static void putRouteStatus(boolean status) {
         sPreferences.edit().putBoolean(ROUTE_STATUS, status).apply();
+    }
+
+    public static void replaceFragment(android.support.v4.app.FragmentManager fragMan, android.support.v4.app.Fragment frag) {
+        FragmentTransaction transaction = fragMan.beginTransaction();
+        transaction.replace(R.id.container_main, frag);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }
