@@ -1,6 +1,5 @@
 package com.byteshaft.busservice.fragments;
 
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,42 +11,32 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.byteshaft.busservice.R;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 public class MapsFragment extends Fragment {
 
-    View convertView;
-    FragmentManager fm;
-//    MapView mMapView = null;
-//    Location mLocation = null;
-//    private Menu actionsMenu;
-//    private boolean simpleMapView = true;
-//    private final MapOptions mStreetsView = new MapOptions(MapOptions.MapType.STREETS);
-//    private final MapOptions mSatelliteView = new MapOptions(MapOptions.MapType.SATELLITE);
+    private View convertView;
+    private FragmentManager fm;
+    private SupportMapFragment myMapFragment;
+    private GoogleMap mMap;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
-//        fm = getChildFragmentManager();
-//
-//        // Retrieve the map and initial extent from XML layout
-//        mMapView = (MapView) convertView.findViewById(R.id.map);
-//        // Enable map to wrap around date line.
-//        mMapView.enableWrapAround(true);
-//        mMapView.setKeepScreenOn(true);
-//
-//        mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
-//            @Override
-//            public void onStatusChanged(Object o, STATUS status) {
-//                if (o == mMapView && status == STATUS.INITIALIZED) {
-//                    LocationDisplayManager ldm = mMapView.getLocationDisplayManager();
-//                    ldm.setAutoPanMode(LocationDisplayManager.AutoPanMode.LOCATION);
-//                    ldm.start();
-//                    mLocation = ldm.getLocation();
-//                }
-//            }
-//        });
+        fm = getChildFragmentManager();
+        myMapFragment=(SupportMapFragment) fm.findFragmentById(R.id.map);
 
+        myMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+
+//                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16.0f));
+            }
+        });
 
         return convertView;
     }
@@ -61,13 +50,11 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-//        mMapView.pause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-//        mMapView.unpause();
     }
 
     @Override
