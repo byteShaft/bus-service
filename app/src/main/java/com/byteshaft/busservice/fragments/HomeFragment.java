@@ -39,7 +39,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         tvUserType = (TextView) convertView.findViewById(R.id.tv_user_type);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
-//        layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
+        layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
 
@@ -83,15 +83,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         if (AppGlobals.getUserType() == 2) {
             layoutDriverButtons.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Driver");
-//            layoutAdminInfo.setVisibility(View.GONE);
+            layoutAdminInfo.setVisibility(View.GONE);
         } else if (AppGlobals.getUserType() == 1) {
             layoutDriverButtons.setVisibility(View.GONE);
             tvUserType.setText("UserType: Student");
-//            layoutAdminInfo.setVisibility(View.GONE);
+            layoutAdminInfo.setVisibility(View.GONE);
             layoutRouteCancelled.setClickable(false);
         } else if (AppGlobals.getUserType() == 0) {
             layoutDriverButtons.setVisibility(View.GONE);
-//            layoutAdminInfo.setVisibility(View.VISIBLE);
+            layoutAdminInfo.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Admin");
             layoutRouteCancelled.setClickable(false);
         }

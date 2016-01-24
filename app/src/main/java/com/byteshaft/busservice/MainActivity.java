@@ -1,7 +1,6 @@
 package com.byteshaft.busservice;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +19,9 @@ import android.view.MenuItem;
 import com.byteshaft.busservice.fragments.ChangePasswordFragment;
 import com.byteshaft.busservice.fragments.ContactFragment;
 import com.byteshaft.busservice.fragments.HomeFragment;
+import com.byteshaft.busservice.fragments.ManageDrivers;
+import com.byteshaft.busservice.fragments.ManageRoutes;
+import com.byteshaft.busservice.fragments.ManageStudent;
 import com.byteshaft.busservice.fragments.MapsFragment;
 import com.byteshaft.busservice.fragments.ScheduleFragment;
 import com.byteshaft.busservice.fragments.TwitterFragment;
@@ -59,8 +61,21 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
-        if (AppGlobals.getUserType() == 1) {
+        if (AppGlobals.getUserType() == 0) {
+            navigationView.getMenu().getItem(1).setVisible(false);
             navigationView.getMenu().getItem(2).setVisible(false);
+            navigationView.getMenu().getItem(3).setVisible(true);
+            navigationView.getMenu().getItem(4).setVisible(true);
+            navigationView.getMenu().getItem(5).setVisible(true);
+        } else if (AppGlobals.getUserType() == 1) {
+            navigationView.getMenu().getItem(3).setVisible(false);
+            navigationView.getMenu().getItem(4).setVisible(false);
+            navigationView.getMenu().getItem(5).setVisible(false);
+        } else if (AppGlobals.getUserType() == 2) {
+            navigationView.getMenu().getItem(2).setVisible(false);
+            navigationView.getMenu().getItem(3).setVisible(false);
+            navigationView.getMenu().getItem(4).setVisible(false);
+            navigationView.getMenu().getItem(5).setVisible(false);
         }
     }
 
@@ -87,6 +102,15 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_schedule:
                 fragmentClass = ScheduleFragment.class;
+                break;
+            case R.id.nav_manage_drivers:
+                fragmentClass = ManageDrivers.class;
+                break;
+            case R.id.nav_manage_routes:
+                fragmentClass = ManageRoutes.class;
+                break;
+            case R.id.nav_manage_students:
+                fragmentClass = ManageStudent.class;
                 break;
             case R.id.nav_change_password:
                 fragmentClass = ChangePasswordFragment.class;
