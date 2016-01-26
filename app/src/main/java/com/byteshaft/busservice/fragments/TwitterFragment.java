@@ -1,6 +1,5 @@
 package com.byteshaft.busservice.fragments;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -71,10 +70,10 @@ public class TwitterFragment extends Fragment {
                 Paging paging = new Paging(1, 10);
 
                 try {
-                    final User user = twitter.showUser("byteshaft");
+                    final User user = twitter.showUser("taibahuen");
                     URL url = new URL(user.getBiggerProfileImageURL());
                     twitterProfileIcon = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    statuses = twitter.getUserTimeline("byteshaft",paging);
+                    statuses = twitter.getUserTimeline("taibahuen", paging);
                     final tweetsArrayAdapter tweetsAdapter = new tweetsArrayAdapter(
                             getActivity().getApplicationContext(), R.layout.tweets_row, statuses);
 

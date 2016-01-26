@@ -34,10 +34,10 @@ public class MapsFragment extends Fragment {
     private GoogleMap mMap;
     private RoutingListener mRoutingListener;
 
-    private LatLng startPoint = new LatLng(30.162193, 71.441587);
-    private LatLng endPoint = new LatLng(30.173939, 71.466715);
-    private LatLng wayPoint1 = new LatLng(30.177717, 71.452137);
-    private LatLng wayPoint2 = new LatLng(30.181112, 71.463681);
+    private LatLng startPoint = new LatLng(24.546198, 39.590284);
+    private LatLng endPoint = new LatLng(24.481133,39.5432913);
+    private LatLng wayPoint1 = new LatLng(24.522815, 39.572929);
+    private LatLng wayPoint2 = new LatLng(24.500190, 39.581002);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,8 +51,8 @@ public class MapsFragment extends Fragment {
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
 //                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                LatLng currentDummyLocation = new LatLng(30.162193, 71.441587);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentDummyLocation, 16.0f));
+                LatLng currentDummyLocation = new LatLng(24.546198, 39.590284);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentDummyLocation, 13.0f));
 
                 mMap.addMarker(new MarkerOptions().position(startPoint)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus)));
@@ -87,7 +87,7 @@ public class MapsFragment extends Fragment {
             public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
                 PolylineOptions mPolylineOptions = new PolylineOptions();
                 mPolylineOptions.color(Color.BLUE);
-                mPolylineOptions.width(15);
+                mPolylineOptions.width(6);
                 mPolylineOptions.zIndex(102);
                 mPolylineOptions.addAll(polylineOptions.getPoints());
                 mMap.addPolyline(mPolylineOptions);
