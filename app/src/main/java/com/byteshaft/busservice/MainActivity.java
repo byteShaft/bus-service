@@ -103,11 +103,11 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_schedule:
                 fragmentClass = ScheduleFragment.class;
                 break;
-            case R.id.nav_manage_drivers:
-                fragmentClass = ManageDrivers.class;
-                break;
             case R.id.nav_manage_routes:
                 fragmentClass = ManageRoutes.class;
+                break;
+            case R.id.nav_manage_drivers:
+                fragmentClass = ManageDrivers.class;
                 break;
             case R.id.nav_manage_students:
                 fragmentClass = ManageStudent.class;

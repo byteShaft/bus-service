@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/layout_create_driver_form"
+        android:id="@+id/layout_create_student_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -16,7 +16,7 @@
             android:layout_marginBottom="8dp">
 
             <EditText
-                android:id="@+id/et_driver_first_name"
+                android:id="@+id/et_student_first_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="First Name"
@@ -31,12 +31,28 @@
             android:layout_marginTop="8dp">
 
             <EditText
-                android:id="@+id/et_driver_last_name"
+                android:id="@+id/et_student_last_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Last Name"
                 android:inputType="textPersonName"
                 android:maxLength="10" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/et_student_roll_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Roll Number"
+                android:inputType="textVisiblePassword"
+                android:maxLength="18" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -46,11 +62,26 @@
             android:layout_marginTop="8dp">
 
             <EditText
-                android:id="@+id/et_driver_contact"
+                android:id="@+id/et_student_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Contact Number"
-                android:inputType="phone"
+                android:inputType="number"
+                android:maxLength="18" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/et_student_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="E-Mail"
+                android:inputType="textEmailAddress"
                 android:maxLength="18" />
         </android.support.design.widget.TextInputLayout>
 
