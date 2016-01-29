@@ -2,6 +2,8 @@ package com.byteshaft.busservice.utils;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.IBinder;
+import android.view.inputmethod.InputMethodManager;
 
 
 public class Helpers {
@@ -21,6 +23,11 @@ public class Helpers {
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
+    }
+
+    public static void closeKeyboard(Context c, IBinder windowToken) {
+        InputMethodManager mgr = (InputMethodManager) c.getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.hideSoftInputFromWindow(windowToken, 0);
     }
 
 }
