@@ -37,8 +37,6 @@ public class RegisterRoute extends Fragment {
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        setTabIcons(tabLayout);
-
         return convertView;
     }
 
@@ -92,8 +90,6 @@ public class RegisterRoute extends Fragment {
     }
 
     public static class PlaceholderFragment extends Fragment {
-
-
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -127,21 +123,7 @@ public class RegisterRoute extends Fragment {
             }  else if (tabCount == 3) {
                 rootView = inflater.inflate(R.layout.layout_route_register_map, container, false);
             }
-//            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-//            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
-        }
-    }
-
-    private void setTabIcons(TabLayout tabLayout) {
-        for (int i = 0; i < tabLayout.getTabCount(); i++) {
-            if (i == 0) {
-                tabLayout.getTabAt(i).setIcon(R.mipmap.ic_waypoint);
-            } else if (i == 1) {
-                tabLayout.getTabAt(i).setIcon(R.mipmap.ic_map_simple);
-            } else if (i == 2) {
-                tabLayout.getTabAt(i).setIcon(R.mipmap.ic_manage_routes);
-            }
         }
     }
 }
