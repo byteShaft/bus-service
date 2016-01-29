@@ -24,13 +24,27 @@
                     android:maxLength="16"
                     android:inputType="textNoSuggestions" />
             </android.support.design.widget.TextInputLayout>
-            <LinearLayout
+
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+                <EditText
+                    android:id="@+id/et_driver_bus_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Bus Number"
+                    android:maxLength="14"
+                    android:inputType="textVisiblePassword" />
+            </android.support.design.widget.TextInputLayout>
 
-
-
-            </LinearLayout>
+            <Spinner
+                android:id="@+id/spinner_register_route_select_driver"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
