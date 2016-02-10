@@ -20,7 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="First Name"
-                android:inputType="textEmailAddress"
+                android:inputType="textPersonName"
                 android:maxLength="10" />
         </android.support.design.widget.TextInputLayout>
 
@@ -62,11 +62,11 @@
             android:layout_marginTop="8dp">
 
             <EditText
-                android:id="@+id/et_student_number"
+                android:id="@+id/et_student_contact"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Contact Number"
-                android:inputType="number"
+                android:inputType="phone"
                 android:maxLength="18" />
         </android.support.design.widget.TextInputLayout>
 

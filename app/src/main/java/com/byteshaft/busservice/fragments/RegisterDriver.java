@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,9 +53,9 @@ public class RegisterDriver extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_done_button:
 
-                firstNameDriver = etDriverFirstName.getText().toString();
-                lastNameDriver = etDriverLastName.getText().toString();
-                contactNumberDriver = etDriverContactNumber.getText().toString();
+                firstNameDriver = etDriverFirstName.getText().toString().trim();
+                lastNameDriver = etDriverLastName.getText().toString().trim();
+                contactNumberDriver = etDriverContactNumber.getText().toString().trim();
 
                 register();
 
@@ -70,6 +71,12 @@ public class RegisterDriver extends Fragment {
             onRegistrationFailed();
             return;
         }
+
+        String username = "dvr" + firstNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
+        String password = lastNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3 );
+
+        Log.i("username", " " + username);
+        Log.i("password", " " + password);
 
         Helpers.showProgressDialog(getActivity(), "Registering");
 
@@ -87,21 +94,21 @@ public class RegisterDriver extends Fragment {
     public boolean validate() {
         boolean valid = true;
 
-        if (firstNameDriver.trim().isEmpty() || firstNameDriver.length() < 3) {
+        if (firstNameDriver.isEmpty() || firstNameDriver.length() < 3) {
             etDriverFirstName.setError("at least 3 characters");
             valid = false;
         } else {
             etDriverFirstName.setError(null);
         }
 
-        if (lastNameDriver.trim().isEmpty() || lastNameDriver.length() < 3) {
+        if (lastNameDriver.isEmpty() || lastNameDriver.length() < 3) {
             etDriverLastName.setError("at least 3 characters");
             valid = false;
         } else {
             etDriverLastName.setError(null);
         }
 
-        if (contactNumberDriver.trim().isEmpty() || contactNumberDriver.length() < 4) {
+        if (contactNumberDriver.isEmpty()) {
             etDriverContactNumber.setError("Contact is required");
             valid = false;
         } else {
@@ -109,7 +116,7 @@ public class RegisterDriver extends Fragment {
         }
 
         if (valid && !PhoneNumberUtils.isGlobalPhoneNumber(contactNumberDriver)) {
-            etDriverContactNumber.setError("Number is Invalid");
+            etDriverContactNumber.setError("Contact is invalid");
             valid = false;
         }
 
@@ -119,9 +126,10 @@ public class RegisterDriver extends Fragment {
     public void onRegistrationSuccess() {
         Helpers.closeKeyboard(getActivity(), etDriverContactNumber.getWindowToken());
         getActivity().onBackPressed();
+        Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
     }
 
     public void onRegistrationFailed() {
-        Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_SHORT).show();
     }
 }
