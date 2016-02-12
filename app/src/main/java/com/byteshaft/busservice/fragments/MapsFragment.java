@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,7 +23,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-
 
 public class MapsFragment extends Fragment {
 
@@ -85,12 +83,12 @@ public class MapsFragment extends Fragment {
 
             @Override
             public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
-                PolylineOptions mPolylineOptions = new PolylineOptions();
-                mPolylineOptions.color(Color.BLUE);
-                mPolylineOptions.width(6);
-                mPolylineOptions.zIndex(102);
-                mPolylineOptions.addAll(polylineOptions.getPoints());
-                mMap.addPolyline(mPolylineOptions);
+                PolylineOptions polyoptions = new PolylineOptions();
+                polyoptions.color(Color.RED);
+                polyoptions.width(15);
+                polylineOptions.zIndex(102);
+                polyoptions.addAll(polylineOptions.getPoints());
+                mMap.addPolyline(polyoptions);
             }
 
             @Override

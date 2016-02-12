@@ -1,5 +1,6 @@
 package com.byteshaft.busservice.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,11 +17,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.byteshaft.busservice.R;
+import com.directions.route.Route;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class RegisterRoute extends Fragment {
 
-    View convertView;
     private ViewPager mViewPager;
+    private View convertView;
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     @Nullable
@@ -90,6 +102,18 @@ public class RegisterRoute extends Fragment {
     }
 
     public static class PlaceholderFragment extends Fragment {
+
+        private FragmentManager fm;
+
+        private GoogleMap mMap;
+        private SupportMapFragment myMapFragment;
+        private RoutingListener mRoutingListener;
+
+        private LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
+        private LatLng pointA, pointB;
+
+        private int onLongClickCounter = 0;
+
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -122,7 +146,64 @@ public class RegisterRoute extends Fragment {
                 rootView = inflater.inflate(R.layout.layout_route_register_timepicker, container, false);
             }  else if (tabCount == 3) {
                 rootView = inflater.inflate(R.layout.layout_route_register_map, container, false);
+                fm = getChildFragmentManager();
+                myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map1);
+
+                myMapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap googleMap) {
+                        mMap = googleMap;
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(taibahUniversityLocation, 13.0f));
+
+                        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                            @Override
+                            public void onMapLongClick(LatLng latLng) {
+                                onLongClickCounter++;
+                                Log.i("Long Click Counter", "" + onLongClickCounter);
+                                if (onLongClickCounter == 1) {
+                                    mMap.addMarker(new MarkerOptions().position(latLng));
+                                    pointA = latLng;
+                                } else if (onLongClickCounter == 2) {
+                                    mMap.addMarker(new MarkerOptions().position(latLng));
+                                    pointB = latLng;
+                                    Routing routing = new Routing.Builder()
+                                            .travelMode(Routing.TravelMode.DRIVING)
+                                            .withListener(mRoutingListener)
+                                            .waypoints(pointA, pointB)
+                                            .build();
+                                    routing.execute();
+                                }
+                            }
+                        });
+                    }
+                });
             }
+            mRoutingListener = new RoutingListener() {
+                @Override
+                public void onRoutingFailure() {
+
+                }
+
+                @Override
+                public void onRoutingStart() {
+
+                }
+
+                @Override
+                public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
+                    PolylineOptions polyoptions = new PolylineOptions();
+                    polyoptions.color(Color.RED);
+                    polyoptions.width(15);
+                    polylineOptions.zIndex(102);
+                    polyoptions.addAll(polylineOptions.getPoints());
+                    mMap.addPolyline(polyoptions);
+                }
+
+                @Override
+                public void onRoutingCancelled() {
+
+                }
+            };
             return rootView;
         }
     }
