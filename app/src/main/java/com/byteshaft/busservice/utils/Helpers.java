@@ -2,8 +2,16 @@ package com.byteshaft.busservice.utils;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.IBinder;
 import android.view.inputmethod.InputMethodManager;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 
 public class Helpers {
@@ -30,4 +38,14 @@ public class Helpers {
         mgr.hideSoftInputFromWindow(windowToken, 0);
     }
 
+
+    public static String getAddress(Context context, LatLng latLng) throws IOException {
+        Geocoder geocoder;
+        List<Address> addresses;
+        geocoder = new Geocoder(context, Locale.getDefault());
+        addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        String address = addresses.get(0).getAddressLine(0);
+
+        return address;
+    }
 }
