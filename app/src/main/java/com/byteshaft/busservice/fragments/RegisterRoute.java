@@ -3,6 +3,7 @@ package com.byteshaft.busservice.fragments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -34,8 +35,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.io.IOException;
 
 
 public class RegisterRoute extends Fragment {
@@ -93,16 +92,13 @@ public class RegisterRoute extends Fragment {
                     menuItemUndo.setVisible(false);
                 }
             }
-
             @Override
             public void onPageScrollStateChanged(int state) {
 
             }
         });
-
         return convertView;
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -144,41 +140,84 @@ public class RegisterRoute extends Fragment {
                     return true;
                 }
 
-                Helpers.showProgressDialog(getActivity(), "Collecting Information");
-
-                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        getActivity());
-                alertDialogBuilder.setTitle("Are you sure?");
-                try {
-                    alertDialogBuilder
-                            .setMessage("Route Name: " + routeName + "\n" + "Bus Number: " + busNumber
-                                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
-                                    + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
-                                    PlaceholderFragment.pointA) + "\n" + "Point B: "
-                                    + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB))
-                            .setCancelable(false)
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    register();
-                                }
-                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    Helpers.dismissProgressDialog();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-
+                new checkInternetTask().execute();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
+
+        String message = "Route Name: "
+                + routeName + "\n" + "Bus Number: " + busNumber
+                + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
+                + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
+                PlaceholderFragment.pointA) + "\n" + "Point B: "
+                + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return Helpers.isInternetWorking(getActivity());
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Checking internet availability");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+            Helpers.dismissProgressDialog();
+            if (success) {
+                showRegInfoDialog(message);
+            } else {
+                showInternetNotWorkingDialog();
+            }
+        }
+
+        public void showInternetNotWorkingDialog() {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+            alertDialogBuilder.setMessage("Internet not available");
+            alertDialogBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+                    new checkInternetTask().execute();
+                }
+            });
+            alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }
+    }
+
+    public void showRegInfoDialog(String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setTitle("Are you sure?");
+        alertDialogBuilder.setMessage(message);
+        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                register();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alertDialogBuilder.create();
+        alertDialogBuilder.show();
     }
 
     public static class PlaceholderFragment extends Fragment {
@@ -211,9 +250,7 @@ public class RegisterRoute extends Fragment {
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
-
         }
-
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -230,11 +267,13 @@ public class RegisterRoute extends Fragment {
                 rootView = inflater.inflate(R.layout.layout_route_register_timepicker, container, false);
                 timePickerArrivalTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_arrival_time);
                 timePickerDepartureTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_departure_time);
+                Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
 
             } else if (tabCount == 3) {
                 rootView = inflater.inflate(R.layout.layout_route_register_map, container, false);
                 fm = getChildFragmentManager();
                 myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map1);
+                Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
 
                 tvMapRegisterInfo = (TextView) rootView.findViewById(R.id.tv_map_register_info);
 
@@ -284,8 +323,8 @@ public class RegisterRoute extends Fragment {
                 public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
                     PolylineOptions polyOptions = new PolylineOptions();
                     polyOptions.color(Color.RED);
-                    polyOptions.width(12);
-                    polylineOptions.zIndex(102);
+                    polyOptions.width(10);
+                    polylineOptions.zIndex(60);
                     polyOptions.addAll(polylineOptions.getPoints());
                     mMap.addPolyline(polyOptions);
                     tvMapRegisterInfo.setText("Route Successfully Established");
