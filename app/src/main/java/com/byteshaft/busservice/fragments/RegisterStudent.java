@@ -1,5 +1,6 @@
 package com.byteshaft.busservice.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -20,6 +21,17 @@ import android.widget.Toast;
 
 import com.byteshaft.busservice.R;
 import com.byteshaft.busservice.utils.Helpers;
+import com.directions.route.Route;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class RegisterStudent extends Fragment {
     View convertView;
@@ -118,7 +130,17 @@ public class RegisterStudent extends Fragment {
          * The fragment argument representing the section number for this
          * fragment.
          */
+
+        private FragmentManager fm;
+
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private SupportMapFragment myMapFragment;
+        private RoutingListener mRoutingListener;
+        private GoogleMap mMap;
+        private Polyline polyline;
+
+        private int onLongClickCounter = 0;
+        private static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
 
         public PlaceholderFragment() {
         }
@@ -152,8 +174,86 @@ public class RegisterStudent extends Fragment {
 
             } else if (tabCount == 2) {
                 rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
+                fm = getChildFragmentManager();
+                myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.register_student_map);
+
+                myMapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap googleMap) {
+                        mMap = googleMap;
+                        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
+                        mMap.addMarker(new MarkerOptions().position(dummyPosition));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
+                                taibahUniversityLocation, 13.0f));
+
+                        buildAndDisplayRoute(RegisterRoute.taibahUniversityLocation, dummyPosition);
+
+                        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                            @Override
+                            public void onMapLongClick(LatLng latLng) {
+                                onLongClickCounter++;
+                                if (onLongClickCounter == 1) {
+                                    mMap.clear();
+                                    mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
+                                    mMap.addMarker(new MarkerOptions().position(dummyPosition));
+                                    mMap.addMarker(new MarkerOptions().position(latLng));
+                                    LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
+                                            taibahUniversityLocation, latLng, dummyPosition};
+
+                                    buildAndDisplayRouteWithWayPoints(latLngDummyList);
+                                }
+                            }
+                        });
+
+                    }
+                });
+
+                mRoutingListener = new RoutingListener() {
+                    @Override
+                    public void onRoutingFailure() {
+
+                    }
+
+                    @Override
+                    public void onRoutingStart() {
+
+                    }
+
+                    @Override
+                    public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
+                        PolylineOptions polyoptions = new PolylineOptions();
+                        polyoptions.color(Color.RED);
+                        polyoptions.width(15);
+                        polylineOptions.zIndex(102);
+                        polyoptions.addAll(polylineOptions.getPoints());
+                        mMap.addPolyline(polyoptions);
+                    }
+
+                    @Override
+                    public void onRoutingCancelled() {
+
+                    }
+                };
             }
             return rootView;
+        }
+
+        private void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
+            Routing routing = new Routing.Builder()
+                    .travelMode(Routing.TravelMode.DRIVING)
+                    .withListener(mRoutingListener)
+                    .waypoints(startPoint, endPoint)
+                    .build();
+            routing.execute();
+        }
+
+        private void buildAndDisplayRouteWithWayPoints(LatLng[] latLngArrayWithWayPoints) {
+            Routing routing = new Routing.Builder()
+                    .travelMode(Routing.TravelMode.DRIVING)
+                    .withListener(mRoutingListener)
+                    .waypoints(latLngArrayWithWayPoints)
+                    .build();
+            routing.execute();
         }
     }
 

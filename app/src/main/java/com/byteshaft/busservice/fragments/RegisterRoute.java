@@ -1,5 +1,7 @@
 package com.byteshaft.busservice.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -58,6 +60,9 @@ public class RegisterRoute extends Fragment {
 
     public static TimePicker timePickerArrivalTime;
     public static TimePicker timePickerDepartureTime;
+
+    public static LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
+    public static LatLng[] latLngList;
 
     @Nullable
     @Override
@@ -297,6 +302,7 @@ public class RegisterRoute extends Fragment {
                                     mMap.addMarker(new MarkerOptions().position(latLng));
                                     tvMapRegisterInfo.setText("Resolving route points...");
                                     pointB = latLng;
+                                    latLngList = new LatLng[]{pointA, pointB};
                                     Routing routing = new Routing.Builder()
                                             .travelMode(Routing.TravelMode.DRIVING)
                                             .withListener(mRoutingListener)
