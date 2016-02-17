@@ -1,5 +1,7 @@
 package com.byteshaft.busservice.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -33,6 +35,11 @@ public class RegisterRoute extends Fragment {
     private ViewPager mViewPager;
     private View convertView;
     private SectionsPagerAdapter mSectionsPagerAdapter;
+
+    public static LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
+    public static LatLng pointA, pointB;
+
+    public static LatLng[] latLngList;
 
     @Nullable
     @Override
@@ -109,9 +116,6 @@ public class RegisterRoute extends Fragment {
         private SupportMapFragment myMapFragment;
         private RoutingListener mRoutingListener;
 
-        private LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
-        private LatLng pointA, pointB;
-
         private int onLongClickCounter = 0;
 
         /**
@@ -166,6 +170,7 @@ public class RegisterRoute extends Fragment {
                                 } else if (onLongClickCounter == 2) {
                                     mMap.addMarker(new MarkerOptions().position(latLng));
                                     pointB = latLng;
+                                    latLngList = new LatLng[]{pointA, pointB};
                                     Routing routing = new Routing.Builder()
                                             .travelMode(Routing.TravelMode.DRIVING)
                                             .withListener(mRoutingListener)
