@@ -150,13 +150,6 @@ public class RegisterRoute extends Fragment {
 
     class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
 
-        String message = "Route Name: "
-                + routeName + "\n" + "Bus Number: " + busNumber
-                + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
-                + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
-                PlaceholderFragment.pointA) + "\n" + "Point B: "
-                + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
-
         @Override
         protected Boolean doInBackground(Void... params) {
             return Helpers.isInternetWorking(getActivity());
@@ -165,12 +158,20 @@ public class RegisterRoute extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Checking internet availability");
+            Helpers.showProgressDialog(getActivity(), "Collecting information");
         }
 
         @Override
         protected void onPostExecute(Boolean success) {
             super.onPostExecute(success);
+
+            String message = "Route Name: "
+                    + routeName + "\n" + "Bus Number: " + busNumber
+                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
+                    + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
+                    PlaceholderFragment.pointA) + "\n" + "Point B: "
+                    + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
+
             Helpers.dismissProgressDialog();
             if (success) {
                 showRegInfoDialog(message);
@@ -178,25 +179,26 @@ public class RegisterRoute extends Fragment {
                 showInternetNotWorkingDialog();
             }
         }
+    }
 
-        public void showInternetNotWorkingDialog() {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-            alertDialogBuilder.setMessage("Internet not available");
-            alertDialogBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface arg0, int arg1) {
-                    new checkInternetTask().execute();
-                }
-            });
-            alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-        }
+
+    public void showInternetNotWorkingDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setMessage("Internet not available");
+        alertDialogBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                new checkInternetTask().execute();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     public void showRegInfoDialog(String message) {
