@@ -1,10 +1,12 @@
 package com.byteshaft.busservice.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.telephony.PhoneNumberUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,12 +55,18 @@ public class RegisterDriver extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_done_button:
 
-                firstNameDriver = etDriverFirstName.getText().toString().trim();
-                lastNameDriver = etDriverLastName.getText().toString().trim();
-                contactNumberDriver = etDriverContactNumber.getText().toString().trim();
+                    firstNameDriver = etDriverFirstName.getText().toString().trim();
+                    lastNameDriver = etDriverLastName.getText().toString().trim();
+                    contactNumberDriver = etDriverContactNumber.getText().toString().trim();
 
-                register();
+                    if (!validateInfo()) {
+                        Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
 
+                String message = "Driver Name: " + firstNameDriver + " " + lastNameDriver
+                        + "\n" + "Driver Contact: " + contactNumberDriver;
+                showRegInfoDialog(message);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -67,16 +75,8 @@ public class RegisterDriver extends Fragment {
 
     public void register() {
 
-        if (!validate()) {
-            onRegistrationFailed();
-            return;
-        }
-
         String username = "dvr" + firstNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
         String password = lastNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3 );
-
-        Log.i("username", " " + username);
-        Log.i("password", " " + password);
 
         Helpers.showProgressDialog(getActivity(), "Registering");
 
@@ -91,7 +91,7 @@ public class RegisterDriver extends Fragment {
                 }, 2000);
     }
 
-    public boolean validate() {
+    public boolean validateInfo() {
         boolean valid = true;
 
         if (firstNameDriver.isEmpty() || firstNameDriver.length() < 3) {
@@ -125,11 +125,78 @@ public class RegisterDriver extends Fragment {
 
     public void onRegistrationSuccess() {
         Helpers.closeKeyboard(getActivity(), etDriverContactNumber.getWindowToken());
-        getActivity().onBackPressed();
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
+        getActivity().onBackPressed();
     }
 
     public void onRegistrationFailed() {
         Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_SHORT).show();
+    }
+
+
+    class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return Helpers.isInternetWorking(getActivity());
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Checking internet availability");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
+            Helpers.dismissProgressDialog();
+            if (success) {
+                register();
+            } else {
+                showInternetNotWorkingDialog();
+            }
+        }
+    }
+
+    public void showInternetNotWorkingDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setMessage("Internet not available");
+        alertDialogBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                new checkInternetTask().execute();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    public void showRegInfoDialog(String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setTitle("Are you sure?");
+        alertDialogBuilder.setMessage(message);
+        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                new checkInternetTask().execute();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alertDialogBuilder.create();
+        alertDialogBuilder.show();
     }
 }
