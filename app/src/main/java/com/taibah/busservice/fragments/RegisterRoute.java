@@ -76,6 +76,22 @@ public class RegisterRoute extends Fragment {
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Helpers.closeKeyboard(getActivity());
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         mViewPager.setOffscreenPageLimit(3);
 
@@ -262,9 +278,7 @@ public class RegisterRoute extends Fragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             int tabCount = getArguments().getInt(ARG_SECTION_NUMBER);
-            System.out.println("called");
             View rootView = null;
-            Log.i("count", String.valueOf(tabCount));
 
             if (tabCount == 1) {
                 rootView = inflater.inflate(R.layout.layout_register_route_info, container, false);
@@ -275,13 +289,11 @@ public class RegisterRoute extends Fragment {
                 rootView = inflater.inflate(R.layout.layout_route_register_timepicker, container, false);
                 timePickerArrivalTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_arrival_time);
                 timePickerDepartureTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_departure_time);
-                Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
 
             } else if (tabCount == 3) {
                 rootView = inflater.inflate(R.layout.layout_route_register_map, container, false);
                 fm = getChildFragmentManager();
                 myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map1);
-                Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
 
                 tvMapRegisterRouteInfo = (TextView) rootView.findViewById(R.id.tv_map_register_route_info);
 
@@ -417,7 +429,8 @@ public class RegisterRoute extends Fragment {
 
     public void onRegistrationSuccess() {
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
-        Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
+        menuItemUndo.setVisible(true);
+        Helpers.closeKeyboard(getActivity());
         getActivity().onBackPressed();
     }
 

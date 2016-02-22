@@ -124,8 +124,8 @@ public class RegisterDriver extends Fragment {
     }
 
     public void onRegistrationSuccess() {
-        Helpers.closeKeyboard(getActivity(), etDriverContactNumber.getWindowToken());
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
+        Helpers.closeKeyboard(getActivity());
         getActivity().onBackPressed();
     }
 
