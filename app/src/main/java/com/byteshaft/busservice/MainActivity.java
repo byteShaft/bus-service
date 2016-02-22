@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.byteshaft.busservice.Helpers.WebServiceHelpers;
 import com.byteshaft.busservice.fragments.ChangePasswordFragment;
 import com.byteshaft.busservice.fragments.ContactFragment;
 import com.byteshaft.busservice.fragments.HomeFragment;
@@ -28,6 +29,10 @@ import com.byteshaft.busservice.fragments.TwitterFragment;
 import com.byteshaft.busservice.utils.AppGlobals;
 import com.byteshaft.busservice.utils.Helpers;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -36,6 +41,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = WebServiceHelpers.getToken();
+                    System.out.println(token);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
 
         if (AppGlobals.isVirgin()) {
             Intent i = new Intent(MainActivity.this, LoginActivity.class);

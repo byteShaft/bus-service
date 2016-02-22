@@ -1,46 +1,68 @@
 package com.byteshaft.busservice.Helpers;
 
 
-import android.os.AsyncTask;
 import android.util.Base64;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
-public class WebServiceHelpers extends AsyncTask<Void, Void, JSONObject> {
+public class WebServiceHelpers {
 
-    private static final String mSessionURL = "Needed";
+    private static final String mSessionURL = "http://46.101.75.194:8080/login";
 
-
-    private HttpURLConnection openConnectionForUrl(String path)
+    private static HttpURLConnection openConnectionForUrl(String path)
             throws IOException {
 
         URL url = new URL(path);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty("Content-Type", "application/json");
-        String authString = "Needed";
-        System.out.println("auth string: " + authString);
-        String authEncBytes = Base64.encodeToString(authString.getBytes(), Base64.DEFAULT);
-        System.out.println("Base64 encoded auth string: " + authEncBytes);
-        connection.setRequestProperty("Authorization", "Basic " + authEncBytes);
-        connection.setRequestMethod("GET");
+        String authString = "superadmin" + ":" + "secret";
+        String authStringEncoded = Base64.encodeToString(authString.getBytes(), Base64.DEFAULT);
+        connection.setRequestProperty("Authorization", authStringEncoded);
+        connection.setRequestMethod("POST");
         return connection;
     }
 
-    private JSONObject postLocationUpdate()
+    public static String getToken()
             throws IOException, JSONException {
-        HttpURLConnection connection = openConnectionForUrl(mSessionURL);
-        return readResponse(connection);
+//        String data = String.format("{\"username\" : \"%s\", \"password\" : \"%s\"}", username, password);
+        Multipart multipart = new Multipart(new URL(mSessionURL), "POST");
+        multipart.addFormField("username", "superadmin");
+        multipart.addFormField("password", "secret");
+        multipart.finish();
+
+////        sendRequestData(connection, data);
+//        System.out.println(connection.getResponseCode());
+//        System.out.println(connection.getResponseMessage());
+//
+//        JSONObject jsonObj = readResponse(connection);
+//        Log.i("Response", "" + connection.getResponseCode());
+//        Log.i("JSONObject", "" + jsonObj);
+//        return (String) jsonObj.get("token");
+        return null;
     }
 
-    private JSONObject readResponse(HttpURLConnection connection)
+    private static void sendRequestData(HttpURLConnection connection, String body)
+            throws IOException {
+
+        byte[] outputInBytes = body.getBytes("UTF-8");
+        OutputStream os = connection.getOutputStream();
+        os.write(outputInBytes);
+        os.close();
+    }
+
+    private static JSONObject readResponse(HttpURLConnection connection)
             throws IOException, JSONException {
 
         InputStream is = connection.getInputStream();
@@ -54,27 +76,18 @@ public class WebServiceHelpers extends AsyncTask<Void, Void, JSONObject> {
         return new JSONObject(response.toString());
     }
 
-    @Override
-    protected JSONObject doInBackground(Void... params) {
-        JSONObject out = null;
+    public boolean isInternetWorking() {
+        boolean success = false;
         try {
-            out = postLocationUpdate();
+            URL url = new URL("https://google.com");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(10000);
+            connection.connect();
+            success = connection.getResponseCode() == 200;
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
-        return out;
+        return success;
     }
 
-    @Override
-    protected void onPostExecute(JSONObject jsonObject) {
-        try {
-            System.out.println(jsonObject.get("latitude"));
-            System.out.println(jsonObject.get("longitude"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        super.onPostExecute(jsonObject);
-    }
 }
