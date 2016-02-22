@@ -1,4 +1,4 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -10,8 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.byteshaft.busservice.R;
-import com.byteshaft.busservice.utils.AppGlobals;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.AppGlobals;
 
 public class ManageRoutes extends Fragment {
 

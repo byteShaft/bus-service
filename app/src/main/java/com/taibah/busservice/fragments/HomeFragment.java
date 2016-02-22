@@ -1,4 +1,4 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -16,9 +16,9 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.byteshaft.busservice.R;
-import com.byteshaft.busservice.utils.AppGlobals;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.Helpers;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 

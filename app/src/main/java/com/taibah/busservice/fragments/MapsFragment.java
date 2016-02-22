@@ -1,4 +1,4 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.byteshaft.busservice.R;
+import com.taibah.busservice.R;
 import com.directions.route.Route;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;

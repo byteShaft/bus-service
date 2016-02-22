@@ -1,4 +1,4 @@
-package com.byteshaft.busservice;
+package com.taibah.busservice;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,17 +16,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.byteshaft.busservice.fragments.ChangePasswordFragment;
-import com.byteshaft.busservice.fragments.ContactFragment;
-import com.byteshaft.busservice.fragments.HomeFragment;
-import com.byteshaft.busservice.fragments.ManageDrivers;
-import com.byteshaft.busservice.fragments.ManageRoutes;
-import com.byteshaft.busservice.fragments.ManageStudent;
-import com.byteshaft.busservice.fragments.MapsFragment;
-import com.byteshaft.busservice.fragments.ScheduleFragment;
-import com.byteshaft.busservice.fragments.TwitterFragment;
-import com.byteshaft.busservice.utils.AppGlobals;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.fragments.ChangePasswordFragment;
+import com.taibah.busservice.fragments.ContactFragment;
+import com.taibah.busservice.fragments.HomeFragment;
+import com.taibah.busservice.fragments.ManageDrivers;
+import com.taibah.busservice.fragments.ManageRoutes;
+import com.taibah.busservice.fragments.ManageStudent;
+import com.taibah.busservice.fragments.MapsFragment;
+import com.taibah.busservice.fragments.ScheduleFragment;
+import com.taibah.busservice.fragments.TwitterFragment;
+import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.Helpers;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

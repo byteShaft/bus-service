@@ -1,6 +1,5 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,8 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.byteshaft.busservice.R;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.Helpers;
 
 public class ChangePasswordFragment extends Fragment {
 
