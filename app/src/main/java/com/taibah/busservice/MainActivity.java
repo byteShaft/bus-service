@@ -62,20 +62,33 @@ public class MainActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);
 
         if (AppGlobals.getUserType() == 0) {
+
+            // User Type: Admin
+
             navigationView.getMenu().getItem(1).setVisible(false);
             navigationView.getMenu().getItem(2).setVisible(false);
             navigationView.getMenu().getItem(3).setVisible(true);
             navigationView.getMenu().getItem(4).setVisible(true);
             navigationView.getMenu().getItem(5).setVisible(true);
+            navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(false);
+
         } else if (AppGlobals.getUserType() == 1) {
+
+            // User Type: Student
+
             navigationView.getMenu().getItem(3).setVisible(false);
             navigationView.getMenu().getItem(4).setVisible(false);
             navigationView.getMenu().getItem(5).setVisible(false);
+            navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(true);
         } else if (AppGlobals.getUserType() == 2) {
+
+            // User Type: Driver
+
             navigationView.getMenu().getItem(2).setVisible(false);
             navigationView.getMenu().getItem(3).setVisible(false);
             navigationView.getMenu().getItem(4).setVisible(false);
             navigationView.getMenu().getItem(5).setVisible(false);
+            navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(true);
         }
     }
 
@@ -127,6 +140,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             default:
                 fragmentClass = HomeFragment.class;
+                break;
         }
 
         if (!logoutCheck) {

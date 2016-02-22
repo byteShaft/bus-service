@@ -67,7 +67,7 @@ public class RegisterStudent extends Fragment {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
@@ -75,6 +75,22 @@ public class RegisterStudent extends Fragment {
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs_student);
         tabLayout.setupWithViewPager(mViewPager);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Helpers.closeKeyboard(getActivity());
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         return convertView;
     }
@@ -83,6 +99,8 @@ public class RegisterStudent extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_done, menu);
+
+        menuItemUndo = menu.findItem(R.id.action_undo_button);
     }
 
     @Override
@@ -227,6 +245,8 @@ public class RegisterStudent extends Fragment {
             }
             return null;
         }
+
+
     }
 
     public static class PlaceholderFragment extends Fragment {
@@ -368,6 +388,8 @@ public class RegisterStudent extends Fragment {
         }
     }
 
+
+
     public void register() {
 
         String username = "sdt" + firstNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
@@ -433,7 +455,8 @@ public class RegisterStudent extends Fragment {
 
     public void onRegistrationSuccess() {
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
-        Helpers.closeKeyboard(getActivity(), etStudentContactNumber.getWindowToken());
+        menuItemUndo.setVisible(false);
+        Helpers.closeKeyboard(getActivity());
         getActivity().onBackPressed();
     }
 
@@ -445,6 +468,12 @@ public class RegisterStudent extends Fragment {
     public void onResume() {
         super.onResume();
         Log.i("OnResume", "OnResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
     }
 }
 
