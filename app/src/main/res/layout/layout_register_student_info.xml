@@ -82,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:hint="E-Mail"
                 android:inputType="textEmailAddress"
-                android:maxLength="18" />
+                android:maxLength="26" />
         </android.support.design.widget.TextInputLayout>
 
         <Spinner

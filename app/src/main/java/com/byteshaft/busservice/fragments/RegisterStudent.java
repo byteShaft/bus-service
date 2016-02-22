@@ -1,6 +1,9 @@
 package com.byteshaft.busservice.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -17,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.byteshaft.busservice.R;
@@ -42,11 +46,17 @@ public class RegisterStudent extends Fragment {
     public static EditText etStudentRollNumber;
     public static EditText etStudentEmail;
 
+    public static MenuItem menuItemUndo;
+
+    public static TextView tvMapRegisterStudentInfo;
+
     String firstNameStudent;
     String lastNameStudent;
     String contactNumberStudent;
     String rollNumberStudent;
     String emailStudent;
+
+    String studentStop;
 
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -78,6 +88,16 @@ public class RegisterStudent extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            case R.id.action_undo_button:
+
+                PlaceholderFragment.onLongClickCounter = 0;
+                menuItemUndo.setVisible(false);
+                PlaceholderFragment.studentStopLatLng = null;
+                tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
+
+
+                return true;
             case R.id.action_done_button:
 
                 firstNameStudent =  etStudentFirstName.getText().toString().trim();
@@ -86,12 +106,96 @@ public class RegisterStudent extends Fragment {
                 rollNumberStudent = etStudentRollNumber.getText().toString().trim();
                 emailStudent = etStudentEmail.getText().toString().trim();
 
-                register();
+                try {
+                    if (!validateInfo()) {
+                        Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    studentStop = PlaceholderFragment.studentStopLatLng.toString();
+
+                } catch (NullPointerException e) {
+                    Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                    return true;
+                }
+
+                new checkInternetTask().execute();
 
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return Helpers.isInternetWorking(getActivity());
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Collecting information");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
+            String message = "Student Name:  " + firstNameStudent + " " + lastNameStudent + "\n"
+                    + "Contact Number: " + contactNumberStudent
+                    + "\n" + "RollNumber: " + rollNumberStudent + "\n" + "Email ID: " + emailStudent
+                    + "\n\n" + "Stop Address: " + Helpers.getAddress(getActivity(), PlaceholderFragment.studentStopLatLng);
+
+            Helpers.dismissProgressDialog();
+            if (success) {
+                showRegInfoDialog(message);
+            } else {
+                showInternetNotWorkingDialog();
+            }
+        }
+    }
+
+    public void showInternetNotWorkingDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setMessage("Internet not available");
+        alertDialogBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                new checkInternetTask().execute();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    public void showRegInfoDialog(String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setTitle("Are you sure?");
+        alertDialogBuilder.setMessage(message);
+        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                register();
+            }
+        });
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alertDialogBuilder.create();
+        alertDialogBuilder.show();
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -139,7 +243,9 @@ public class RegisterStudent extends Fragment {
         private GoogleMap mMap;
         private Polyline polyline;
 
-        private int onLongClickCounter = 0;
+        public static LatLng studentStopLatLng = null;
+
+        public static int onLongClickCounter = 0;
         private static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
 
         public PlaceholderFragment() {
@@ -176,6 +282,7 @@ public class RegisterStudent extends Fragment {
                 rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
                 fm = getChildFragmentManager();
                 myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.register_student_map);
+                tvMapRegisterStudentInfo = (TextView) rootView.findViewById(R.id.tv_map_register_student_info);
 
                 myMapFragment.getMapAsync(new OnMapReadyCallback() {
                     @Override
@@ -194,13 +301,14 @@ public class RegisterStudent extends Fragment {
                                 onLongClickCounter++;
                                 if (onLongClickCounter == 1) {
                                     mMap.clear();
+                                    tvMapRegisterStudentInfo.setText("Resolving route points...");
                                     mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
                                     mMap.addMarker(new MarkerOptions().position(dummyPosition));
                                     mMap.addMarker(new MarkerOptions().position(latLng));
                                     LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
                                             taibahUniversityLocation, latLng, dummyPosition};
-
                                     buildAndDisplayRouteWithWayPoints(latLngDummyList);
+                                    studentStopLatLng = latLng;
                                 }
                             }
                         });
@@ -223,10 +331,13 @@ public class RegisterStudent extends Fragment {
                     public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
                         PolylineOptions polyoptions = new PolylineOptions();
                         polyoptions.color(Color.RED);
-                        polyoptions.width(15);
-                        polylineOptions.zIndex(102);
+                        polyoptions.width(10);
+                        polylineOptions.zIndex(90);
                         polyoptions.addAll(polylineOptions.getPoints());
                         mMap.addPolyline(polyoptions);
+                        if (onLongClickCounter == 1) {
+                            tvMapRegisterStudentInfo.setText("Stop Successfully Marked");
+                        }
                     }
 
                     @Override
@@ -259,11 +370,6 @@ public class RegisterStudent extends Fragment {
 
     public void register() {
 
-        if (!validate()) {
-            onRegistrationFailed();
-            return;
-        }
-
         String username = "sdt" + firstNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
         String password = lastNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3 );
 
@@ -283,7 +389,7 @@ public class RegisterStudent extends Fragment {
                 }, 2000);
     }
 
-    public boolean validate() {
+    public boolean validateInfo() {
         boolean valid = true;
 
         if (firstNameStudent.isEmpty() || firstNameStudent.length() < 3) {
@@ -339,7 +445,6 @@ public class RegisterStudent extends Fragment {
     public void onResume() {
         super.onResume();
         Log.i("OnResume", "OnResume");
-
     }
 }
 
