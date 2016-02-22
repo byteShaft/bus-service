@@ -67,7 +67,7 @@ public class RegisterStudent extends Fragment {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
@@ -445,6 +445,12 @@ public class RegisterStudent extends Fragment {
     public void onResume() {
         super.onResume();
         Log.i("OnResume", "OnResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
     }
 }
 

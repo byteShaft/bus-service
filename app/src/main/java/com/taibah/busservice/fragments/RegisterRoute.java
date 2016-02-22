@@ -68,7 +68,7 @@ public class RegisterRoute extends Fragment {
         convertView = inflater.inflate(R.layout.layout_register_route, null);
         setHasOptionsMenu(true);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container);
@@ -76,6 +76,8 @@ public class RegisterRoute extends Fragment {
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        mViewPager.setOffscreenPageLimit(3);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -260,7 +262,9 @@ public class RegisterRoute extends Fragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             int tabCount = getArguments().getInt(ARG_SECTION_NUMBER);
+            System.out.println("called");
             View rootView = null;
+            Log.i("count", String.valueOf(tabCount));
 
             if (tabCount == 1) {
                 rootView = inflater.inflate(R.layout.layout_register_route_info, container, false);
