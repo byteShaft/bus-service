@@ -1,4 +1,4 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,8 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
-import com.byteshaft.busservice.R;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.Helpers;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

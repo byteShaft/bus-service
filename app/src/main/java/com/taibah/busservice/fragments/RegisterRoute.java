@@ -1,7 +1,5 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -25,8 +23,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.byteshaft.busservice.R;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.Helpers;
 import com.directions.route.Route;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
@@ -49,7 +47,7 @@ public class RegisterRoute extends Fragment {
     public static EditText etRouteName;
     public static EditText etBusNumber;
 
-    public static TextView tvMapRegisterInfo;
+    public static TextView tvMapRegisterRouteInfo;
 
     String routeName;
     String busNumber;
@@ -70,7 +68,7 @@ public class RegisterRoute extends Fragment {
         convertView = inflater.inflate(R.layout.layout_register_route, null);
         setHasOptionsMenu(true);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container);
@@ -78,6 +76,24 @@ public class RegisterRoute extends Fragment {
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Helpers.closeKeyboard(getActivity());
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mViewPager.setOffscreenPageLimit(3);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -120,7 +136,7 @@ public class RegisterRoute extends Fragment {
                 PlaceholderFragment.onLongClickCounter = 0;
                 menuItemUndo.setVisible(false);
                 PlaceholderFragment.pointA = null;
-                tvMapRegisterInfo.setText("Tap and hold to set Point 'A'");
+                tvMapRegisterRouteInfo.setText("Tap and hold to set Point 'A'");
                 return true;
             case R.id.action_done_button:
 
@@ -153,7 +169,7 @@ public class RegisterRoute extends Fragment {
     }
 
 
-    class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
+    private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -185,7 +201,6 @@ public class RegisterRoute extends Fragment {
             }
         }
     }
-
 
     public void showInternetNotWorkingDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
@@ -274,15 +289,13 @@ public class RegisterRoute extends Fragment {
                 rootView = inflater.inflate(R.layout.layout_route_register_timepicker, container, false);
                 timePickerArrivalTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_arrival_time);
                 timePickerDepartureTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_departure_time);
-                Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
 
             } else if (tabCount == 3) {
                 rootView = inflater.inflate(R.layout.layout_route_register_map, container, false);
                 fm = getChildFragmentManager();
                 myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map1);
-                Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
 
-                tvMapRegisterInfo = (TextView) rootView.findViewById(R.id.tv_map_register_info);
+                tvMapRegisterRouteInfo = (TextView) rootView.findViewById(R.id.tv_map_register_route_info);
 
                 myMapFragment.getMapAsync(new OnMapReadyCallback() {
                     @Override
@@ -296,11 +309,11 @@ public class RegisterRoute extends Fragment {
                                 onLongClickCounter++;
                                 if (onLongClickCounter == 1) {
                                     mMap.addMarker(new MarkerOptions().position(latLng));
-                                    tvMapRegisterInfo.setText("Tap and hold to set Point 'B'");
+                                    tvMapRegisterRouteInfo.setText("Tap and hold to set Point 'B'");
                                     pointA = latLng;
                                 } else if (onLongClickCounter == 2) {
                                     mMap.addMarker(new MarkerOptions().position(latLng));
-                                    tvMapRegisterInfo.setText("Resolving route points...");
+                                    tvMapRegisterRouteInfo.setText("Resolving route points...");
                                     pointB = latLng;
                                     latLngList = new LatLng[]{pointA, pointB};
                                     Routing routing = new Routing.Builder()
@@ -332,10 +345,10 @@ public class RegisterRoute extends Fragment {
                     PolylineOptions polyOptions = new PolylineOptions();
                     polyOptions.color(Color.RED);
                     polyOptions.width(10);
-                    polylineOptions.zIndex(60);
+                    polylineOptions.zIndex(90);
                     polyOptions.addAll(polylineOptions.getPoints());
                     mMap.addPolyline(polyOptions);
-                    tvMapRegisterInfo.setText("Route Successfully Established");
+                    tvMapRegisterRouteInfo.setText("Route Successfully Established");
                 }
 
                 @Override
@@ -416,7 +429,8 @@ public class RegisterRoute extends Fragment {
 
     public void onRegistrationSuccess() {
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
-        Helpers.closeKeyboard(getActivity(), etBusNumber.getWindowToken());
+        menuItemUndo.setVisible(true);
+        Helpers.closeKeyboard(getActivity());
         getActivity().onBackPressed();
     }
 

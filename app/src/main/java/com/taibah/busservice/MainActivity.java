@@ -1,4 +1,4 @@
-package com.byteshaft.busservice;
+package com.taibah.busservice;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,18 +16,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.byteshaft.busservice.Helpers.WebServiceHelpers;
-import com.byteshaft.busservice.fragments.ChangePasswordFragment;
-import com.byteshaft.busservice.fragments.ContactFragment;
-import com.byteshaft.busservice.fragments.HomeFragment;
-import com.byteshaft.busservice.fragments.ManageDrivers;
-import com.byteshaft.busservice.fragments.ManageRoutes;
-import com.byteshaft.busservice.fragments.ManageStudent;
-import com.byteshaft.busservice.fragments.MapsFragment;
-import com.byteshaft.busservice.fragments.ScheduleFragment;
-import com.byteshaft.busservice.fragments.TwitterFragment;
-import com.byteshaft.busservice.utils.AppGlobals;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.Helpers.WebServiceHelpers;
+import com.taibah.busservice.fragments.ChangePasswordFragment;
+import com.taibah.busservice.fragments.ContactFragment;
+import com.taibah.busservice.fragments.HomeFragment;
+import com.taibah.busservice.fragments.ManageDrivers;
+import com.taibah.busservice.fragments.ManageRoutes;
+import com.taibah.busservice.fragments.ManageStudent;
+import com.taibah.busservice.fragments.MapsFragment;
+import com.taibah.busservice.fragments.ScheduleFragment;
+import com.taibah.busservice.fragments.TwitterFragment;
+import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.Helpers;
 
 import org.json.JSONException;
 
@@ -81,20 +81,33 @@ public class MainActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);
 
         if (AppGlobals.getUserType() == 0) {
+
+            // User Type: Admin
+
             navigationView.getMenu().getItem(1).setVisible(false);
             navigationView.getMenu().getItem(2).setVisible(false);
             navigationView.getMenu().getItem(3).setVisible(true);
             navigationView.getMenu().getItem(4).setVisible(true);
             navigationView.getMenu().getItem(5).setVisible(true);
+            navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(false);
+
         } else if (AppGlobals.getUserType() == 1) {
+
+            // User Type: Student
+
             navigationView.getMenu().getItem(3).setVisible(false);
             navigationView.getMenu().getItem(4).setVisible(false);
             navigationView.getMenu().getItem(5).setVisible(false);
+            navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(true);
         } else if (AppGlobals.getUserType() == 2) {
+
+            // User Type: Driver
+
             navigationView.getMenu().getItem(2).setVisible(false);
             navigationView.getMenu().getItem(3).setVisible(false);
             navigationView.getMenu().getItem(4).setVisible(false);
             navigationView.getMenu().getItem(5).setVisible(false);
+            navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(true);
         }
     }
 
@@ -146,6 +159,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             default:
                 fragmentClass = HomeFragment.class;
+                break;
         }
 
         if (!logoutCheck) {

@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "com.byteshaft.busservice"
+        applicationId "com.taibah.busservice"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1

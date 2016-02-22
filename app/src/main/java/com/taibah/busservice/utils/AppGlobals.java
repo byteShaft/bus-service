@@ -1,15 +1,13 @@
-package com.byteshaft.busservice.utils;
+package com.taibah.busservice.utils;
 
 
 import android.app.Application;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 
-import com.byteshaft.busservice.R;
+import com.taibah.busservice.R;
 
 public class AppGlobals extends Application {
 

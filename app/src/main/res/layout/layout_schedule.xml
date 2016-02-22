@@ -2,14 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical">
+
+    <Switch
+        android:id="@+id/switch_student_schedule"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:padding="16dp"
+        android:text="Service"/>
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="28dp"
-        android:textStyle="bold"
-        android:text="CALENDER HERE"
-        android:gravity="center"/>
+        android:layout_height="wrap_content"
+        android:textSize="18dp"
+        android:text="Service Scheduling"
+        android:textColor="@color/colorPrimary"
+        android:shadowColor="#80000000"
+        android:shadowDx="1.4"
+        android:shadowDy="1.2"
+        android:shadowRadius="1.4"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="50dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp"
+        android:textSize="16dp"
+        android:text="Set whether you will be attending the bus or not. Turn the switch 'Off' and you'll be removed from the route shown to the driver until you turn it 'On' again"
+        android:gravity="center_horizontal"/>
 
 </LinearLayout>
+

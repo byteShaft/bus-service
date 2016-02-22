@@ -1,4 +1,4 @@
-package com.byteshaft.busservice.fragments;
+package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -17,8 +17,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.byteshaft.busservice.R;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.Helpers;
 
 public class RegisterDriver extends Fragment {
 
@@ -124,8 +124,8 @@ public class RegisterDriver extends Fragment {
     }
 
     public void onRegistrationSuccess() {
-        Helpers.closeKeyboard(getActivity(), etDriverContactNumber.getWindowToken());
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
+        Helpers.closeKeyboard(getActivity());
         getActivity().onBackPressed();
     }
 
