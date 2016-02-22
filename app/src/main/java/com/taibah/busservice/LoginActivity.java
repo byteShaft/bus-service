@@ -1,4 +1,4 @@
-package com.byteshaft.busservice;
+package com.taibah.busservice;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,8 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.byteshaft.busservice.utils.AppGlobals;
-import com.byteshaft.busservice.utils.Helpers;
+import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.Helpers;
 
 public class LoginActivity extends Activity {
 

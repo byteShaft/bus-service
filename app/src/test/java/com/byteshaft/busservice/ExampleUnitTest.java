@@ -1,4 +1,4 @@
-package com.byteshaft.busservice;
+package com.taibah.busservice;
 
 import org.junit.Test;
 

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.byteshaft.busservice" >
+    package="com.taibah.busservice" >
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:name=".utils.AppGlobals"
+        android:name="com.taibah.busservice.utils.AppGlobals"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.taibah.busservice.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait">
@@ -24,12 +24,11 @@
             </intent-filter>
         </activity>
     <activity
-        android:name=".LoginActivity"
+        android:name="com.taibah.busservice.LoginActivity"
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
     </application>
 </manifest>
