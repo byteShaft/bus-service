@@ -11,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,8 +22,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.taibah.busservice.R;
-import com.taibah.busservice.utils.Helpers;
 import com.directions.route.Route;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
@@ -35,32 +32,31 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.Helpers;
 
 
 public class RegisterRoute extends Fragment {
 
-    private ViewPager mViewPager;
-    private View convertView;
-    private SectionsPagerAdapter mSectionsPagerAdapter;
     public static MenuItem menuItemUndo;
-
+    public static GoogleMap mMap;
     public static EditText etRouteName;
     public static EditText etBusNumber;
-
     public static TextView tvMapRegisterRouteInfo;
-
+    public static int onLongClickCounter = 0;
+    public static TimePicker timePickerArrivalTime;
+    public static TimePicker timePickerDepartureTime;
+    public static LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
+    public static LatLng[] latLngList;
     String routeName;
     String busNumber;
     String arrivalTime;
     String departureTime;
     String locationPointA;
     String locationPointB;
-
-    public static TimePicker timePickerArrivalTime;
-    public static TimePicker timePickerDepartureTime;
-
-    public static LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
-    public static LatLng[] latLngList;
+    private ViewPager mViewPager;
+    private View convertView;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     @Nullable
     @Override
@@ -85,6 +81,13 @@ public class RegisterRoute extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 Helpers.closeKeyboard(getActivity());
+                if (position == 2) {
+                    if (onLongClickCounter != 0) {
+                        menuItemUndo.setVisible(true);
+                    }
+                } else {
+                    menuItemUndo.setVisible(false);
+                }
             }
 
             @Override
@@ -94,30 +97,6 @@ public class RegisterRoute extends Fragment {
         });
 
         mViewPager.setOffscreenPageLimit(3);
-
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                Log.i("getItem", " position " + position);
-                if (position == 2) {
-                    if (PlaceholderFragment.pointA != null) {
-                        Log.i("test", " test " + position);
-                        menuItemUndo.setVisible(true);
-                    }
-                } else {
-                    menuItemUndo.setVisible(false);
-                }
-            }
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
         return convertView;
     }
 
@@ -132,8 +111,8 @@ public class RegisterRoute extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_undo_button:
-                PlaceholderFragment.mMap.clear();
-                PlaceholderFragment.onLongClickCounter = 0;
+                mMap.clear();
+                onLongClickCounter = 0;
                 menuItemUndo.setVisible(false);
                 PlaceholderFragment.pointA = null;
                 tvMapRegisterRouteInfo.setText("Tap and hold to set Point 'A'");
@@ -165,40 +144,6 @@ public class RegisterRoute extends Fragment {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-
-    private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            return Helpers.isInternetWorking();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Collecting information");
-        }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            super.onPostExecute(success);
-
-            String message = "Route Name: "
-                    + routeName + "\n" + "Bus Number: " + busNumber
-                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
-                    + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
-                    PlaceholderFragment.pointA) + "\n" + "Point B: "
-                    + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
-
-            Helpers.dismissProgressDialog();
-            if (success) {
-                showRegInfoDialog(message);
-            } else {
-                showInternetNotWorkingDialog();
-            }
         }
     }
 
@@ -242,6 +187,59 @@ public class RegisterRoute extends Fragment {
         alertDialogBuilder.show();
     }
 
+    public void register() {
+
+        Helpers.showProgressDialog(getActivity(), "Registering");
+
+        // TODO: Implement registration here.
+
+        new android.os.Handler().postDelayed(
+                new Runnable() {
+                    public void run() {
+                        onRegistrationSuccess();
+                        Helpers.dismissProgressDialog();
+                    }
+                }, 2000);
+    }
+
+    public boolean validateInfo() {
+        boolean valid = true;
+
+        if (routeName.trim().isEmpty() || routeName.trim().length() < 6) {
+            etRouteName.setError("at least 6 characters");
+            valid = false;
+        } else {
+            etRouteName.setError(null);
+        }
+
+        if (busNumber.trim().isEmpty() || busNumber.trim().length() < 4) {
+            etBusNumber.setError("at least 4 characters");
+            valid = false;
+        } else {
+            etBusNumber.setError(null);
+        }
+        return valid;
+    }
+
+    public void onRegistrationSuccess() {
+        Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
+        menuItemUndo.setVisible(true);
+        Helpers.closeKeyboard(getActivity());
+        getActivity().onBackPressed();
+    }
+
+    public void onRegistrationFailed() {
+        Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        onLongClickCounter = 0;
+        PlaceholderFragment.pointA = null;
+        PlaceholderFragment.pointB = null;
+    }
+
     public static class PlaceholderFragment extends Fragment {
 
         /**
@@ -249,14 +247,12 @@ public class RegisterRoute extends Fragment {
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        public static LatLng pointA = null;
+        public static LatLng pointB = null;
         private FragmentManager fm;
-        public static GoogleMap mMap;
         private SupportMapFragment myMapFragment;
         private RoutingListener mRoutingListener;
         private LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
-        public static LatLng pointA = null;
-        public static LatLng pointB = null;
-        public static int onLongClickCounter = 0;
 
         public PlaceholderFragment() {
 
@@ -360,6 +356,39 @@ public class RegisterRoute extends Fragment {
         }
     }
 
+    private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return Helpers.isInternetWorking();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Collecting information");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
+            String message = "Route Name: "
+                    + routeName + "\n" + "Bus Number: " + busNumber
+                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
+                    + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
+                    PlaceholderFragment.pointA) + "\n" + "Point B: "
+                    + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
+
+            Helpers.dismissProgressDialog();
+            if (success) {
+                showRegInfoDialog(message);
+            } else {
+                showInternetNotWorkingDialog();
+            }
+        }
+    }
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -391,50 +420,5 @@ public class RegisterRoute extends Fragment {
             }
             return null;
         }
-    }
-
-    public void register() {
-
-        Helpers.showProgressDialog(getActivity(), "Registering");
-
-        // TODO: Implement registration here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onRegistrationSuccess();
-                        Helpers.dismissProgressDialog();
-                    }
-                }, 2000);
-    }
-
-    public boolean validateInfo() {
-        boolean valid = true;
-
-        if (routeName.trim().isEmpty() || routeName.trim().length() < 6) {
-            etRouteName.setError("at least 6 characters");
-            valid = false;
-        } else {
-            etRouteName.setError(null);
-        }
-
-        if (busNumber.trim().isEmpty() || busNumber.trim().length() < 4) {
-            etBusNumber.setError("at least 4 characters");
-            valid = false;
-        } else {
-            etBusNumber.setError(null);
-        }
-        return valid;
-    }
-
-    public void onRegistrationSuccess() {
-        Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
-        menuItemUndo.setVisible(true);
-        Helpers.closeKeyboard(getActivity());
-        getActivity().onBackPressed();
-    }
-
-    public void onRegistrationFailed() {
-        Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_SHORT).show();
     }
 }

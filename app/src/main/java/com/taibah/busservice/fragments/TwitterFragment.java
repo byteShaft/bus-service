@@ -98,7 +98,16 @@ public class TwitterFragment extends Fragment {
         }).start();
    }
 
+    static class ViewHolder {
+        public TextView title;
+    }
+
     private class tweetsArrayAdapter extends ArrayAdapter<List> {
+
+        public tweetsArrayAdapter(Context context, int resource, List objects) {
+            super(context, resource, objects);
+
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -118,14 +127,5 @@ public class TwitterFragment extends Fragment {
             holder.title.setText(status.getText());
             return convertView;
         }
-
-        public tweetsArrayAdapter(Context context, int resource, List objects) {
-            super(context, resource, objects);
-
-        }
-    }
-
-    static class ViewHolder {
-        public TextView title;
     }
 }

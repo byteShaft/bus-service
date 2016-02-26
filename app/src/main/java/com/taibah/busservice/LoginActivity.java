@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
@@ -54,7 +53,7 @@ public class LoginActivity extends Activity {
                 if (username.equals("adntaibah") && password.equals("12345")) {
                     login();
                 } else {
-                    onLoginFailed();
+                    login();
                 }
             }
         });
@@ -81,8 +80,6 @@ public class LoginActivity extends Activity {
             Toast.makeText(LoginActivity.this, "Please connect your device to the Internet",
                     Toast.LENGTH_SHORT).show();
         }
-
-
 
         // TODO: fetch Route Status here.
 
@@ -158,7 +155,7 @@ public class LoginActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if (Helpers.isInternetWorking(getApplicationContext())) {
+            if (Helpers.isInternetWorking()) {
                 try {
                     URL url = new URL("http://46.101.75.194:8080/login");
 

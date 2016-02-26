@@ -38,18 +38,15 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class RegisterStudent extends Fragment {
-    View convertView;
-
     public static EditText etStudentFirstName;
     public static EditText etStudentLastName;
     public static EditText etStudentContactNumber;
     public static EditText etStudentRollNumber;
     public static EditText etStudentEmail;
-
     public static MenuItem menuItemUndo;
-
     public static TextView tvMapRegisterStudentInfo;
-
+    public static int onLongClickCounter = 0;
+    View convertView;
     String firstNameStudent;
     String lastNameStudent;
     String contactNumberStudent;
@@ -84,6 +81,13 @@ public class RegisterStudent extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 Helpers.closeKeyboard(getActivity());
+                if (position == 1) {
+                    if (onLongClickCounter != 0) {
+                        menuItemUndo.setVisible(true);
+                    }
+                } else {
+                    menuItemUndo.setVisible(false);
+                }
             }
 
             @Override
@@ -91,6 +95,9 @@ public class RegisterStudent extends Fragment {
 
             }
         });
+
+
+        mViewPager.setOffscreenPageLimit(2);
 
         return convertView;
     }
@@ -108,8 +115,7 @@ public class RegisterStudent extends Fragment {
         switch (item.getItemId()) {
 
             case R.id.action_undo_button:
-
-                PlaceholderFragment.onLongClickCounter = 0;
+                onLongClickCounter = 0;
                 menuItemUndo.setVisible(false);
                 PlaceholderFragment.studentStopLatLng = null;
                 tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
@@ -118,7 +124,7 @@ public class RegisterStudent extends Fragment {
                 return true;
             case R.id.action_done_button:
 
-                firstNameStudent =  etStudentFirstName.getText().toString().trim();
+                firstNameStudent = etStudentFirstName.getText().toString().trim();
                 lastNameStudent = etStudentLastName.getText().toString().trim();
                 contactNumberStudent = etStudentContactNumber.getText().toString().trim();
                 rollNumberStudent = etStudentRollNumber.getText().toString().trim();
@@ -142,37 +148,6 @@ public class RegisterStudent extends Fragment {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            return Helpers.isInternetWorking();
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Collecting information");
-        }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            super.onPostExecute(success);
-
-            String message = "Student Name:  " + firstNameStudent + " " + lastNameStudent + "\n"
-                    + "Contact Number: " + contactNumberStudent
-                    + "\n" + "RollNumber: " + rollNumberStudent + "\n" + "Email ID: " + emailStudent
-                    + "\n\n" + "Stop Address: " + Helpers.getAddress(getActivity(), PlaceholderFragment.studentStopLatLng);
-
-            Helpers.dismissProgressDialog();
-            if (success) {
-                showRegInfoDialog(message);
-            } else {
-                showInternetNotWorkingDialog();
-            }
         }
     }
 
@@ -216,184 +191,10 @@ public class RegisterStudent extends Fragment {
         alertDialogBuilder.show();
     }
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
-        }
-
-        @Override
-        public int getCount() {
-            // Show 2 total pages.
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Info";
-                case 1:
-                    return "Stop";
-            }
-            return null;
-        }
-
-
-    }
-
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-
-        private FragmentManager fm;
-
-        private static final String ARG_SECTION_NUMBER = "section_number";
-        private SupportMapFragment myMapFragment;
-        private RoutingListener mRoutingListener;
-        private GoogleMap mMap;
-        private Polyline polyline;
-
-        public static LatLng studentStopLatLng = null;
-
-        public static int onLongClickCounter = 0;
-        private static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            int tabCount =  getArguments().getInt(ARG_SECTION_NUMBER);
-            View rootView = null;
-            if (tabCount == 1) {
-                rootView = inflater.inflate(R.layout.layout_register_student_info, container, false);
-
-                etStudentFirstName = (EditText) rootView.findViewById(R.id.et_student_first_name);
-                etStudentLastName = (EditText) rootView.findViewById(R.id.et_student_last_name);
-                etStudentContactNumber = (EditText) rootView.findViewById(R.id.et_student_contact);
-                etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
-                etStudentEmail = (EditText) rootView.findViewById(R.id.et_student_email);
-
-            } else if (tabCount == 2) {
-                rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
-                fm = getChildFragmentManager();
-                myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.register_student_map);
-                tvMapRegisterStudentInfo = (TextView) rootView.findViewById(R.id.tv_map_register_student_info);
-
-                myMapFragment.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(GoogleMap googleMap) {
-                        mMap = googleMap;
-                        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
-                        mMap.addMarker(new MarkerOptions().position(dummyPosition));
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
-                                taibahUniversityLocation, 13.0f));
-
-                        buildAndDisplayRoute(RegisterRoute.taibahUniversityLocation, dummyPosition);
-
-                        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-                            @Override
-                            public void onMapLongClick(LatLng latLng) {
-                                onLongClickCounter++;
-                                if (onLongClickCounter == 1) {
-                                    mMap.clear();
-                                    tvMapRegisterStudentInfo.setText("Resolving route points...");
-                                    mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
-                                    mMap.addMarker(new MarkerOptions().position(dummyPosition));
-                                    mMap.addMarker(new MarkerOptions().position(latLng));
-                                    LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
-                                            taibahUniversityLocation, latLng, dummyPosition};
-                                    buildAndDisplayRouteWithWayPoints(latLngDummyList);
-                                    studentStopLatLng = latLng;
-                                }
-                            }
-                        });
-
-                    }
-                });
-
-                mRoutingListener = new RoutingListener() {
-                    @Override
-                    public void onRoutingFailure() {
-
-                    }
-
-                    @Override
-                    public void onRoutingStart() {
-
-                    }
-
-                    @Override
-                    public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
-                        PolylineOptions polyoptions = new PolylineOptions();
-                        polyoptions.color(Color.RED);
-                        polyoptions.width(10);
-                        polylineOptions.zIndex(102);
-                        polyoptions.addAll(polylineOptions.getPoints());
-                        mMap.addPolyline(polyoptions);
-                        if (onLongClickCounter == 1) {
-                            tvMapRegisterStudentInfo.setText("Stop Successfully Marked");
-                        }
-                    }
-
-                    @Override
-                    public void onRoutingCancelled() {
-
-                    }
-                };
-            }
-            return rootView;
-        }
-
-        private void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
-            Routing routing = new Routing.Builder()
-                    .travelMode(Routing.TravelMode.DRIVING)
-                    .withListener(mRoutingListener)
-                    .waypoints(startPoint, endPoint)
-                    .build();
-            routing.execute();
-        }
-
-        private void buildAndDisplayRouteWithWayPoints(LatLng[] latLngArrayWithWayPoints) {
-            Routing routing = new Routing.Builder()
-                    .travelMode(Routing.TravelMode.DRIVING)
-                    .withListener(mRoutingListener)
-                    .waypoints(latLngArrayWithWayPoints)
-                    .build();
-            routing.execute();
-        }
-    }
-
-
-
     public void register() {
 
         String username = "sdt" + firstNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
-        String password = lastNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3 );
+        String password = lastNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
 
         Log.i("username", " " + username);
         Log.i("password", " " + password);
@@ -467,12 +268,213 @@ public class RegisterStudent extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.i("OnResume", "OnResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        onLongClickCounter = 0;
+        menuItemUndo.setVisible(false);
+        PlaceholderFragment.studentStopLatLng = null;
+    }
+
+    public static class PlaceholderFragment extends Fragment {
+        private static final String ARG_SECTION_NUMBER = "section_number";
+        public static LatLng studentStopLatLng = null;
+        private static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+
+        private FragmentManager fm;
+        private SupportMapFragment myMapFragment;
+        private RoutingListener mRoutingListener;
+        private GoogleMap mMap;
+        private Polyline polyline;
+
+        public PlaceholderFragment() {
+        }
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+
+        public static PlaceholderFragment newInstance(int sectionNumber) {
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            int tabCount = getArguments().getInt(ARG_SECTION_NUMBER);
+            View rootView = null;
+            if (tabCount == 1) {
+                rootView = inflater.inflate(R.layout.layout_register_student_info, container, false);
+
+                etStudentFirstName = (EditText) rootView.findViewById(R.id.et_student_first_name);
+                etStudentLastName = (EditText) rootView.findViewById(R.id.et_student_last_name);
+                etStudentContactNumber = (EditText) rootView.findViewById(R.id.et_student_contact);
+                etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
+                etStudentEmail = (EditText) rootView.findViewById(R.id.et_student_email);
+
+            } else if (tabCount == 2) {
+                rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
+                fm = getChildFragmentManager();
+                myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.register_student_map);
+                tvMapRegisterStudentInfo = (TextView) rootView.findViewById(R.id.tv_map_register_student_info);
+
+                myMapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap googleMap) {
+                        mMap = googleMap;
+                        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
+                        mMap.addMarker(new MarkerOptions().position(dummyPosition));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
+                                taibahUniversityLocation, 13.0f));
+
+                        buildAndDisplayRoute(RegisterRoute.taibahUniversityLocation, dummyPosition);
+
+                        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                            @Override
+                            public void onMapLongClick(LatLng latLng) {
+                                onLongClickCounter++;
+                                if (onLongClickCounter == 1) {
+                                    mMap.clear();
+                                    menuItemUndo.setVisible(true);
+                                    tvMapRegisterStudentInfo.setText("Resolving route points...");
+                                    mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
+                                    mMap.addMarker(new MarkerOptions().position(dummyPosition));
+                                    mMap.addMarker(new MarkerOptions().position(latLng));
+                                    LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
+                                            taibahUniversityLocation, latLng, dummyPosition};
+                                    buildAndDisplayRouteWithWayPoints(latLngDummyList);
+                                    studentStopLatLng = latLng;
+                                }
+                            }
+                        });
+
+                    }
+                });
+
+                mRoutingListener = new RoutingListener() {
+                    @Override
+                    public void onRoutingFailure() {
+
+                    }
+
+                    @Override
+                    public void onRoutingStart() {
+
+                    }
+
+                    @Override
+                    public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
+                        PolylineOptions polyoptions = new PolylineOptions();
+                        polyoptions.color(Color.RED);
+                        polyoptions.width(10);
+                        polylineOptions.zIndex(102);
+                        polyoptions.addAll(polylineOptions.getPoints());
+                        mMap.addPolyline(polyoptions);
+                        if (onLongClickCounter == 1) {
+                            tvMapRegisterStudentInfo.setText("Stop Successfully Marked");
+                        }
+                    }
+
+                    @Override
+                    public void onRoutingCancelled() {
+
+                    }
+                };
+            }
+            return rootView;
+        }
+
+        private void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
+            Routing routing = new Routing.Builder()
+                    .travelMode(Routing.TravelMode.DRIVING)
+                    .withListener(mRoutingListener)
+                    .waypoints(startPoint, endPoint)
+                    .build();
+            routing.execute();
+        }
+
+        private void buildAndDisplayRouteWithWayPoints(LatLng[] latLngArrayWithWayPoints) {
+            Routing routing = new Routing.Builder()
+                    .travelMode(Routing.TravelMode.DRIVING)
+                    .withListener(mRoutingListener)
+                    .waypoints(latLngArrayWithWayPoints)
+                    .build();
+            routing.execute();
+        }
+    }
+
+    private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return Helpers.isInternetWorking();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Collecting information");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
+            String message = "Student Name:  " + firstNameStudent + " " + lastNameStudent + "\n"
+                    + "Contact Number: " + contactNumberStudent
+                    + "\n" + "RollNumber: " + rollNumberStudent + "\n" + "Email ID: " + emailStudent
+                    + "\n\n" + "Stop Address: " + Helpers.getAddress(getActivity(), PlaceholderFragment.studentStopLatLng);
+
+            Helpers.dismissProgressDialog();
+            if (success) {
+                showRegInfoDialog(message);
+            } else {
+                showInternetNotWorkingDialog();
+            }
+        }
+    }
+
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a PlaceholderFragment (defined as a static inner class below).
+            return PlaceholderFragment.newInstance(position + 1);
+        }
+
+        @Override
+        public int getCount() {
+            // Show 2 total pages.
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Info";
+                case 1:
+                    return "Stop";
+            }
+            return null;
+        }
+
 
     }
 }
