@@ -29,10 +29,6 @@ import com.taibah.busservice.fragments.TwitterFragment;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
-import org.json.JSONException;
-
-import java.io.IOException;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -41,20 +37,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String token = WebServiceHelpers.getToken();
-                    System.out.println(token);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
 
         if (AppGlobals.isVirgin()) {
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
@@ -223,9 +205,10 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         AppGlobals.setVirgin(true);
                         Helpers.dismissProgressDialog();
+                        AppGlobals.putToken(null);
                         finish();
                     }
-                }, 2000);
+                }, 1000);
     }
 
     @Override

@@ -2,15 +2,27 @@ package com.taibah.busservice;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class LoginActivity extends Activity {
 
@@ -19,6 +31,11 @@ public class LoginActivity extends Activity {
     Button buttonLogin;
     String username;
     String password;
+
+    JSONObject response;
+    String token = "";
+
+    boolean internetNotWorking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +51,11 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 username = editTextUsername.getText().toString();
                 password = editTextPassword.getText().toString();
-                login();
+                if (username.equals("adntaibah") && password.equals("12345")) {
+                    login();
+                } else {
+                    onLoginFailed();
+                }
             }
         });
     }
@@ -51,21 +72,20 @@ public class LoginActivity extends Activity {
             return;
         }
 
-        buttonLogin.setEnabled(false);
-
-        Helpers.showProgressDialog(LoginActivity.this, "Authenticating...");
+//        buttonLogin.setEnabled(false);
 
         // TODO: Implement authentication here.
+        if (Helpers.isNetworkAvailable()) {
+            new LoginTask().execute();
+        } else {
+            Toast.makeText(LoginActivity.this, "Please connect your device to the Internet",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+
 
         // TODO: fetch Route Status here.
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onLoginSuccess();
-                        Helpers.dismissProgressDialog();
-                    }
-                }, 2000);
     }
 
     public boolean validate() {
@@ -125,6 +145,92 @@ public class LoginActivity extends Activity {
         super.onPause();
         if (!AppGlobals.isVirgin()) {
             finish();
+        }
+    }
+
+    public class LoginTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(LoginActivity.this, "Authenticating...");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isInternetWorking(getApplicationContext())) {
+                try {
+                    URL url = new URL("http://46.101.75.194:8080/login");
+
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    connection.setRequestProperty("charset", "utf-8");
+
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    out.writeBytes("username=superadmin&password=secret");
+                    out.flush();
+                    out.close();
+
+                    InputStream in = (InputStream) connection.getContent();
+
+                    int ch;
+                    StringBuilder sb = new StringBuilder();
+                    while((ch = in.read()) != -1)
+                        sb.append((char)ch);
+
+                    Log.d("RESULT", sb.toString());
+
+                    response = new JSONObject(sb.toString());
+                    token = response.getString("token");
+                    AppGlobals.putToken(token);
+                    Log.d("TOKEN", token);
+
+                    connection.disconnect();
+
+                    url = new URL("http://46.101.75.194:8080/user");
+
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(false);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("GET");
+                    connection.setRequestProperty("X-Api-Key", token);
+
+                    in = (InputStream) connection.getContent();
+
+                    sb = new StringBuilder();
+                    while((ch = in.read()) != -1)
+                        sb.append((char)ch);
+
+                    Log.d("RESULT", sb.toString());
+
+                } catch (JSONException | IOException e) {
+                    Log.e("BEFORE", e.getMessage());
+                }
+            } else {
+                internetNotWorking = true;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (internetNotWorking) {
+                Toast.makeText(LoginActivity.this, "Internet is not working. Make sure you are " +
+                        "properly connected to the Internet", Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
+                internetNotWorking = false;
+            }
+            if (!token.isEmpty()) {
+                Helpers.dismissProgressDialog();
+                onLoginSuccess();
+            }
         }
     }
 }
