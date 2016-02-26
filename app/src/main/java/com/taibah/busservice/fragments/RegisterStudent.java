@@ -149,7 +149,7 @@ public class RegisterStudent extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return Helpers.isInternetWorking(getActivity());
+            return Helpers.isInternetWorking();
         }
 
         @Override
@@ -352,7 +352,7 @@ public class RegisterStudent extends Fragment {
                         PolylineOptions polyoptions = new PolylineOptions();
                         polyoptions.color(Color.RED);
                         polyoptions.width(10);
-                        polylineOptions.zIndex(90);
+                        polylineOptions.zIndex(102);
                         polyoptions.addAll(polylineOptions.getPoints());
                         mMap.addPolyline(polyoptions);
                         if (onLongClickCounter == 1) {

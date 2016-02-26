@@ -138,7 +138,7 @@ public class RegisterDriver extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return Helpers.isInternetWorking(getActivity());
+            return Helpers.isInternetWorking();
         }
 
         @Override

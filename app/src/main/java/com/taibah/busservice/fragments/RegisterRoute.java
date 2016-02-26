@@ -173,7 +173,7 @@ public class RegisterRoute extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return Helpers.isInternetWorking(getActivity());
+            return Helpers.isInternetWorking();
         }
 
         @Override
@@ -345,7 +345,7 @@ public class RegisterRoute extends Fragment {
                     PolylineOptions polyOptions = new PolylineOptions();
                     polyOptions.color(Color.RED);
                     polyOptions.width(10);
-                    polylineOptions.zIndex(90);
+                    polylineOptions.zIndex(102);
                     polyOptions.addAll(polylineOptions.getPoints());
                     mMap.addPolyline(polyOptions);
                     tvMapRegisterRouteInfo.setText("Route Successfully Established");
