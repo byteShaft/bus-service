@@ -18,6 +18,7 @@ public class AppGlobals extends Application {
     private static final String STUDENT_NAME = "student_name";
     private static final String ROUTE_STATUS = "route_status";
     private static final String STUDENT_TYPE = "student_type";
+    private static final String TOKEN = "token";
 
     @Override
     public void onCreate() {
@@ -44,6 +45,14 @@ public class AppGlobals extends Application {
 
     public static void putUsername(String username) {
         sPreferences.edit().putString(USER_NAME, username).apply();
+    }
+
+    public static void putToken(String token) {
+        sPreferences.edit().putString(TOKEN, token).apply();
+    }
+
+    public static void getToken(String token) {
+        sPreferences.getString(TOKEN, token);
     }
 
     public static String getStudentName() {
