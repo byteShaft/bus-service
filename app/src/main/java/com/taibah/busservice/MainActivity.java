@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
 import com.taibah.busservice.fragments.HomeFragment;
@@ -206,7 +205,7 @@ public class MainActivity extends AppCompatActivity
                         AppGlobals.setVirgin(true);
                         Helpers.dismissProgressDialog();
                         AppGlobals.putToken(null);
-                        finish();
+                        launchLoginActivity();
                     }
                 }, 1000);
     }
@@ -215,5 +214,12 @@ public class MainActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         finish();
+    }
+
+
+    public void launchLoginActivity() {
+        Intent startIntent = new Intent(MainActivity.this, LoginActivity.class);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        MainActivity.this.startActivity(startIntent);
     }
 }

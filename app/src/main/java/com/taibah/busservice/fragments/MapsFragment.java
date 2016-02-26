@@ -75,7 +75,7 @@ public class MapsFragment extends Fragment {
                     }
                     mMap.setMyLocationEnabled(true);
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                    mMap.getUiSettings().setCompassEnabled(true); 
+                    mMap.getUiSettings().setCompassEnabled(true);
                 }
                 LatLng currentDummyLocation = new LatLng(24.546198, 39.590284);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentDummyLocation, 13.0f));
