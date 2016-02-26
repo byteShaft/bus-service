@@ -38,6 +38,7 @@ public class Helpers {
     public static void closeKeyboard(FragmentActivity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        activity.getCurrentFocus().clearFocus();
     }
 
     public static String getAddress(Context context, LatLng latLng) {
@@ -56,12 +57,12 @@ public class Helpers {
     }
 
     // ping the google server to check if internet is really working or not
-    public static boolean isInternetWorking(Context context) {
+    public static boolean isInternetWorking() {
         boolean success = false;
         try {
             URL url = new URL("https://google.com");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(6000);
+            connection.setConnectTimeout(8000);
             connection.connect();
             success = connection.getResponseCode() == 200;
         } catch (IOException e) {
