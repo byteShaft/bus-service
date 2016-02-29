@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -16,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.directions.route.Route;
@@ -27,20 +27,25 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.DriverService;
 
 public class MapsFragment extends Fragment {
 
     private View convertView;
     private FragmentManager fm;
     private SupportMapFragment myMapFragment;
-    private GoogleMap mMap = null;
+    private static GoogleMap mMap = null;
     private RoutingListener mRoutingListener;
     private LocationManager mLocationManager;
-    private LatLng currentLatLng = null;
+    private LatLng currentLatLngStudent = null;
+    private static TextView tvDriverCurrentSpeed;
+    private static TextView tvDriverCurrentLocationTimeStamp;
+    public static boolean mapsFragmentOpen;
 
     private LatLng startPoint = new LatLng(24.546198, 39.590284);
     private LatLng endPoint = new LatLng(24.481133, 39.5432913);
@@ -48,12 +53,18 @@ public class MapsFragment extends Fragment {
     private LatLng wayPoint2 = new LatLng(24.500190, 39.581002);
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
+    public static Marker driverLocationMarker;
+    public static LatLng currentLatLngDriver = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
+
+        tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
+        tvDriverCurrentLocationTimeStamp = (TextView) convertView.findViewById(R.id.tv_route_driver_location_timestamp);
+
         mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
 
@@ -77,11 +88,17 @@ public class MapsFragment extends Fragment {
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     mMap.getUiSettings().setCompassEnabled(true);
                 }
+
+                if (AppGlobals.getUserType() == 2) {
+                    addDriverLocationMarker();
+                    tvDriverCurrentLocationTimeStamp.setVisibility(View.GONE);
+                }
+
                 LatLng currentDummyLocation = new LatLng(24.546198, 39.590284);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentDummyLocation, 13.0f));
 
                 mMap.addMarker(new MarkerOptions().position(startPoint)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location)));
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_map_simple)));
                 mMap.addMarker(new MarkerOptions().position(wayPoint1)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop)));
                 mMap.addMarker(new MarkerOptions().position(wayPoint2)
@@ -124,14 +141,6 @@ public class MapsFragment extends Fragment {
 
             }
         };
-
-        GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-            }
-        };
-
         return convertView;
     }
 
@@ -144,11 +153,13 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        mapsFragmentOpen = false;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        mapsFragmentOpen = true;
     }
 
     @Override
@@ -165,11 +176,19 @@ public class MapsFragment extends Fragment {
                 if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                     Toast.makeText(getActivity(), "Location Service disabled", Toast.LENGTH_SHORT).show();
                 } else {
-                    currentLatLng = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                    if(mMap != null && currentLatLng != null){
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 16.0f));
-                    } else {
-                        Toast.makeText(getActivity(), "Current Location unavailable", Toast.LENGTH_SHORT).show();
+                    if (AppGlobals.getUserType() == 1) {
+                        currentLatLngStudent = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                        if(mMap != null){
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngStudent, 16.0f));
+                        } else {
+                            Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (AppGlobals.getUserType() == 2) {
+                        if (currentLatLngDriver != null) {
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngDriver, 16.0f));
+                        } else {
+                            Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
                 return true;
@@ -198,5 +217,20 @@ public class MapsFragment extends Fragment {
                 item.setIcon(R.mipmap.ic_map_simple);
             }
         }
+    }
+
+    public static void addDriverLocationMarker() {
+        if (DriverService.driverLocationReportingServiceIsRunning) {
+            LatLng mLastKnownLatLng = new LatLng(DriverService.driverLastKnownLocation.getLatitude(), DriverService.driverLastKnownLocation.getLongitude());
+            MarkerOptions a = new MarkerOptions();
+            a.position(mLastKnownLatLng);
+            driverLocationMarker = mMap.addMarker(a);
+        }
+    }
+
+    public static void updateDriverLocation() {
+        currentLatLngDriver = new LatLng(DriverService.driverCurrentLocation.getLatitude(), DriverService.driverCurrentLocation.getLongitude());
+        driverLocationMarker.setPosition(currentLatLngDriver);
+        tvDriverCurrentSpeed.setText("Speed: " + String.valueOf(DriverService.driverCurrentLocation.getSpeed()) + " Km/h");
     }
 }
