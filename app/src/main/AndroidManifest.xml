@@ -27,8 +27,20 @@
         android:name="com.taibah.busservice.LoginActivity"
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait"/>
+        <activity android:name=".DialogMessageActivity"
+            android:theme="@android:style/Theme.Dialog"
+            android:screenOrientation="portrait"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <receiver
+            android:name="com.taibah.busservice.utils.NetworkChangeReceiver"
+            android:label="NetworkChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".utils.DriverService"/>
     </application>
 </manifest>

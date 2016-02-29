@@ -3,6 +3,7 @@ package com.taibah.busservice.fragments;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
@@ -45,14 +47,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         layoutRouteInfo = (RelativeLayout) convertView.findViewById(R.id.layout_route_info);
 
-        setAppView();
-        setRouteStatus(AppGlobals.getRouteStatus());
 
         buttonStartStopRoute = (Button) convertView.findViewById(R.id.btn_route_switch);
         buttonStartStopRoute.setOnClickListener(this);
 
         buttonReportSituation = (Button) convertView.findViewById(R.id.btn_report_situation);
         buttonReportSituation.setOnClickListener(this);
+
+        setAppView();
+        setRouteStatus(AppGlobals.getRouteStatus());
 
         return convertView;
     }
@@ -84,6 +87,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             layoutDriverButtons.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Driver");
             layoutAdminInfo.setVisibility(View.GONE);
+            if (DriverService.driverLocationReportingServiceIsRunning) {
+                buttonStartStopRoute.setText("End Route");
+            } else {
+                buttonStartStopRoute.setText("Start Route");
+            }
         } else if (AppGlobals.getUserType() == 1) {
             layoutDriverButtons.setVisibility(View.GONE);
             tvUserType.setText("UserType: Student");
@@ -100,7 +108,71 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.btn_route_switch:
+                if (!DriverService.driverLocationReportingServiceIsRunning) {
+                    AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
+                            getActivity());
+                    alertDialogRouteSwitch.setTitle("Start Route");
+                    alertDialogRouteSwitch
+                            .setMessage("Are you sure?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
 
+                                    Helpers.showProgressDialog(getActivity(), "Starting Route");
+
+                                    // TODO: Implement route starting logic here.
+
+                                    new android.os.Handler().postDelayed(
+                                            new Runnable() {
+                                                public void run() {
+                                                    buttonStartStopRoute.setText("End Route");
+                                                    Helpers.dismissProgressDialog();
+                                                    getActivity().startService(new Intent(getActivity(), DriverService.class));
+                                                }
+                                            }, 2000);
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
+                    routeSwitchDialog.show();
+                } else {
+                    AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
+                            getActivity());
+                    alertDialogRouteSwitch.setTitle("End Route");
+                    alertDialogRouteSwitch
+                            .setMessage("Are you sure?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+
+                                    Helpers.showProgressDialog(getActivity(), "Ending Route");
+
+                                    // TODO: Implement route starting logic here.
+
+                                    new android.os.Handler().postDelayed(
+                                            new Runnable() {
+                                                public void run() {
+                                                    buttonStartStopRoute.setText("Start Route");
+                                                    Helpers.dismissProgressDialog();
+                                                    getActivity().stopService(new Intent(getActivity(), DriverService.class));
+                                                }
+                                            }, 2000);
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
+                    routeSwitchDialog.show();
+                }
+                break;
             case R.id.layout_driver_route_cancelled:
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                         getActivity());
