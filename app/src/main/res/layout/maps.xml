@@ -11,6 +11,8 @@
         android:layout_height="match_parent"></fragment>
 
     <LinearLayout
+        android:id="@+id/layout_route_map_info_strip"
+        android:visibility="gone"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -29,7 +31,6 @@
             android:id="@+id/tv_route_driver_location_timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
             android:layout_marginRight="30dp"
             android:shadowColor="#000000"
             android:shadowDx="1.6"
@@ -43,6 +44,7 @@
             android:id="@+id/tv_route_driver_speed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
             android:shadowColor="#000000"
             android:shadowDx="1.6"
             android:shadowDy="1.3"

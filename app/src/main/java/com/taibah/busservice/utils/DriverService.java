@@ -24,6 +24,7 @@ public class DriverService extends Service implements LocationListener,
 
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
+    public static String driverCurrentSpeedInKilometers;
     public static Location driverCurrentLocation = null;
     public static Location driverLastKnownLocation = null;
 
@@ -71,11 +72,11 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public void onLocationChanged(Location location) {
         driverCurrentLocation = location;
+        driverCurrentSpeedInKilometers = String.valueOf((int)(location.getSpeed() / 0.62137));
         if (MapsFragment.mapsFragmentOpen) {
             MapsFragment.updateDriverLocation();
         }
     }
-
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {

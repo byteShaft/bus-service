@@ -18,7 +18,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         status = NetworkUtils.getConnectivityStatusString(context);
         Log.i("BusService", " " + status);
 
-        if (status.equalsIgnoreCase("Not connected to Internet")) {
+        if (AppGlobals.getUserType() == 2 && DriverService.driverLocationReportingServiceIsRunning && status.equalsIgnoreCase("Not connected to Internet")) {
             Intent i = new Intent(context.getApplicationContext(), DialogMessageActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.getApplicationContext().startActivity(i);

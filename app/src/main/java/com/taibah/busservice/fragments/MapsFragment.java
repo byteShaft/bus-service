@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,7 @@ public class MapsFragment extends Fragment {
     private static TextView tvDriverCurrentSpeed;
     private static TextView tvDriverCurrentLocationTimeStamp;
     public static boolean mapsFragmentOpen;
+    public static LinearLayout layoutRouteMapInfoStrip;
 
     private LatLng startPoint = new LatLng(24.546198, 39.590284);
     private LatLng endPoint = new LatLng(24.481133, 39.5432913);
@@ -64,6 +66,8 @@ public class MapsFragment extends Fragment {
 
         tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
         tvDriverCurrentLocationTimeStamp = (TextView) convertView.findViewById(R.id.tv_route_driver_location_timestamp);
+
+        layoutRouteMapInfoStrip = (LinearLayout) convertView.findViewById(R.id.layout_route_map_info_strip);
 
         mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
@@ -89,11 +93,6 @@ public class MapsFragment extends Fragment {
                     mMap.getUiSettings().setCompassEnabled(true);
                 }
 
-                if (AppGlobals.getUserType() == 2) {
-                    addDriverLocationMarker();
-                    tvDriverCurrentLocationTimeStamp.setVisibility(View.GONE);
-                }
-
                 LatLng currentDummyLocation = new LatLng(24.546198, 39.590284);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentDummyLocation, 13.0f));
 
@@ -112,6 +111,19 @@ public class MapsFragment extends Fragment {
                         .waypoints(startPoint, wayPoint1, wayPoint2, endPoint)
                         .build();
                 routing.execute();
+
+                if (AppGlobals.getUserType() == 2) {
+                    addDriverLocationMarker();
+                    tvDriverCurrentLocationTimeStamp.setVisibility(View.GONE);
+                }
+
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        return true;
+                    }
+                });
+
             }
         });
 
@@ -157,6 +169,12 @@ public class MapsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mapsFragmentOpen = false;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         mapsFragmentOpen = true;
@@ -184,7 +202,7 @@ public class MapsFragment extends Fragment {
                             Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
                         }
                     } else if (AppGlobals.getUserType() == 2) {
-                        if (currentLatLngDriver != null) {
+                        if (DriverService.driverLocationReportingServiceIsRunning && currentLatLngDriver != null) {
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngDriver, 16.0f));
                         } else {
                             Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
@@ -221,8 +239,10 @@ public class MapsFragment extends Fragment {
 
     public static void addDriverLocationMarker() {
         if (DriverService.driverLocationReportingServiceIsRunning) {
+            layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
             LatLng mLastKnownLatLng = new LatLng(DriverService.driverLastKnownLocation.getLatitude(), DriverService.driverLastKnownLocation.getLongitude());
             MarkerOptions a = new MarkerOptions();
+            a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
             a.position(mLastKnownLatLng);
             driverLocationMarker = mMap.addMarker(a);
         }
@@ -230,7 +250,9 @@ public class MapsFragment extends Fragment {
 
     public static void updateDriverLocation() {
         currentLatLngDriver = new LatLng(DriverService.driverCurrentLocation.getLatitude(), DriverService.driverCurrentLocation.getLongitude());
-        driverLocationMarker.setPosition(currentLatLngDriver);
-        tvDriverCurrentSpeed.setText("Speed: " + String.valueOf(DriverService.driverCurrentLocation.getSpeed()) + " Km/h");
+        if (currentLatLngDriver != null) {
+            driverLocationMarker.setPosition(currentLatLngDriver);
+        }
+        tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
     }
 }
