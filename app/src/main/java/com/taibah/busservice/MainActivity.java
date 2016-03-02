@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (AppGlobals.isVirgin()) {
+        if (AppGlobals.isFirstRUn()) {
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);
             return;
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else if (!isHomeFragmentOpen){
             navigationView.getMenu().getItem(0).setChecked(true);
-            setTitle(navigationView.getMenu().getItem(0).getTitle()); 
+            setTitle(navigationView.getMenu().getItem(0).getTitle());
                 Fragment newFragment = new HomeFragment();
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.container_main, newFragment);
@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
-                        AppGlobals.setVirgin(true);
+                        AppGlobals.setFirstRun(true);
                         Helpers.dismissProgressDialog();
                         AppGlobals.putToken(null);
                         launchLoginActivity();

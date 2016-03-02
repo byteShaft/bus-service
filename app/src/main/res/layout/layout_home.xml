@@ -120,16 +120,27 @@
                 android:src="@mipmap/ic_route_cancelled" />
 
             <TextView
+                android:id="@+id/tv_route_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Route Cancelled"
-                android:textColor="#B71C1C"
-                android:textSize="18dp" />
+                android:textSize="14dp"
+                android:textColor="#000000"
+                android:textAllCaps="true"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Route Cancelled"
+                android:textColor="#B71C1C"
+                android:textSize="20dp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tv_route_click_to_restore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Click to Restore"
+                android:visibility="gone"
                 android:textSize="14dp" />
 
         </LinearLayout>
