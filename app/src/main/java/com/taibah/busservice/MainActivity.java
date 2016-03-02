@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     Fragment fragment;
+    public static boolean isHomeFragmentOpen;
+    NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
@@ -97,7 +99,14 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (!isHomeFragmentOpen){
+            navigationView.getMenu().getItem(0).setChecked(true);
+            setTitle(navigationView.getMenu().getItem(0).getTitle()); 
+                Fragment newFragment = new HomeFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container_main, newFragment);
+                transaction.commit();
+            } else {
             super.onBackPressed();
         }
     }
@@ -195,7 +204,7 @@ public class MainActivity extends AppCompatActivity
 
     public void logout() {
 
-        Helpers.showProgressDialog(MainActivity.this, "Logging Out...");
+        Helpers.showProgressDialog(MainActivity.this, "Logging out");
 
         // TODO: Implement logout logic here.
 
@@ -213,9 +222,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
     }
-
 
     public void launchLoginActivity() {
         Intent startIntent = new Intent(MainActivity.this, LoginActivity.class);

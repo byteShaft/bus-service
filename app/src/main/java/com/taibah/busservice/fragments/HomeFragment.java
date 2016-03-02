@@ -16,7 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.taibah.busservice.MainActivity;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
@@ -109,6 +111,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_route_switch:
+                if (Helpers.isNetworkAvailable()) {
                 if (!DriverService.driverLocationReportingServiceIsRunning) {
                     AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
                             getActivity());
@@ -171,6 +174,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             });
                     AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
                     routeSwitchDialog.show();
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.layout_driver_route_cancelled:
@@ -248,5 +254,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 reportSituationDialog.show();
                 break;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MainActivity.isHomeFragmentOpen = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity.isHomeFragmentOpen = false;
     }
 }
