@@ -35,6 +35,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     RelativeLayout layoutRouteInfo;
     LinearLayout layoutAdminInfo;
     TextView tvUserType;
+    TextView tvRouteStatus;
+    TextView tvRouteClickToRestore;
 
     @Nullable
     @Override
@@ -42,13 +44,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         convertView = inflater.inflate(R.layout.layout_home, null);
 
         tvUserType = (TextView) convertView.findViewById(R.id.tv_user_type);
+        tvRouteStatus = (TextView) convertView.findViewById(R.id.tv_route_status);
+        tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
 
         layoutRouteInfo = (RelativeLayout) convertView.findViewById(R.id.layout_route_info);
-
 
         buttonStartStopRoute = (Button) convertView.findViewById(R.id.btn_route_switch);
         buttonStartStopRoute.setOnClickListener(this);
@@ -62,8 +65,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         return convertView;
     }
 
-    private void setRouteStatus(boolean status) {
-        if (status) {
+    private void setRouteStatus(int status) {
+        if (status == 0) {
             if (AppGlobals.getUserType() == 2) {
                 layoutDriverButtons.setVisibility(View.VISIBLE);
             }
@@ -71,7 +74,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             if (AppGlobals.getUserType() != 0) {
                 layoutRouteInfo.setVisibility(View.VISIBLE);
             }
-            AppGlobals.putRouteStatus(true);
         } else {
             if (AppGlobals.getUserType() == 2) {
                 layoutDriverButtons.setVisibility(View.GONE);
@@ -79,8 +81,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             layoutRouteCancelled.setVisibility(View.VISIBLE);
             if (AppGlobals.getUserType() != 0) {
                 layoutRouteInfo.setVisibility(View.GONE);
+                if (status == 1) {
+                    tvRouteStatus.setText("Accident");
+                } else if (status == 2) {
+                    tvRouteStatus.setText("Driver unavailable");
+                } else if (status == 3) {
+                    tvRouteStatus.setText("Bus out of service");
+                }
             }
-            AppGlobals.putRouteStatus(false);
         }
     }
 
@@ -88,6 +96,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         if (AppGlobals.getUserType() == 2) {
             layoutDriverButtons.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Driver");
+            tvRouteClickToRestore.setVisibility(View.VISIBLE);
             layoutAdminInfo.setVisibility(View.GONE);
             if (DriverService.driverLocationReportingServiceIsRunning) {
                 buttonStartStopRoute.setText("End Route");
@@ -188,18 +197,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         .setCancelable(false)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
+                                if (Helpers.isNetworkAvailable()) {
 
-                                Helpers.showProgressDialog(getActivity(), "Restoring Route...");
+                                    Helpers.showProgressDialog(getActivity(), "Restoring Route...");
 
-                                // TODO: Implement restoration logic here.
+                                    // TODO: Implement restoration logic here.
 
-                                new android.os.Handler().postDelayed(
-                                        new Runnable() {
-                                            public void run() {
-                                                setRouteStatus(true);
-                                                Helpers.dismissProgressDialog();
-                                            }
-                                        }, 2000);
+                                    new android.os.Handler().postDelayed(
+                                            new Runnable() {
+                                                public void run() {
+                                                    AppGlobals.putRouteStatus(0);
+                                                    setRouteStatus(0);
+                                                    Helpers.dismissProgressDialog();
+                                                }
+                                            }, 2000);
+                                } else {
+                                    Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -231,24 +245,30 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 dialogButtonOk.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        reportSituationDialog.dismiss();
+                        if (Helpers.isNetworkAvailable()) {
 
-                        Helpers.showProgressDialog(getActivity(), "Reporting Situation...");
+                            reportSituationDialog.dismiss();
 
-                        int id= radioGroupReportSituation.getCheckedRadioButtonId();
-                        View radioButton = radioGroupReportSituation.findViewById(id);
-                        int radioIndex = radioGroupReportSituation.indexOfChild(radioButton);
-                        Log.i("BusService", "SituationReportingIndex: " + radioIndex);
+                            Helpers.showProgressDialog(getActivity(), "Reporting Situation...");
 
-                        // TODO: Implement reporting logic here.
+                            int id = radioGroupReportSituation.getCheckedRadioButtonId();
+                            View radioButton = radioGroupReportSituation.findViewById(id);
+                            final int radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
+                            Log.i("BusService", "SituationReportingIndex: " + radioIndex);
 
-                        new android.os.Handler().postDelayed(
-                                new Runnable() {
-                                    public void run() {
-                                        setRouteStatus(false);
-                                        Helpers.dismissProgressDialog();
-                                    }
-                                }, 2000);
+                            // TODO: Implement reporting logic here.
+
+                            new android.os.Handler().postDelayed(
+                                    new Runnable() {
+                                        public void run() {
+                                            AppGlobals.putRouteStatus(radioIndex);
+                                            setRouteStatus(radioIndex);
+                                            Helpers.dismissProgressDialog();
+                                        }
+                                    }, 2000);
+                        } else {
+                            Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 reportSituationDialog.show();

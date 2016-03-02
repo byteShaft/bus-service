@@ -109,7 +109,7 @@ public class LoginActivity extends Activity {
     }
 
     public void onLoginSuccess() {
-        AppGlobals.setVirgin(false);
+        AppGlobals.setFirstRun(false);
         AppGlobals.putUsername(username);
         buttonLogin.setEnabled(true);
         setUserType();
@@ -140,7 +140,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (!AppGlobals.isVirgin()) {
+        if (!AppGlobals.isFirstRUn()) {
             finish();
         }
     }

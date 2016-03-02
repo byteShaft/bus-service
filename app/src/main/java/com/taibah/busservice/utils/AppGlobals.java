@@ -13,7 +13,7 @@ public class AppGlobals extends Application {
 
     private static Context sContext;
     private static SharedPreferences sPreferences;
-    private static final String VIRGIN_KEY = "virgin";
+    private static final String FIRST_RUN = "first_run";
     private static final String USER_NAME = "user_name";
     private static final String STUDENT_NAME = "student_name";
     private static final String ROUTE_STATUS = "route_status";
@@ -31,12 +31,12 @@ public class AppGlobals extends Application {
         return sContext;
     }
 
-    public static boolean isVirgin() {
-        return sPreferences.getBoolean(VIRGIN_KEY, true);
+    public static boolean isFirstRUn() {
+        return sPreferences.getBoolean(FIRST_RUN, true);
     }
 
-    public static void setVirgin(boolean virgin) {
-        sPreferences.edit().putBoolean(VIRGIN_KEY, virgin).apply();
+    public static void setFirstRun(boolean firstRun) {
+        sPreferences.edit().putBoolean(FIRST_RUN, firstRun).apply();
     }
 
     public static String getUsername() {
@@ -62,8 +62,8 @@ public class AppGlobals extends Application {
     public static void putStudentName(String studentName) {
         sPreferences.edit().putString(STUDENT_NAME, studentName).apply();
     }
-    public static boolean getRouteStatus() {
-        return sPreferences.getBoolean(ROUTE_STATUS, true);
+    public static int getRouteStatus() {
+        return sPreferences.getInt(ROUTE_STATUS, 0);
     }
 
     public static int getUserType() {
@@ -74,8 +74,8 @@ public class AppGlobals extends Application {
         sPreferences.edit().putInt(STUDENT_TYPE, userType).apply();
     }
 
-    public static void putRouteStatus(boolean status) {
-        sPreferences.edit().putBoolean(ROUTE_STATUS, status).apply();
+    public static void putRouteStatus(int status) {
+        sPreferences.edit().putInt(ROUTE_STATUS, status).apply();
     }
 
     public static void replaceFragment(android.support.v4.app.FragmentManager fragMan, android.support.v4.app.Fragment frag) {
