@@ -202,8 +202,8 @@ public class MapsFragment extends Fragment {
                             Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
                         }
                     } else if (AppGlobals.getUserType() == 2) {
-                        if (DriverService.driverLocationReportingServiceIsRunning && currentLatLngDriver != null) {
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngDriver, 16.0f));
+                        if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(DriverService.driverCurrentLocation, 16.0f));
                         } else {
                             Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
                         }
@@ -240,19 +240,15 @@ public class MapsFragment extends Fragment {
     public static void addDriverLocationMarker() {
         if (DriverService.driverLocationReportingServiceIsRunning) {
             layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
-            LatLng mLastKnownLatLng = new LatLng(DriverService.driverLastKnownLocation.getLatitude(), DriverService.driverLastKnownLocation.getLongitude());
             MarkerOptions a = new MarkerOptions();
             a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
-            a.position(mLastKnownLatLng);
+            a.position(DriverService.driverLastKnownLocation);
             driverLocationMarker = mMap.addMarker(a);
         }
     }
 
     public static void updateDriverLocation() {
-        currentLatLngDriver = new LatLng(DriverService.driverCurrentLocation.getLatitude(), DriverService.driverCurrentLocation.getLongitude());
-        if (currentLatLngDriver != null) {
-            driverLocationMarker.setPosition(currentLatLngDriver);
-        }
+        driverLocationMarker.setPosition(DriverService.driverCurrentLocation);
         tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
     }
 }

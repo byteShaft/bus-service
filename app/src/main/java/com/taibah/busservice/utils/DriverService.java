@@ -15,6 +15,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.taibah.busservice.fragments.MapsFragment;
 
 public class DriverService extends Service implements LocationListener,
@@ -25,8 +26,8 @@ public class DriverService extends Service implements LocationListener,
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
     public static String driverCurrentSpeedInKilometers;
-    public static Location driverCurrentLocation = null;
-    public static Location driverLastKnownLocation = null;
+    public static LatLng driverCurrentLocation = null;
+    public static LatLng driverLastKnownLocation = null;
 
     @Nullable
     @Override
@@ -61,7 +62,8 @@ public class DriverService extends Service implements LocationListener,
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        driverLastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Location tempLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        driverLastKnownLocation = new LatLng(tempLocation.getLatitude(), tempLocation.getLongitude());
     }
 
     @Override
@@ -71,9 +73,9 @@ public class DriverService extends Service implements LocationListener,
 
     @Override
     public void onLocationChanged(Location location) {
-        driverCurrentLocation = location;
+        driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         driverCurrentSpeedInKilometers = String.valueOf((int)(location.getSpeed() / 0.62137));
-        if (MapsFragment.mapsFragmentOpen) {
+        if (MapsFragment.mapsFragmentOpen && driverCurrentLocation != null) {
             MapsFragment.updateDriverLocation();
         }
     }
