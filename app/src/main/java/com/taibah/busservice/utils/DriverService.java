@@ -64,6 +64,7 @@ public class DriverService extends Service implements LocationListener,
         }
         Location tempLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         driverLastKnownLocation = new LatLng(tempLocation.getLatitude(), tempLocation.getLongitude());
+
     }
 
     @Override
@@ -74,7 +75,7 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public void onLocationChanged(Location location) {
         driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        driverCurrentSpeedInKilometers = String.valueOf((int)(location.getSpeed() / 0.62137));
+        driverCurrentSpeedInKilometers = String.valueOf((int)(location.getSpeed() / 1.60934));
         if (MapsFragment.mapsFragmentOpen && driverCurrentLocation != null) {
             MapsFragment.updateDriverLocation();
         }

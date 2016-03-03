@@ -22,7 +22,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_student_name_header"
+            android:id="@+id/tv_header_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Student Name"
@@ -30,10 +30,10 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
+            android:id="@+id/tv_header_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="username"
-            android:textSize="12dp"
-            android:id="@+id/textView" />
+            android:textSize="12dp"/>
     </LinearLayout>
 </LinearLayout>
