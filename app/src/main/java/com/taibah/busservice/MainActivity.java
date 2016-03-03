@@ -15,6 +15,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
@@ -39,9 +41,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (AppGlobals.isFirstRUn()) {
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(i);
+        if (AppGlobals.isFirstRun()) {
+            startActivity(new Intent(getApplicationContext(), LoginActivity.class));
             return;
         }
 
@@ -92,6 +93,15 @@ public class MainActivity extends AppCompatActivity
             navigationView.getMenu().getItem(5).setVisible(false);
             navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(true);
         }
+
+        navigationView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                navigationView.removeOnLayoutChangeListener( this );
+                TextView textView = (TextView) navigationView.findViewById(R.id.tv_header_username);
+                textView.setText(AppGlobals.getUsername());
+            }
+        });
     }
 
     @Override
@@ -100,12 +110,9 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (!isHomeFragmentOpen){
+            AppGlobals.replaceFragment(getSupportFragmentManager(), new HomeFragment());
             navigationView.getMenu().getItem(0).setChecked(true);
             setTitle(navigationView.getMenu().getItem(0).getTitle());
-                Fragment newFragment = new HomeFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.container_main, newFragment);
-                transaction.commit();
             } else {
             super.onBackPressed();
         }
@@ -222,6 +229,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public void launchLoginActivity() {

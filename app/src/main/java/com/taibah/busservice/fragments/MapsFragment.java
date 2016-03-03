@@ -56,7 +56,6 @@ public class MapsFragment extends Fragment {
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
     public static Marker driverLocationMarker;
-    public static LatLng currentLatLngDriver = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -113,7 +112,6 @@ public class MapsFragment extends Fragment {
                 routing.execute();
 
                 if (AppGlobals.getUserType() == 2) {
-                    addDriverLocationMarker();
                     tvDriverCurrentLocationTimeStamp.setVisibility(View.GONE);
                 }
 
@@ -146,6 +144,10 @@ public class MapsFragment extends Fragment {
                 polylineOptions.zIndex(102);
                 polyOptions.addAll(polylineOptions.getPoints());
                 mMap.addPolyline(polyOptions);
+
+                if (AppGlobals.getUserType() == 2) {
+                    addDriverLocationMarker();
+                }
             }
 
             @Override
@@ -238,7 +240,7 @@ public class MapsFragment extends Fragment {
     }
 
     public static void addDriverLocationMarker() {
-        if (DriverService.driverLocationReportingServiceIsRunning) {
+        if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
             layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
             MarkerOptions a = new MarkerOptions();
             a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
@@ -248,7 +250,9 @@ public class MapsFragment extends Fragment {
     }
 
     public static void updateDriverLocation() {
-        driverLocationMarker.setPosition(DriverService.driverCurrentLocation);
-        tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
+        if (driverLocationMarker != null) {
+            driverLocationMarker.setPosition(DriverService.driverCurrentLocation);
+            tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
+        }
     }
 }

@@ -61,7 +61,12 @@ public class LoginActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public void login() {
@@ -70,8 +75,6 @@ public class LoginActivity extends Activity {
             onLoginFailed();
             return;
         }
-
-//        buttonLogin.setEnabled(false);
 
         // TODO: Implement authentication here.
         if (Helpers.isNetworkAvailable()) {
@@ -104,7 +107,6 @@ public class LoginActivity extends Activity {
         } else {
             editTextPassword.setError(null);
         }
-
         return valid;
     }
 
@@ -113,18 +115,12 @@ public class LoginActivity extends Activity {
         AppGlobals.putUsername(username);
         buttonLogin.setEnabled(true);
         setUserType();
-        launchHomeFragment();
+        startActivity(new Intent(getApplicationContext(), MainActivity.class));
     }
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
         buttonLogin.setEnabled(true);
-    }
-
-    public void launchHomeFragment() {
-        Intent startIntent = new Intent(LoginActivity.this, MainActivity.class);
-        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        LoginActivity.this.startActivity(startIntent);
     }
 
     public void setUserType() {
@@ -140,7 +136,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (!AppGlobals.isFirstRUn()) {
+        if (!AppGlobals.isFirstRun()) {
             finish();
         }
     }

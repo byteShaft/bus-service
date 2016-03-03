@@ -138,9 +138,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     new android.os.Handler().postDelayed(
                                             new Runnable() {
                                                 public void run() {
+                                                    getActivity().startService(new Intent(getActivity(), DriverService.class));
                                                     buttonStartStopRoute.setText("End Route");
                                                     Helpers.dismissProgressDialog();
-                                                    getActivity().startService(new Intent(getActivity(), DriverService.class));
+                                                    AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
                                                 }
                                             }, 2000);
                                 }
@@ -199,7 +200,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             public void onClick(DialogInterface dialog, int id) {
                                 if (Helpers.isNetworkAvailable()) {
 
-                                    Helpers.showProgressDialog(getActivity(), "Restoring Route...");
+                                    Helpers.showProgressDialog(getActivity(), "Restoring Route");
 
                                     // TODO: Implement restoration logic here.
 
@@ -224,11 +225,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 AlertDialog restoreRouteDialog = alertDialogBuilder.create();
                 restoreRouteDialog.show();
                 break;
-
             case R.id.btn_report_situation:
                 final Dialog reportSituationDialog = new Dialog(getActivity());
                 reportSituationDialog.setContentView(R.layout.layout_report_dialog);
-                reportSituationDialog.setTitle("Choose a Situation");
+                reportSituationDialog.setTitle("Choose a situation");
                 reportSituationDialog.setCancelable(false);
 
                 radioGroupReportSituation = (RadioGroup) reportSituationDialog.findViewById(R.id.rg_report_situation);
@@ -249,7 +249,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                             reportSituationDialog.dismiss();
 
-                            Helpers.showProgressDialog(getActivity(), "Reporting Situation...");
+                            Helpers.showProgressDialog(getActivity(), "Reporting situation");
 
                             int id = radioGroupReportSituation.getCheckedRadioButtonId();
                             View radioButton = radioGroupReportSituation.findViewById(id);

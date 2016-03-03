@@ -15,7 +15,7 @@ public class AppGlobals extends Application {
     private static SharedPreferences sPreferences;
     private static final String FIRST_RUN = "first_run";
     private static final String USER_NAME = "user_name";
-    private static final String STUDENT_NAME = "student_name";
+    private static final String NAME = "student_name";
     private static final String ROUTE_STATUS = "route_status";
     private static final String STUDENT_TYPE = "student_type";
     private static final String TOKEN = "token";
@@ -31,7 +31,7 @@ public class AppGlobals extends Application {
         return sContext;
     }
 
-    public static boolean isFirstRUn() {
+    public static boolean isFirstRun() {
         return sPreferences.getBoolean(FIRST_RUN, true);
     }
 
@@ -55,12 +55,12 @@ public class AppGlobals extends Application {
         sPreferences.getString(TOKEN, token);
     }
 
-    public static String getStudentName() {
-        return sPreferences.getString(STUDENT_NAME, null);
+    public static String getName() {
+        return sPreferences.getString(NAME, null);
     }
 
-    public static void putStudentName(String studentName) {
-        sPreferences.edit().putString(STUDENT_NAME, studentName).apply();
+    public static void putName(String name) {
+        sPreferences.edit().putString(NAME, name).apply();
     }
     public static int getRouteStatus() {
         return sPreferences.getInt(ROUTE_STATUS, 0);
@@ -81,7 +81,6 @@ public class AppGlobals extends Application {
     public static void replaceFragment(android.support.v4.app.FragmentManager fragMan, android.support.v4.app.Fragment frag) {
         FragmentTransaction transaction = fragMan.beginTransaction();
         transaction.replace(R.id.container_main, frag);
-        transaction.addToBackStack(null);
         transaction.commit();
     }
 }
