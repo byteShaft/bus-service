@@ -51,8 +51,8 @@ public class AppGlobals extends Application {
         sPreferences.edit().putString(TOKEN, token).apply();
     }
 
-    public static void getToken(String token) {
-        sPreferences.getString(TOKEN, token);
+    public static String getToken() {
+        return sPreferences.getString(TOKEN, null);
     }
 
     public static String getName() {
