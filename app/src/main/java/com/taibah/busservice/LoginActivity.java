@@ -32,7 +32,7 @@ public class LoginActivity extends Activity {
     String password;
 
     JSONObject response;
-    String token = "";
+    public String token = "";
 
     boolean internetNotWorking = false;
 

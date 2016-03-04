@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,8 +33,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.taibah.busservice.LoginActivity;
 import com.taibah.busservice.R;
+import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
 public class RegisterRoute extends Fragment {
@@ -48,12 +57,15 @@ public class RegisterRoute extends Fragment {
     public static TimePicker timePickerDepartureTime;
     public static LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
     public static LatLng[] latLngList;
+    public static int responseCode;
+    HttpURLConnection connection;
     String routeName;
     String busNumber;
     String arrivalTime;
     String departureTime;
     String locationPointA;
     String locationPointB;
+    String routeInfo = "";
     private ViewPager mViewPager;
     private View convertView;
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -139,8 +151,18 @@ public class RegisterRoute extends Fragment {
                     e.printStackTrace();
                     return true;
                 }
+                routeInfo = "name=" + routeName + "&" + "bus_number=" + busNumber + "&"
+                        + "arrival_time=2016-02-19 "
+                        + arrivalTime + ":00" + "&" + "departure_time=2016-02-19 "
+                        + departureTime + ":00"
+                        + "&" + "start_latitude=" + PlaceholderFragment.pointA.latitude
+                        + "&" + "end_latitude=" + PlaceholderFragment.pointB.latitude
+                        + "&" + "start_longitude=" + PlaceholderFragment.pointA.longitude
+                        + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
+                        + "&" + "total_stops=10";
 
-                new checkInternetTask().execute();
+                Log.i("routeInfo", routeInfo);
+                new RegisterRouteTask().execute();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -419,6 +441,70 @@ public class RegisterRoute extends Fragment {
                     return "Route";
             }
             return null;
+        }
+    }
+
+    private class RegisterRouteTask extends AsyncTask<Void, Integer, Void> {
+
+        LoginActivity loginActivity = new LoginActivity();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Collecting information");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (loginActivity.token.isEmpty() && Helpers.isInternetWorking()) {
+                try {
+                    URL url = new URL("http://46.101.75.194:8080/routes");
+
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    connection.setRequestProperty("charset", "utf-8");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                    Log.i("Token", AppGlobals.getToken());
+
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    out.writeBytes(routeInfo);
+                    out.flush();
+                    out.close();
+                    responseCode = connection.getResponseCode();
+                    Log.i("Response", "" + responseCode);
+
+                    InputStream in = (InputStream) connection.getContent();
+                    int ch;
+                    StringBuilder sb;
+
+                    sb = new StringBuilder();
+                    while ((ch = in.read()) != -1)
+                        sb.append((char) ch);
+
+                    Log.d("RESULT", sb.toString());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("BEFORE", e.getMessage());
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                Helpers.dismissProgressDialog();
+            } else {
+                Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
+            }
         }
     }
 }
