@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.app.FragmentActivity;
@@ -78,5 +79,27 @@ public class Helpers {
                 AppGlobals.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+    public static boolean isAnyLocationServiceAvailable() {
+        LocationManager locationManager = getLocationManager();
+        return isGpsEnabled(locationManager) || isNetworkBasedGpsEnabled(locationManager);
+    }
+
+    public static boolean isHighAccuracyLocationServiceAvailable() {
+        LocationManager locationManager = getLocationManager();
+        return isGpsEnabled(locationManager) && isNetworkBasedGpsEnabled(locationManager);
+    }
+
+    private static LocationManager getLocationManager() {
+        return (LocationManager) AppGlobals.getContext().getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    private static boolean isGpsEnabled(LocationManager locationManager) {
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    private static boolean isNetworkBasedGpsEnabled(LocationManager locationManager) {
+        return locationManager.isProviderEnabled((LocationManager.NETWORK_PROVIDER));
     }
 }
