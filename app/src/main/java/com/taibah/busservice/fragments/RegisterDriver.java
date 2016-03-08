@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,9 +19,18 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.taibah.busservice.R;
+import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class RegisterDriver extends Fragment {
+
+    public static int responseCode;
 
     View convertView;
     EditText etDriverFirstName;
@@ -29,6 +39,8 @@ public class RegisterDriver extends Fragment {
     String firstNameDriver;
     String lastNameDriver;
     String contactNumberDriver;
+    HttpURLConnection connection;
+    String registrationDetail;
 
     @Nullable
     @Override
@@ -62,10 +74,7 @@ public class RegisterDriver extends Fragment {
                         Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
                         return true;
                     }
-
-                String message = "Driver Name: " + firstNameDriver + " " + lastNameDriver
-                        + "\n" + "Driver Contact: " + contactNumberDriver;
-                showRegInfoDialog(message);
+                new checkInternetTask().execute();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -77,17 +86,12 @@ public class RegisterDriver extends Fragment {
         String username = "dvr" + firstNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
         String password = lastNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3 );
 
-        Helpers.showProgressDialog(getActivity(), "Registering");
+        registrationDetail = "first_name=" + firstNameDriver + "&" + "last_name=" + lastNameDriver
+                + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=driver"
+                + "&" + "username=" + username;
+        Log.i("Registration Detail: ",  registrationDetail);
 
-        // TODO: Implement registration here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onRegistrationSuccess();
-                        Helpers.dismissProgressDialog();
-                    }
-                }, 2000);
+        new RegisterDriverTask().execute();
     }
 
     public boolean validateInfo() {
@@ -151,7 +155,9 @@ public class RegisterDriver extends Fragment {
 
             Helpers.dismissProgressDialog();
             if (success) {
-                register();
+                String message = "Driver Name: " + firstNameDriver + " " + lastNameDriver
+                        + "\n" + "Driver Contact: " + contactNumberDriver;
+                showRegInfoDialog(message);
             } else {
                 showInternetNotWorkingDialog();
             }
@@ -185,7 +191,7 @@ public class RegisterDriver extends Fragment {
         alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                new checkInternetTask().execute();
+                register();
             }
         });
         alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -196,5 +202,68 @@ public class RegisterDriver extends Fragment {
         });
         alertDialogBuilder.create();
         alertDialogBuilder.show();
+    }
+
+    private class RegisterDriverTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            Helpers.showProgressDialog(getActivity(), "Collecting Information...");
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL url = new URL("http://46.101.75.194:8080/register");
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                Log.i("Token", AppGlobals.getToken());
+
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.writeBytes(registrationDetail);
+                out.flush();
+                out.close();
+                responseCode = connection.getResponseCode();
+                Log.i("Response", "" + responseCode);
+
+                InputStream in = (InputStream) connection.getContent();
+                int ch;
+                StringBuilder sb;
+
+                sb = new StringBuilder();
+                while ((ch = in.read()) != -1)
+                    sb.append((char) ch);
+
+                Log.d("RESULT", sb.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("BEFORE", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 201) {
+                Helpers.dismissProgressDialog();
+                Toast.makeText(getActivity(), "Registration Successful", Toast.LENGTH_LONG).show();
+                Helpers.closeKeyboard(getActivity());
+                getActivity().onBackPressed();
+            } else {
+                // TODO Implement correct logic here
+                Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

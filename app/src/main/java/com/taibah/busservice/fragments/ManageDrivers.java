@@ -34,11 +34,15 @@ public class ManageDrivers extends Fragment {
     View convertView;
     HttpURLConnection connection;
 
+    MenuInflater mMenuInflater;
+    Menu mMenu;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_manage_drivers, null);
         setHasOptionsMenu(true);
+        new RetrieveAllRegisteredRoutes().execute();
 
         return convertView;
     }
@@ -46,14 +50,15 @@ public class ManageDrivers extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_manage, menu);
+        mMenu = menu;
+        mMenuInflater = inflater;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_button:
-                new RetrieveAllRegisteredRoutes().execute();
+                AppGlobals.replaceFragment(getFragmentManager(), new RegisterDriver());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -91,7 +96,7 @@ public class ManageDrivers extends Fragment {
             super.onPostExecute(aVoid);
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
-                AppGlobals.replaceFragment(getFragmentManager(), new RegisterDriver());
+                mMenuInflater.inflate(R.menu.menu_manage, mMenu);
             } else {
                 Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
                 Helpers.dismissProgressDialog();
