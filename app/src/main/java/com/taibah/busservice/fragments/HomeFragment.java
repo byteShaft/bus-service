@@ -121,72 +121,76 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.btn_route_switch:
                 if (Helpers.isNetworkAvailable()) {
-                if (!DriverService.driverLocationReportingServiceIsRunning) {
-                    AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
-                            getActivity());
-                    alertDialogRouteSwitch.setTitle("Start Route");
-                    alertDialogRouteSwitch
-                            .setMessage("Are you sure?")
-                            .setCancelable(false)
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
+                    if (Helpers.isHighAccuracyLocationServiceAvailable()) {
+                        if (!DriverService.driverLocationReportingServiceIsRunning) {
+                            AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
+                                    getActivity());
+                            alertDialogRouteSwitch.setTitle("Start Route");
+                            alertDialogRouteSwitch
+                                    .setMessage("Are you sure?")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
 
-                                    Helpers.showProgressDialog(getActivity(), "Starting Route");
+                                            Helpers.showProgressDialog(getActivity(), "Starting Route");
 
-                                    // TODO: Implement route starting logic here.
+                                            // TODO: Implement route starting logic here.
 
-                                    new android.os.Handler().postDelayed(
-                                            new Runnable() {
-                                                public void run() {
-                                                    getActivity().startService(new Intent(getActivity(), DriverService.class));
-                                                    buttonStartStopRoute.setText("End Route");
-                                                    Helpers.dismissProgressDialog();
-                                                    AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
-                                                }
-                                            }, 2000);
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
-                    routeSwitchDialog.show();
-                } else {
-                    AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
-                            getActivity());
-                    alertDialogRouteSwitch.setTitle("End Route");
-                    alertDialogRouteSwitch
-                            .setMessage("Are you sure?")
-                            .setCancelable(false)
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
+                                            new android.os.Handler().postDelayed(
+                                                    new Runnable() {
+                                                        public void run() {
+                                                            getActivity().startService(new Intent(getActivity(), DriverService.class));
+                                                            buttonStartStopRoute.setText("End Route");
+                                                            Helpers.dismissProgressDialog();
+                                                            AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
+                                                        }
+                                                    }, 2000);
+                                        }
+                                    })
+                                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                            AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
+                            routeSwitchDialog.show();
+                        } else {
+                            AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
+                                    getActivity());
+                            alertDialogRouteSwitch.setTitle("End Route");
+                            alertDialogRouteSwitch
+                                    .setMessage("Are you sure?")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
 
-                                    Helpers.showProgressDialog(getActivity(), "Ending Route");
+                                            Helpers.showProgressDialog(getActivity(), "Ending Route");
 
-                                    // TODO: Implement route starting logic here.
+                                            // TODO: Implement route starting logic here.
 
-                                    new android.os.Handler().postDelayed(
-                                            new Runnable() {
-                                                public void run() {
-                                                    buttonStartStopRoute.setText("Start Route");
-                                                    Helpers.dismissProgressDialog();
-                                                    getActivity().stopService(new Intent(getActivity(), DriverService.class));
-                                                }
-                                            }, 2000);
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
-                    routeSwitchDialog.show();
+                                            new android.os.Handler().postDelayed(
+                                                    new Runnable() {
+                                                        public void run() {
+                                                            buttonStartStopRoute.setText("Start Route");
+                                                            Helpers.dismissProgressDialog();
+                                                            getActivity().stopService(new Intent(getActivity(), DriverService.class));
+                                                        }
+                                                    }, 2000);
+                                        }
+                                    })
+                                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                            AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
+                            routeSwitchDialog.show();
+                        }
+                    } else {
+                        Toast.makeText(getActivity(), "Error: Location Service not on HighAccuracy", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Error: Not connected to the network", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.layout_driver_route_cancelled:
