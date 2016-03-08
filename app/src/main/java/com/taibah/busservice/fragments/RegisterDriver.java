@@ -26,7 +26,6 @@ public class RegisterDriver extends Fragment {
     EditText etDriverFirstName;
     EditText etDriverLastName;
     EditText etDriverContactNumber;
-    Spinner etDriverRouteSpinner;
     String firstNameDriver;
     String lastNameDriver;
     String contactNumberDriver;
@@ -132,7 +131,6 @@ public class RegisterDriver extends Fragment {
     public void onRegistrationFailed() {
         Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_SHORT).show();
     }
-
 
     class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
 
