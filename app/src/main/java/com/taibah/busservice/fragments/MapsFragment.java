@@ -27,6 +27,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -42,8 +43,10 @@ public class MapsFragment extends Fragment {
     public static LinearLayout layoutRouteMapInfoStrip;
     public static Marker driverLocationMarker;
     private static GoogleMap mMap = null;
+    private static boolean isZooming;
     private static TextView tvDriverCurrentSpeed;
     private static TextView tvDriverCurrentLocationTimeStamp;
+    private static float previousZoomLevel = -1.0f;
     private View convertView;
     private FragmentManager fm;
     private SupportMapFragment myMapFragment;
@@ -64,6 +67,7 @@ public class MapsFragment extends Fragment {
             a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
             a.position(DriverService.driverLastKnownLocation);
             driverLocationMarker = mMap.addMarker(a);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(DriverService.driverLastKnownLocation, 16.0f));
         }
     }
 
@@ -71,6 +75,9 @@ public class MapsFragment extends Fragment {
         if (driverLocationMarker != null) {
             driverLocationMarker.setPosition(DriverService.driverCurrentLocation);
             tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
+            if (!isZooming) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(DriverService.driverCurrentLocation));
+            }
         }
     }
 
@@ -109,8 +116,7 @@ public class MapsFragment extends Fragment {
                     mMap.getUiSettings().setCompassEnabled(true);
                 }
 
-                LatLng currentDummyLocation = new LatLng(24.546198, 39.590284);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentDummyLocation, 13.0f));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
 
                 mMap.addMarker(new MarkerOptions().position(startPoint)
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_map_simple)));
@@ -139,6 +145,17 @@ public class MapsFragment extends Fragment {
                     }
                 });
 
+                mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+                    @Override
+                    public void onCameraChange(CameraPosition cameraPosition) {
+                        if (previousZoomLevel != cameraPosition.zoom) {
+                            isZooming = true;
+                        } else {
+                            isZooming = false;
+                        }
+                        previousZoomLevel = cameraPosition.zoom;
+                    }
+                });
             }
         });
 
@@ -175,6 +192,7 @@ public class MapsFragment extends Fragment {
         return convertView;
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,12 +202,6 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mapsFragmentOpen = false;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
         mapsFragmentOpen = false;
     }
 
@@ -220,11 +232,43 @@ public class MapsFragment extends Fragment {
                         Toast.makeText(getActivity(), "Error: Location unavailable", Toast.LENGTH_SHORT).show();
                     }
                 } else if (AppGlobals.getUserType() == 2) {
+                    isZooming = true;
                     if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(DriverService.driverCurrentLocation, 16.0f));
+                        CameraPosition cameraPosition =
+                            new CameraPosition.Builder()
+                                    .target(DriverService.driverCurrentLocation)
+                                    .zoom(16.0f)
+                                    .build();
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+                            @Override
+                            public void onFinish() {
+                                isZooming = false;
+                            }
+
+                            @Override
+                            public void onCancel() {
+                                isZooming = false;
+                            }
+                        });
                     } else if (!DriverService.driverLocationReportingServiceIsRunning && mMap != null) {
+                        isZooming = true;
                         currentLatLngAuto = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngAuto, 16.0f));
+                        CameraPosition cameraPosition =
+                                new CameraPosition.Builder()
+                                        .target(currentLatLngAuto)
+                                        .zoom(16.0f)
+                                        .build();
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+                            @Override
+                            public void onFinish() {
+                                isZooming = false;
+                            }
+
+                            @Override
+                            public void onCancel() {
+                                isZooming = false;
+                            }
+                        });
                     } else {
                         Toast.makeText(getActivity(), "Error: Location unavailable", Toast.LENGTH_SHORT).show();
                     }
