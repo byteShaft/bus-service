@@ -34,28 +34,45 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
+import com.taibah.busservice.utils.Helpers;
 
 public class MapsFragment extends Fragment {
 
+    public static boolean mapsFragmentOpen;
+    public static LinearLayout layoutRouteMapInfoStrip;
+    public static Marker driverLocationMarker;
+    private static GoogleMap mMap = null;
+    private static TextView tvDriverCurrentSpeed;
+    private static TextView tvDriverCurrentLocationTimeStamp;
     private View convertView;
     private FragmentManager fm;
     private SupportMapFragment myMapFragment;
-    private static GoogleMap mMap = null;
     private RoutingListener mRoutingListener;
     private LocationManager mLocationManager;
-    private LatLng currentLatLngStudent = null;
-    private static TextView tvDriverCurrentSpeed;
-    private static TextView tvDriverCurrentLocationTimeStamp;
-    public static boolean mapsFragmentOpen;
-    public static LinearLayout layoutRouteMapInfoStrip;
-
+    private LatLng currentLatLngAuto = null;
     private LatLng startPoint = new LatLng(24.546198, 39.590284);
     private LatLng endPoint = new LatLng(24.481133, 39.5432913);
     private LatLng wayPoint1 = new LatLng(24.522815, 39.572929);
     private LatLng wayPoint2 = new LatLng(24.500190, 39.581002);
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
-    public static Marker driverLocationMarker;
+
+    public static void addDriverLocationMarker() {
+        if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
+            layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
+            MarkerOptions a = new MarkerOptions();
+            a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
+            a.position(DriverService.driverLastKnownLocation);
+            driverLocationMarker = mMap.addMarker(a);
+        }
+    }
+
+    public static void updateDriverLocation() {
+        if (driverLocationMarker != null) {
+            driverLocationMarker.setPosition(DriverService.driverCurrentLocation);
+            tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,7 +93,7 @@ public class MapsFragment extends Fragment {
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
 
-                if (AppGlobals.getUserType() == 1) {
+                if (AppGlobals.getUserType() == 1 || (AppGlobals.getUserType() == 2 && !DriverService.driverLocationReportingServiceIsRunning)) {
                     if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
                         //    ActivityCompat#requestPermissions
@@ -193,22 +210,23 @@ public class MapsFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_current_location:
-                if (!mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    Toast.makeText(getActivity(), "Location Service disabled", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (AppGlobals.getUserType() == 1) {
-                        currentLatLngStudent = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                        if(mMap != null){
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngStudent, 16.0f));
-                        } else {
-                            Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
-                        }
-                    } else if (AppGlobals.getUserType() == 2) {
-                        if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(DriverService.driverCurrentLocation, 16.0f));
-                        } else {
-                            Toast.makeText(getActivity(), "Location unavailable", Toast.LENGTH_SHORT).show();
-                        }
+                if (!Helpers.isAnyLocationServiceAvailable()) {
+                    Toast.makeText(getActivity(), "Error: Location Service disabled", Toast.LENGTH_SHORT).show();
+                } else if (AppGlobals.getUserType() == 1) {
+                    if (mMap != null) {
+                        currentLatLngAuto = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngAuto, 16.0f));
+                    } else {
+                        Toast.makeText(getActivity(), "Error: Location unavailable", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (AppGlobals.getUserType() == 2) {
+                    if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(DriverService.driverCurrentLocation, 16.0f));
+                    } else if (!DriverService.driverLocationReportingServiceIsRunning && mMap != null) {
+                        currentLatLngAuto = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngAuto, 16.0f));
+                    } else {
+                        Toast.makeText(getActivity(), "Error: Location unavailable", Toast.LENGTH_SHORT).show();
                     }
                 }
                 return true;
@@ -236,23 +254,6 @@ public class MapsFragment extends Fragment {
             } else {
                 item.setIcon(R.mipmap.ic_map_simple);
             }
-        }
-    }
-
-    public static void addDriverLocationMarker() {
-        if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
-            layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
-            MarkerOptions a = new MarkerOptions();
-            a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
-            a.position(DriverService.driverLastKnownLocation);
-            driverLocationMarker = mMap.addMarker(a);
-        }
-    }
-
-    public static void updateDriverLocation() {
-        if (driverLocationMarker != null) {
-            driverLocationMarker.setPosition(DriverService.driverCurrentLocation);
-            tvDriverCurrentSpeed.setText("Speed: " + DriverService.driverCurrentSpeedInKilometers + " Km/h");
         }
     }
 }
