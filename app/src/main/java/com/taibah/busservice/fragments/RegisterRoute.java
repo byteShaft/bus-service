@@ -65,6 +65,7 @@ public class RegisterRoute extends Fragment {
     String departureTime;
     String locationPointA;
     String locationPointB;
+    String routeInfoDialogMessage;
     String routeInfo = "";
     private ViewPager mViewPager;
     private View convertView;
@@ -366,6 +367,14 @@ public class RegisterRoute extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... params) {
+
+            routeInfoDialogMessage = "Route Name: "
+                    + routeName + "\n" + "Bus Number: " + busNumber
+                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
+                    + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
+                    PlaceholderFragment.pointA) + "\n" + "Point B: "
+                    + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
+
             return Helpers.isInternetWorking();
         }
 
@@ -379,16 +388,9 @@ public class RegisterRoute extends Fragment {
         protected void onPostExecute(Boolean success) {
             super.onPostExecute(success);
 
-            String message = "Route Name: "
-                    + routeName + "\n" + "Bus Number: " + busNumber
-                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
-                    + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
-                    PlaceholderFragment.pointA) + "\n" + "Point B: "
-                    + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
-
             Helpers.dismissProgressDialog();
             if (success) {
-                showRegInfoDialog(message);
+                showRegInfoDialog(routeInfoDialogMessage);
             } else {
                 showInternetNotWorkingDialog();
             }
@@ -435,7 +437,7 @@ public class RegisterRoute extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Collecting information");
+            Helpers.showProgressDialog(getActivity(), "Registering route");
         }
 
         @Override
