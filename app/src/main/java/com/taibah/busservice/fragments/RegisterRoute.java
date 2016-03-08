@@ -151,18 +151,7 @@ public class RegisterRoute extends Fragment {
                     e.printStackTrace();
                     return true;
                 }
-                routeInfo = "name=" + routeName + "&" + "bus_number=" + busNumber + "&"
-                        + "arrival_time=2016-02-19 "
-                        + arrivalTime + ":00" + "&" + "departure_time=2016-02-19 "
-                        + departureTime + ":00"
-                        + "&" + "start_latitude=" + PlaceholderFragment.pointA.latitude
-                        + "&" + "end_latitude=" + PlaceholderFragment.pointB.latitude
-                        + "&" + "start_longitude=" + PlaceholderFragment.pointA.longitude
-                        + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
-                        + "&" + "total_stops=10";
-
-                Log.i("routeInfo", routeInfo);
-                new RegisterRouteTask().execute();
+                new checkInternetTask().execute();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -196,7 +185,17 @@ public class RegisterRoute extends Fragment {
         alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                register();
+                routeInfo = "name=" + routeName + "&" + "bus_number=" + busNumber + "&"
+                        + "arrival_time=2016-02-19 "
+                        + arrivalTime + ":00" + "&" + "departure_time=2016-02-19 "
+                        + departureTime + ":00"
+                        + "&" + "start_latitude=" + PlaceholderFragment.pointA.latitude
+                        + "&" + "end_latitude=" + PlaceholderFragment.pointB.latitude
+                        + "&" + "start_longitude=" + PlaceholderFragment.pointA.longitude
+                        + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
+                        + "&" + "total_stops=10";
+                Log.i("routeInfo", routeInfo);
+                new RegisterRouteTask().execute();
             }
         });
         alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -207,21 +206,6 @@ public class RegisterRoute extends Fragment {
         });
         alertDialogBuilder.create();
         alertDialogBuilder.show();
-    }
-
-    public void register() {
-
-        Helpers.showProgressDialog(getActivity(), "Registering");
-
-        // TODO: Implement registration here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onRegistrationSuccess();
-                        Helpers.dismissProgressDialog();
-                    }
-                }, 2000);
     }
 
     public boolean validateInfo() {
@@ -490,7 +474,7 @@ public class RegisterRoute extends Fragment {
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e("BEFORE", e.getMessage());
+                    onRegistrationFailed();
                 }
             }
             return null;
@@ -499,8 +483,9 @@ public class RegisterRoute extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (responseCode == 200) {
+            if (responseCode == 201) {
                 Helpers.dismissProgressDialog();
+                onRegistrationSuccess();
             } else {
                 Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
                 Helpers.dismissProgressDialog();
