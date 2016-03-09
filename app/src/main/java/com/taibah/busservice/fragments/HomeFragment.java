@@ -143,6 +143,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                                             buttonStartStopRoute.setText("End Route");
                                                             Helpers.dismissProgressDialog();
                                                             AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
+
+                                                            MainActivity.navigationView.getMenu().getItem(1).setChecked(true);
                                                         }
                                                     }, 2000);
                                         }
@@ -194,25 +196,85 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
             case R.id.layout_driver_route_cancelled:
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        getActivity());
-                alertDialogBuilder.setTitle("Restore Route");
-                alertDialogBuilder
-                        .setMessage("Are you sure?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
+                if (Helpers.isNetworkAvailable()) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                            getActivity());
+                    alertDialogBuilder.setTitle("Restore Route");
+                    alertDialogBuilder
+                            .setMessage("Are you sure?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    if (Helpers.isNetworkAvailable()) {
+
+                                        Helpers.showProgressDialog(getActivity(), "Restoring Route");
+
+                                        // TODO: Implement restoration logic here.
+
+                                        new android.os.Handler().postDelayed(
+                                                new Runnable() {
+                                                    public void run() {
+                                                        AppGlobals.putRouteStatus(0);
+                                                        setRouteStatus(0);
+                                                        Helpers.dismissProgressDialog();
+                                                    }
+                                                }, 2000);
+                                    } else {
+                                        Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog restoreRouteDialog = alertDialogBuilder.create();
+                    restoreRouteDialog.show();
+                } else {
+                    Toast.makeText(getActivity(), "Error: Not connected to the network", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.btn_report_situation:
+                if (Helpers.isNetworkAvailable()) {
+                    if (!DriverService.driverLocationReportingServiceIsRunning) {
+                        final Dialog reportSituationDialog = new Dialog(getActivity());
+                        reportSituationDialog.setContentView(R.layout.layout_report_dialog);
+                        reportSituationDialog.setTitle("Choose a situation");
+                        reportSituationDialog.setCancelable(false);
+
+                        radioGroupReportSituation = (RadioGroup) reportSituationDialog.findViewById(R.id.rg_report_situation);
+
+                        Button dialogButtonCancel = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_cancel);
+                        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                reportSituationDialog.dismiss();
+                            }
+                        });
+
+                        Button dialogButtonOk = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_ok);
+                        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
                                 if (Helpers.isNetworkAvailable()) {
 
-                                    Helpers.showProgressDialog(getActivity(), "Restoring Route");
+                                    reportSituationDialog.dismiss();
 
-                                    // TODO: Implement restoration logic here.
+                                    Helpers.showProgressDialog(getActivity(), "Reporting situation");
+
+                                    int id = radioGroupReportSituation.getCheckedRadioButtonId();
+                                    View radioButton = radioGroupReportSituation.findViewById(id);
+                                    final int radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
+                                    Log.i("BusService", "SituationReportingIndex: " + radioIndex);
+
+                                    // TODO: Implement reporting logic here.
 
                                     new android.os.Handler().postDelayed(
                                             new Runnable() {
                                                 public void run() {
-                                                    AppGlobals.putRouteStatus(0);
-                                                    setRouteStatus(0);
+                                                    AppGlobals.putRouteStatus(radioIndex);
+                                                    setRouteStatus(radioIndex);
                                                     Helpers.dismissProgressDialog();
                                                 }
                                             }, 2000);
@@ -220,62 +282,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
                                 }
                             }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
                         });
-                AlertDialog restoreRouteDialog = alertDialogBuilder.create();
-                restoreRouteDialog.show();
-                break;
-            case R.id.btn_report_situation:
-                final Dialog reportSituationDialog = new Dialog(getActivity());
-                reportSituationDialog.setContentView(R.layout.layout_report_dialog);
-                reportSituationDialog.setTitle("Choose a situation");
-                reportSituationDialog.setCancelable(false);
-
-                radioGroupReportSituation = (RadioGroup) reportSituationDialog.findViewById(R.id.rg_report_situation);
-
-                Button dialogButtonCancel = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_cancel);
-                dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        reportSituationDialog.dismiss();
+                        reportSituationDialog.show();
+                    } else {
+                        Toast.makeText(getActivity(), "Error: Driver Service is running", Toast.LENGTH_SHORT).show();
                     }
-                });
-
-                Button dialogButtonOk = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_ok);
-                dialogButtonOk.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (Helpers.isNetworkAvailable()) {
-
-                            reportSituationDialog.dismiss();
-
-                            Helpers.showProgressDialog(getActivity(), "Reporting situation");
-
-                            int id = radioGroupReportSituation.getCheckedRadioButtonId();
-                            View radioButton = radioGroupReportSituation.findViewById(id);
-                            final int radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
-                            Log.i("BusService", "SituationReportingIndex: " + radioIndex);
-
-                            // TODO: Implement reporting logic here.
-
-                            new android.os.Handler().postDelayed(
-                                    new Runnable() {
-                                        public void run() {
-                                            AppGlobals.putRouteStatus(radioIndex);
-                                            setRouteStatus(radioIndex);
-                                            Helpers.dismissProgressDialog();
-                                        }
-                                    }, 2000);
-                        } else {
-                            Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                reportSituationDialog.show();
+                } else {
+                    Toast.makeText(getActivity(), "Error: Not connected to the network", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }
