@@ -1,9 +1,10 @@
 package com.taibah.busservice.fragments;
 
+import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,6 +12,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.taibah.busservice.R;
@@ -19,6 +23,7 @@ import com.taibah.busservice.utils.Helpers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,10 +31,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-public class ManageRoutes extends Fragment {
+public class ManageRoutes extends ListFragment {
 
     public static int responseCode;
+
+    ArrayList<Integer> routeIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapRouteData;
+
+    TextView tvRouteListName;
+    TextView tvRouteListBusNumber;
+    TextView tvRouteListArrivalTime;
+    TextView tvRouteListDepartureTime;
+
+    ListView routesListView;
 
     View convertView;
     HttpURLConnection connection;
@@ -41,6 +58,10 @@ public class ManageRoutes extends Fragment {
         setHasOptionsMenu(true);
 
         new RetrieveAllRegisteredRoutes().execute();
+
+
+        routeIdsList = new ArrayList<>();
+        hashMapRouteData = new HashMap<>();
 
         return convertView;
     }
@@ -101,9 +122,20 @@ public class ManageRoutes extends Fragment {
                     connection = openConnectionForUrl("http://46.101.75.194:8080/routes");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
-                    JSONArray jsonObj = readResponse(connection);
+                    JSONArray jsonArray = readResponse(connection);
                     responseCode = connection.getResponseCode();
-                    System.out.println(jsonObj);
+                    System.out.println(jsonArray);
+                    ArrayList<String> arrayListString = new ArrayList<>();
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+                        routeIdsList.add(jsonObject.getInt("id"));
+                        arrayListString.add(jsonObject.getString("name"));
+                        arrayListString.add(jsonObject.getString("bus_number"));
+                        arrayListString.add(jsonObject.getString("arrival_time"));
+                        arrayListString.add(jsonObject.getString("departure_time"));
+                        hashMapRouteData.put(jsonObject.getInt("id"), arrayListString);
+                    }
                     Log.i("Response Code: ", "" + connection.getResponseCode());
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -123,4 +155,26 @@ public class ManageRoutes extends Fragment {
             }
         }
     }
+
+    class customRoutesListAdapter extends ArrayAdapter {
+
+        ArrayList<Integer> arrayListIntIds;
+
+        public customRoutesListAdapter(Context context, int resource, ArrayList<Integer> arrayList) {
+            super(context, resource);
+            arrayListIntIds = arrayList;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater layoutInflater = getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)
+
+        }
+
+        @Override
+        public int getCount() {
+            return super.getCount();
+        }
+    }
+
 }
