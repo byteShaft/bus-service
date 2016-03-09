@@ -120,7 +120,7 @@ public class ManageRoutes extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Retrieving total routes");
+            Helpers.showProgressDialog(getActivity(), "Retrieving routes list");
         }
 
         @Override

@@ -1,16 +1,22 @@
 package com.taibah.busservice.fragments;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.taibah.busservice.Helpers.WebServiceHelpers;
@@ -18,13 +24,23 @@ import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ManageDrivers extends Fragment {
+
+
+    ArrayList<Integer> driversIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapDriverData;
+
+
+    ListView driversListView;
 
     public static int responseCode;
 
@@ -36,6 +52,12 @@ public class ManageDrivers extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_manage_drivers, null);
         setHasOptionsMenu(true);
+
+        driversListView = (ListView) convertView.findViewById(R.id.lv_list_drivers);
+
+        driversIdsList = new ArrayList<>();
+        hashMapDriverData = new HashMap<>();
+
         new RetrieveAllRegisteredDrivers().execute();
 
         return convertView;
@@ -58,12 +80,42 @@ public class ManageDrivers extends Fragment {
         }
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        registerForContextMenu(driversListView);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        menu.setHeaderTitle("Driver Name: " + hashMapDriverData.get(driversIdsList.get(info.position)).get(0));
+        MenuInflater inflater = this.getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_drivers_list, menu);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int index = info.position;
+        System.out.println(driversIdsList.get(index));
+
+        switch (item.getItemId()) {
+            case R.id.item_context_menu_drivers_list_delete:
+                item.getTitle();
+                return true;
+        }
+        return true;
+    }
+
     private class RetrieveAllRegisteredDrivers extends AsyncTask<Void, Integer, Void> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Retrieving List of All Drivers...");
+            Helpers.showProgressDialog(getActivity(), "Retrieving drivers list");
         }
 
         @Override
@@ -76,8 +128,21 @@ public class ManageDrivers extends Fragment {
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObj = new JSONObject(data);
                     responseCode = connection.getResponseCode();
-                    System.out.println(jsonObj);
+                    Log.i("Driver", ": " + jsonObj);
                     Log.i("Response Code: ", "" + connection.getResponseCode());
+                    JSONArray jsonArray = jsonObj.getJSONArray("users");
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (!driversIdsList.contains(jsonObject.getInt("id"))) {
+                            driversIdsList.add(jsonObject.getInt("id"));
+                            ArrayList<String> arrayListString = new ArrayList<>();
+                            arrayListString.add(jsonObject.getString("first_name"));
+                            arrayListString.add(jsonObject.getString("last_name"));
+                            arrayListString.add(jsonObject.getString("username"));
+                            hashMapDriverData.put(jsonObject.getInt("id"), arrayListString);
+                        }
+                    }
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -88,12 +153,52 @@ public class ManageDrivers extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            Helpers.dismissProgressDialog();
             if (responseCode == 200) {
-                Helpers.dismissProgressDialog();
+                CustomDriverListAdapter customRoutesListAdapter = new CustomDriverListAdapter(getContext(), R.layout.route_list_row, driversIdsList);
+                driversListView.setAdapter(customRoutesListAdapter);
             } else {
                 Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
-                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
             }
         }
+    }
+
+    class CustomDriverListAdapter extends ArrayAdapter<String> {
+
+        ArrayList<Integer> arrayListIntIds;
+
+        public CustomDriverListAdapter(Context context, int resource, ArrayList<Integer> arrayList) {
+            super(context, resource);
+            arrayListIntIds = arrayList;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                convertView = layoutInflater.inflate(R.layout.driver_list_row, parent, false);
+                viewHolder.tvDriverListName = (TextView) convertView.findViewById(R.id.tv_driver_list_name);
+                viewHolder.tvDriverUsername = (TextView) convertView.findViewById(R.id.tv_driver_list_username);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            viewHolder.tvDriverListName.setText("Driver Name: " + hashMapDriverData.get(arrayListIntIds.get(position)).get(0) + " " + hashMapDriverData.get(arrayListIntIds.get(position)).get(1));
+            viewHolder.tvDriverUsername.setText("Username: " + hashMapDriverData.get(arrayListIntIds.get(position)).get(2));
+            return convertView;
+        }
+
+        @Override
+        public int getCount() {
+            return arrayListIntIds.size();
+        }
+    }
+
+    static class ViewHolder {
+        TextView tvDriverListName;
+        TextView tvDriverUsername;
     }
 }
