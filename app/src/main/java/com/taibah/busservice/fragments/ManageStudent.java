@@ -1,6 +1,5 @@
 package com.taibah.busservice.fragments;
 
-
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
-
 
 public class ManageStudent extends Fragment {
 
