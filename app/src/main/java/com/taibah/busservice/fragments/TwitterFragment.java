@@ -54,7 +54,7 @@ public class TwitterFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Helpers.showProgressDialog(getActivity(), "Loading twitter feed...");
+        Helpers.showProgressDialog(getActivity(), "Loading twitter feeds");
 
         new Thread(new Runnable() {
             @Override
