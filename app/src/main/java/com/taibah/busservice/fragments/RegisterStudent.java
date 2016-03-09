@@ -475,7 +475,6 @@ public class RegisterStudent extends Fragment {
             return null;
         }
 
-
     }
 }
 

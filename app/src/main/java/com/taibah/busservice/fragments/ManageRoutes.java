@@ -5,14 +5,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,7 +33,6 @@ import java.util.HashMap;
 public class ManageRoutes extends Fragment {
 
     public static int responseCode;
-    public static int routeId;
 
     ArrayList<Integer> routeIdsList;
     HashMap<Integer, ArrayList<String>> hashMapRouteData;
@@ -79,36 +76,41 @@ public class ManageRoutes extends Fragment {
         }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        registerForContextMenu(routesListView);
-    }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        menu.setHeaderTitle("Route Name: " + hashMapRouteData.get(routeIdsList.get(info.position)).get(0));
-        MenuInflater inflater = this.getActivity().getMenuInflater();
-        inflater.inflate(R.menu.context_menu_routes_list, menu);
+    //    Used for getting context menu in routes list for when needed
 
-    }
+//
+//    @Override
+//    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+//        super.onActivityCreated(savedInstanceState);
+//        registerForContextMenu(routesListView);
+//    }
+////
+//    @Override
+//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+//        super.onCreateContextMenu(menu, v, menuInfo);
+//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+//        menu.setHeaderTitle("Route Name: " + hashMapRouteData.get(routeIdsList.get(info.position)).get(0));
+//        MenuInflater inflater = this.getActivity().getMenuInflater();
+//        inflater.inflate(R.menu.context_menu_routes_list, menu);
+//
+//    }
+//
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+//        int index = info.position;
+//        System.out.println(routeIdsList.get(index));
+//
+//        switch (item.getItemId()) {
+//            case R.id.item_context_menu_routes_list_delete:
+//                item.getTitle();
+//                return true;
+//        }
+//        return true;
+//    }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int index = info.position;
-        routeId = routeIdsList.get(index);
-        System.out.println(routeIdsList.get(index));
 
-        switch (item.getItemId()) {
-            case R.id.item_context_menu_routes_list_delete:
-                item.getTitle();
-                return true;
-        }
-        return true;
-    }
 
     static class ViewHolder {
         TextView tvRouteListName;
@@ -129,7 +131,8 @@ public class ManageRoutes extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    connection = WebServiceHelpers.openConnectionForUrl("http://46.101.75.194:8080/routes", "GET");
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes", "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
@@ -198,8 +201,10 @@ public class ManageRoutes extends Fragment {
             }
             viewHolder.tvRouteListName.setText("Route Name: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
             viewHolder.tvRouteListBusNumber.setText("Bus Number: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(1));
-            viewHolder.tvRouteListArrivalTime.setText("Arrival Time: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(2));
-            viewHolder.tvRouteListDepartureTime.setText("Departure Time: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(3));
+            viewHolder.tvRouteListArrivalTime.setText("Arrival Time: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(2)
+                    .substring(hashMapRouteData.get(arrayListIntIds.get(position)).get(2).length() - 8));
+            viewHolder.tvRouteListDepartureTime.setText("Departure Time: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(3)
+                    .substring(hashMapRouteData.get(arrayListIntIds.get(position)).get(3).length() - 8));
             return convertView;
         }
 

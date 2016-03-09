@@ -1,10 +1,12 @@
 package com.taibah.busservice.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -35,10 +37,8 @@ import java.util.HashMap;
 
 public class ManageDrivers extends Fragment {
 
-
     ArrayList<Integer> driversIdsList;
     HashMap<Integer, ArrayList<String>> hashMapDriverData;
-
 
     ListView driversListView;
 
@@ -46,6 +46,8 @@ public class ManageDrivers extends Fragment {
 
     View convertView;
     HttpURLConnection connection;
+
+    String driversName;
 
     @Nullable
     @Override
@@ -89,11 +91,15 @@ public class ManageDrivers extends Fragment {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        menu.setHeaderTitle("Driver Name: " + hashMapDriverData.get(driversIdsList.get(info.position)).get(0));
+
+        driversName = hashMapDriverData.get(driversIdsList.get(info.position)).get(0) +
+                " " + hashMapDriverData.get(driversIdsList.get(info.position)).get(1);
+
+        menu.setHeaderTitle(driversName);
         MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.context_menu_drivers_list, menu);
-
     }
 
     @Override
@@ -103,9 +109,38 @@ public class ManageDrivers extends Fragment {
         System.out.println(driversIdsList.get(index));
 
         switch (item.getItemId()) {
-            case R.id.item_context_menu_drivers_list_delete:
-                item.getTitle();
-                return true;
+//            case R.id.item_context_menu_drivers_list_delete:
+//                AlertDialog.Builder alertDialogDriverDelete = new AlertDialog.Builder(
+//                        getActivity()).setTitle("Delete Driver")
+//                        .setMessage("Are you sure you wanna delete " +
+//                                item.getTitle() + "?")
+//                        .setCancelable(false)
+//                        .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog,int id) {
+//                            }
+//                        })
+//                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+//                        public void onClick(DialogInterface dialog, int id) {
+//                            dialog.cancel();
+//                        }
+//                        });
+//                AlertDialog alertDialogDelete = alertDialogDriverDelete.create();
+//                alertDialogDelete.show();
+//                return true;
+            case R.id.item_context_menu_drivers_list_show_credentials:
+                AlertDialog.Builder alertDialogDriverShowCredentials = new AlertDialog.Builder(
+                        getActivity()).setTitle(driversName)
+                        .setMessage("Username: " +
+                                hashMapDriverData.get(driversIdsList.get(info.position)).get(2) +
+                        "\nPassword: " + hashMapDriverData.get(driversIdsList.get(info.position)).get(2))
+                        .setCancelable(false)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialogCredentials = alertDialogDriverShowCredentials.create();
+                alertDialogCredentials.show();
         }
         return true;
     }
