@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity
 
     Fragment fragment;
     public static boolean isHomeFragmentOpen;
-    NavigationView navigationView;
+    public static NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
+//        finish();
     }
 
     @Override
