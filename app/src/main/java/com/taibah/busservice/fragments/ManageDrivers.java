@@ -29,10 +29,7 @@ import java.net.URL;
 
 public class ManageDrivers extends Fragment {
 
-    public static int responseCode;
-
     View convertView;
-    HttpURLConnection connection;
 
     MenuInflater mMenuInflater;
     Menu mMenu;
@@ -42,7 +39,6 @@ public class ManageDrivers extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_manage_drivers, null);
         setHasOptionsMenu(true);
-        new RetrieveAllRegisteredRoutes().execute();
 
         return convertView;
     }
@@ -50,8 +46,7 @@ public class ManageDrivers extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        mMenu = menu;
-        mMenuInflater = inflater;
+        inflater.inflate(R.menu.menu_manage, menu);
     }
 
     @Override
@@ -63,68 +58,5 @@ public class ManageDrivers extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private class RetrieveAllRegisteredRoutes extends AsyncTask<Void, Integer, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Retrieving All Routes...");
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
-                try {
-                    connection = openConnectionForUrl("http://46.101.75.194:8080/routes");
-                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-                    connection.connect();
-                    JSONArray jsonObj = readResponse(connection);
-                    responseCode = connection.getResponseCode();
-                    System.out.println(jsonObj);
-                    Log.i("Response Code: ", "" + connection.getResponseCode());
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (responseCode == 200) {
-                Helpers.dismissProgressDialog();
-                mMenuInflater.inflate(R.menu.menu_manage, mMenu);
-            } else {
-                Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
-                Helpers.dismissProgressDialog();
-            }
-        }
-    }
-
-    private HttpURLConnection openConnectionForUrl(String path)
-            throws IOException {
-
-        URL url = new URL(path);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestMethod("GET");
-        return connection;
-    }
-
-    private JSONArray readResponse(HttpURLConnection connection)
-            throws IOException, JSONException {
-
-        InputStream is = connection.getInputStream();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-        String line;
-        StringBuilder response = new StringBuilder();
-        while((line = rd.readLine()) != null) {
-            response.append(line);
-            response.append('\r');
-        }
-        return new JSONArray(response.toString());
     }
 }
