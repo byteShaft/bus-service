@@ -18,9 +18,14 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -42,6 +47,9 @@ public class RegisterDriver extends Fragment {
     HttpURLConnection connection;
     String registrationDetail;
 
+    Menu mMenu;
+    MenuInflater mMenuInflater;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,13 +60,16 @@ public class RegisterDriver extends Fragment {
         etDriverLastName = (EditText) convertView.findViewById(R.id.et_driver_last_name);
         etDriverContactNumber = (EditText) convertView.findViewById(R.id.et_driver_contact);
 
+        new RetrieveUnassignedRoutesTask().execute();
+
         return convertView;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_done, menu);
+        mMenu = menu;
+        mMenuInflater = inflater;
     }
 
     @Override
@@ -66,14 +77,14 @@ public class RegisterDriver extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_done_button:
 
-                    firstNameDriver = etDriverFirstName.getText().toString().trim();
-                    lastNameDriver = etDriverLastName.getText().toString().trim();
-                    contactNumberDriver = etDriverContactNumber.getText().toString().trim();
+                firstNameDriver = etDriverFirstName.getText().toString().trim();
+                lastNameDriver = etDriverLastName.getText().toString().trim();
+                contactNumberDriver = etDriverContactNumber.getText().toString().trim();
 
-                    if (!validateInfo()) {
-                        Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
+                if (!validateInfo()) {
+                    Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 new checkInternetTask().execute();
                 return true;
             default:
@@ -84,12 +95,12 @@ public class RegisterDriver extends Fragment {
     public void register() {
 
         String username = "dvr" + firstNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
-        String password = lastNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3 );
+        String password = lastNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
 
         registrationDetail = "first_name=" + firstNameDriver + "&" + "last_name=" + lastNameDriver
                 + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=driver"
                 + "&" + "username=" + username;
-        Log.i("Registration Detail: ",  registrationDetail);
+        Log.i("Registration Detail: ", registrationDetail);
 
         new RegisterDriverTask().execute();
     }
@@ -263,6 +274,52 @@ public class RegisterDriver extends Fragment {
             } else {
                 // TODO Implement correct logic here
                 Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private class RetrieveUnassignedRoutesTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Retrieving unassigned routes list");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes?unassigned=true", "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+
+                    System.out.print(responseCode);
+
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONArray jsonArray = new JSONArray(data);
+                    System.out.println(jsonArray);
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                Helpers.dismissProgressDialog();
+                Toast.makeText(getActivity(), "Success!", Toast.LENGTH_LONG).show();
+                mMenuInflater.inflate(R.menu.menu_done, mMenu);
+            } else {
+                // TODO Implement correct logic here in case of any failure
+                Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
             }
         }
     }

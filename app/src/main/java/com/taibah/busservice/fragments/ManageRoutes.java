@@ -77,7 +77,7 @@ public class ManageRoutes extends Fragment {
     }
 
 
-        //    Used for getting context menu in routes list for when needed
+    //    Used for getting context menu in routes list for when needed
 
 //
 //    @Override
@@ -131,7 +131,8 @@ public class ManageRoutes extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    connection = WebServiceHelpers.openConnectionForUrl("http://46.101.75.194:8080/routes");
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes", "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
