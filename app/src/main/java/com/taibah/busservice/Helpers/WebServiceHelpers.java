@@ -11,13 +11,13 @@ import java.net.URL;
 
 public class WebServiceHelpers {
 
-    public static HttpURLConnection openConnectionForUrl(String path)
+    public static HttpURLConnection openConnectionForUrl(String path, String RequestType)
             throws IOException {
 
         URL url = new URL(path);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestMethod("GET");
+        connection.setRequestMethod(RequestType);
         return connection;
     }
 

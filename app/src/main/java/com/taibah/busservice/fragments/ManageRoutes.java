@@ -35,6 +35,7 @@ import java.util.HashMap;
 public class ManageRoutes extends Fragment {
 
     public static int responseCode;
+    public static int routeId;
 
     ArrayList<Integer> routeIdsList;
     HashMap<Integer, ArrayList<String>> hashMapRouteData;
@@ -98,6 +99,7 @@ public class ManageRoutes extends Fragment {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         int index = info.position;
+        routeId = routeIdsList.get(index);
         System.out.println(routeIdsList.get(index));
 
         switch (item.getItemId()) {
@@ -127,7 +129,7 @@ public class ManageRoutes extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    connection = WebServiceHelpers.openConnectionForUrl("http://46.101.75.194:8080/routes");
+                    connection = WebServiceHelpers.openConnectionForUrl("http://46.101.75.194:8080/routes", "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();

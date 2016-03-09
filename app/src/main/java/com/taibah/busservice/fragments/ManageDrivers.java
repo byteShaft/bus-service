@@ -122,7 +122,8 @@ public class ManageDrivers extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    connection = WebServiceHelpers.openConnectionForUrl("http://46.101.75.194:8080/users/driver");
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/users/driver", "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     String data = WebServiceHelpers.readResponse(connection);
