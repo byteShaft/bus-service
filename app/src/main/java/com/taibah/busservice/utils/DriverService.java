@@ -75,7 +75,7 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public void onLocationChanged(Location location) {
         driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        driverCurrentSpeedInKilometers = String.valueOf((int)(location.getSpeed() * 1.60934));
+        driverCurrentSpeedInKilometers = String.valueOf((int) ((location.getSpeed() * 3600) / 1000));
         if (MapsFragment.mapsFragmentOpen && driverCurrentLocation != null) {
             MapsFragment.updateDriverLocation();
         }
