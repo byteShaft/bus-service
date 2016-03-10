@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RegisterDriver extends Fragment {
 
@@ -50,10 +51,8 @@ public class RegisterDriver extends Fragment {
     String registrationDetail;
     Spinner spinnerUnAssignedRoutesList;
 
-
     ArrayList<Integer> unAssignedRouteIdsList;
-//    HashMap<Integer, ArrayList<String>> hashMapUnAssignedRouteData;
-
+    HashMap<Integer, ArrayList<String>> hashMapUnAssignedRouteData;
 
     ArrayList<String> arrayListUnAssignedRouteNames;
 
@@ -75,7 +74,7 @@ public class RegisterDriver extends Fragment {
 
         unAssignedRouteIdsList = new ArrayList<>();
         arrayListUnAssignedRouteNames = new ArrayList<>();
-//        hashMapUnAssignedRouteData = new HashMap<>();
+        hashMapUnAssignedRouteData = new HashMap<>();
 
         new RetrieveUnassignedRoutesTask().execute();
 
@@ -184,7 +183,8 @@ public class RegisterDriver extends Fragment {
             Helpers.dismissProgressDialog();
             if (success) {
                 String message = "Driver Name: " + firstNameDriver + " " + lastNameDriver
-                        + "\n" + "Driver Contact: " + contactNumberDriver;
+                        + "\n" + "Driver Contact: " + contactNumberDriver + "\n\n" + "Assigned Route: "
+                        + spinnerUnAssignedRoutesList.getSelectedItem().toString();
                 showRegInfoDialog(message);
             } else {
                 showInternetNotWorkingDialog();
@@ -236,7 +236,7 @@ public class RegisterDriver extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            Helpers.showProgressDialog(getActivity(), "Collecting Information...");
+            Helpers.showProgressDialog(getActivity(), "Collecting information");
             super.onPreExecute();
         }
 
@@ -322,9 +322,8 @@ public class RegisterDriver extends Fragment {
                         if (!unAssignedRouteIdsList.contains(jsonObject.getInt("id"))) {
                             unAssignedRouteIdsList.add(jsonObject.getInt("id"));
                             arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
-//                            hashMapUnAssignedRouteData.put(jsonObject.getInt("id"), arrayListString);
-//                            System.out.println(hashMapUnAssignedRouteData);
-
+                            hashMapUnAssignedRouteData.put(jsonObject.getInt("id"), arrayListUnAssignedRouteNames);
+                            System.out.println(hashMapUnAssignedRouteData);
                         }
                     }
                 } catch (IOException | JSONException e) {
