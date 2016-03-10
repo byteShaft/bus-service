@@ -19,10 +19,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
@@ -37,6 +39,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -74,6 +80,8 @@ public class RegisterStudent extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
+
+        new RetrieveAllRoutesTask().execute();
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
@@ -543,6 +551,50 @@ public class RegisterStudent extends Fragment {
                 // TODO Implement correct logic here
                 Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_LONG).show();
                 Helpers.dismissProgressDialog();
+            }
+        }
+    }
+
+    private class RetrieveAllRoutesTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Retrieving All Routes");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes", "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                    System.out.print(responseCode);
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONArray jsonArray = new JSONArray(data);
+                    System.out.println(jsonArray);
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                Helpers.dismissProgressDialog();
+
+            } else {
+                // TODO Implement correct logic here in case of any failure
+                Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
             }
         }
     }
