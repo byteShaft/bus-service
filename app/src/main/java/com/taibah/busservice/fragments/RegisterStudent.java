@@ -19,11 +19,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
+import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 import com.directions.route.Route;
 import com.directions.route.Routing;
@@ -37,6 +40,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class RegisterStudent extends Fragment {
     public static EditText etStudentFirstName;
     public static EditText etStudentLastName;
@@ -46,14 +59,18 @@ public class RegisterStudent extends Fragment {
     public static MenuItem menuItemUndo;
     public static TextView tvMapRegisterStudentInfo;
     public static int onLongClickCounter = 0;
+    public static int responseCode;
+
     View convertView;
     String firstNameStudent;
     String lastNameStudent;
     String contactNumberStudent;
     String rollNumberStudent;
     String emailStudent;
-
+    String studentRegistrationDetail;
     String studentStop;
+
+    HttpURLConnection connection;
 
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -63,6 +80,8 @@ public class RegisterStudent extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
+
+        new RetrieveAllRoutesTask().execute();
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
@@ -196,20 +215,15 @@ public class RegisterStudent extends Fragment {
         String username = "sdt" + firstNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
         String password = lastNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
 
+        studentRegistrationDetail = "first_name=" + firstNameStudent + "&" + "last_name=" + lastNameStudent
+                + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=student"
+                + "&" + "username=" + username;
+
         Log.i("username", " " + username);
         Log.i("password", " " + password);
 
-        Helpers.showProgressDialog(getActivity(), "Registering");
+        new RegisterStudentTask().execute();
 
-        // TODO: Implement registration here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onRegistrationSuccess();
-                        Helpers.dismissProgressDialog();
-                    }
-                }, 2000);
     }
 
     public boolean validateInfo() {
@@ -475,6 +489,114 @@ public class RegisterStudent extends Fragment {
             return null;
         }
 
+    }
+
+    private class RegisterStudentTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            Helpers.showProgressDialog(getActivity(), "Registering");
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL url = new URL("http://46.101.75.194:8080/register");
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                Log.i("Token", AppGlobals.getToken());
+
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.writeBytes(studentRegistrationDetail);
+                out.flush();
+                out.close();
+                responseCode = connection.getResponseCode();
+                Log.i("Response", "" + responseCode);
+
+                InputStream in = (InputStream) connection.getContent();
+                int ch;
+                StringBuilder sb;
+
+                sb = new StringBuilder();
+                while ((ch = in.read()) != -1)
+                    sb.append((char) ch);
+
+                Log.d("RESULT", sb.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("BEFORE", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 201) {
+                Helpers.dismissProgressDialog();
+                Toast.makeText(getActivity(), "Registration Successful", Toast.LENGTH_LONG).show();
+                Helpers.closeKeyboard(getActivity());
+                getActivity().onBackPressed();
+            } else {
+                // TODO Implement correct logic here
+                Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
+            }
+        }
+    }
+
+    private class RetrieveAllRoutesTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Retrieving All Routes");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes", "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                    System.out.print(responseCode);
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONArray jsonArray = new JSONArray(data);
+                    System.out.println(jsonArray);
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                Helpers.dismissProgressDialog();
+
+            } else {
+                // TODO Implement correct logic here in case of any failure
+                Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
+            }
+        }
     }
 }
 

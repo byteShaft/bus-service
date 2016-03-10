@@ -194,6 +194,7 @@ public class ManageDrivers extends Fragment {
                 CustomDriverListAdapter customRoutesListAdapter = new CustomDriverListAdapter(getContext(), R.layout.route_list_row, driversIdsList);
                 driversListView.setAdapter(customRoutesListAdapter);
             } else {
+                // TODO Implement correct logic here in case of any failure
                 Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
                 getActivity().onBackPressed();
             }
