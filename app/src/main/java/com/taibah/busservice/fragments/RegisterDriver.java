@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class RegisterDriver extends Fragment {
 
@@ -46,6 +48,15 @@ public class RegisterDriver extends Fragment {
     String contactNumberDriver;
     HttpURLConnection connection;
     String registrationDetail;
+    Spinner spinnerUnAssignedRoutesList;
+
+
+    ArrayList<Integer> unAssignedRouteIdsList;
+//    HashMap<Integer, ArrayList<String>> hashMapUnAssignedRouteData;
+
+
+    ArrayList<String> arrayListUnAssignedRouteNames;
+
 
     Menu mMenu;
     MenuInflater mMenuInflater;
@@ -59,6 +70,12 @@ public class RegisterDriver extends Fragment {
         etDriverFirstName = (EditText) convertView.findViewById(R.id.et_driver_first_name);
         etDriverLastName = (EditText) convertView.findViewById(R.id.et_driver_last_name);
         etDriverContactNumber = (EditText) convertView.findViewById(R.id.et_driver_contact);
+
+        spinnerUnAssignedRoutesList = (Spinner) convertView.findViewById(R.id.spinner_register_driver_select_route);
+
+        unAssignedRouteIdsList = new ArrayList<>();
+        arrayListUnAssignedRouteNames = new ArrayList<>();
+//        hashMapUnAssignedRouteData = new HashMap<>();
 
         new RetrieveUnassignedRoutesTask().execute();
 
@@ -295,12 +312,21 @@ public class RegisterDriver extends Fragment {
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
-
                     System.out.print(responseCode);
-
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
                     System.out.println(jsonArray);
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (!unAssignedRouteIdsList.contains(jsonObject.getInt("id"))) {
+                            unAssignedRouteIdsList.add(jsonObject.getInt("id"));
+                            arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
+//                            hashMapUnAssignedRouteData.put(jsonObject.getInt("id"), arrayListString);
+//                            System.out.println(hashMapUnAssignedRouteData);
+
+                        }
+                    }
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -315,6 +341,11 @@ public class RegisterDriver extends Fragment {
                 Helpers.dismissProgressDialog();
                 Toast.makeText(getActivity(), "Success!", Toast.LENGTH_LONG).show();
                 mMenuInflater.inflate(R.menu.menu_done, mMenu);
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_spinner_item , arrayListUnAssignedRouteNames);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerUnAssignedRoutesList.setAdapter(adapter);
             } else {
                 // TODO Implement correct logic here in case of any failure
                 Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
