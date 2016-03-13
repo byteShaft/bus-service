@@ -1,16 +1,24 @@
 package com.taibah.busservice.fragments;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.taibah.busservice.Helpers.WebServiceHelpers;
@@ -18,26 +26,41 @@ import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ManageStudent extends Fragment {
 
     public static int responseCode;
 
+
+    ArrayList<Integer> studentIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapStudentData;
+
+
+    ListView studentListView;
+
     View convertView;
     HttpURLConnection connection;
+    String studentName;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_manage_students, null);
         setHasOptionsMenu(true);
+        studentListView = (ListView) convertView.findViewById(R.id.lv_list_students);
 
         new RetrieveAllRegisteredStudentsTask().execute();
+
+        studentIdsList = new ArrayList<>();
+        hashMapStudentData = new HashMap<>();
 
         return convertView;
     }
@@ -57,6 +80,69 @@ public class ManageStudent extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        registerForContextMenu(studentListView);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+        studentName = hashMapStudentData.get(studentIdsList.get(info.position)).get(0) +
+                " " + hashMapStudentData.get(studentIdsList.get(info.position)).get(1);
+
+        menu.setHeaderTitle(studentName);
+        MenuInflater inflater = this.getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_students_list, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int index = info.position;
+        System.out.println(studentIdsList.get(index));
+
+        switch (item.getItemId()) {
+            case R.id.item_context_menu_student_list_show_credentials:
+                AlertDialog.Builder alertDialogDriverShowCredentials = new AlertDialog.Builder(
+                        getActivity()).setTitle(studentName)
+                        .setMessage("Username: " +
+                                hashMapStudentData.get(studentIdsList.get(info.position)).get(2) +
+                                "\nPassword: " + hashMapStudentData.get(studentIdsList.get(info.position)).get(2))
+                        .setCancelable(false)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialogCredentials = alertDialogDriverShowCredentials.create();
+                alertDialogCredentials.show();
+                return true;
+            case R.id.item_context_menu_student_list_allow_deny_service:
+                AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
+                        getActivity()).setTitle(studentName)
+                        .setMessage("Allow/Deny service")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // TODO Implement correct logic here
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialogService = alertDialogStudentService.create();
+                alertDialogService.show();
+                return true;
+        }
+        return true;
     }
 
     private class RetrieveAllRegisteredStudentsTask extends AsyncTask<Void, Integer, Void> {
@@ -80,6 +166,21 @@ public class ManageStudent extends Fragment {
                     responseCode = connection.getResponseCode();
                     Log.i("Driver", ": " + jsonObj);
                     Log.i("Response Code: ", "" + connection.getResponseCode());
+                    JSONArray jsonArray = jsonObj.getJSONArray("users");
+
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (!studentIdsList.contains(jsonObject.getInt("id"))) {
+                            studentIdsList.add(jsonObject.getInt("id"));
+                            ArrayList<String> arrayListString = new ArrayList<>();
+                            arrayListString.add(jsonObject.getString("first_name"));
+                            arrayListString.add(jsonObject.getString("last_name"));
+                            arrayListString.add(jsonObject.getString("username"));
+//                            arrayListString.add(jsonObject.getString("roll_number"));
+                            hashMapStudentData.put(jsonObject.getInt("id"), arrayListString);
+                        }
+                    }
 
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -94,6 +195,8 @@ public class ManageStudent extends Fragment {
             Helpers.dismissProgressDialog();
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
+                CustomStudentsListAdapter customRoutesListAdapter = new CustomStudentsListAdapter(getContext(), R.layout.route_list_row, studentIdsList);
+                studentListView.setAdapter(customRoutesListAdapter);
             } else {
 
                 // TODO Implement correct logic here in case of any failure
@@ -101,5 +204,47 @@ public class ManageStudent extends Fragment {
                 getActivity().onBackPressed();
             }
         }
+    }
+
+
+    class CustomStudentsListAdapter extends ArrayAdapter<String> {
+
+        ArrayList<Integer> arrayListIntIds;
+
+        public CustomStudentsListAdapter(Context context, int resource, ArrayList<Integer> arrayList) {
+            super(context, resource);
+            arrayListIntIds = arrayList;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                convertView = layoutInflater.inflate(R.layout.student_list_row, parent, false);
+                viewHolder.tvStudentListName = (TextView) convertView.findViewById(R.id.tv_student_list_name);
+                viewHolder.tvStudentUsername = (TextView) convertView.findViewById(R.id.tv_student_list_username);
+                viewHolder.tvStudentRollNumber = (TextView) convertView.findViewById(R.id.tv_student_list_roll_number);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            viewHolder.tvStudentListName.setText("Name: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(0) + " " + hashMapStudentData.get(arrayListIntIds.get(position)).get(1));
+            viewHolder.tvStudentUsername.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(2));
+//            viewHolder.tvStudentRollNumber.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(3));
+            return convertView;
+        }
+
+        @Override
+        public int getCount() {
+            return arrayListIntIds.size();
+        }
+    }
+
+    static class ViewHolder {
+        TextView tvStudentListName;
+        TextView tvStudentUsername;
+        TextView tvStudentRollNumber;
     }
 }

@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+    <!--<item-->
+    <!--android:id="@+id/item_context_menu_routes_list_delete"-->
+    <!--android:title="Delete Srudent" />-->
+    <item
+        android:id="@+id/item_context_menu_student_list_show_credentials"
+        android:title="Show Credentials" />
+    <item
+        android:id="@+id/item_context_menu_student_list_allow_deny_service"
+        android:title="Allow/Deny Service" />
+</menu>

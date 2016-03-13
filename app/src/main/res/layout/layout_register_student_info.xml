@@ -88,7 +88,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/rounded_corners"
             android:orientation="vertical"
             android:padding="12dp">
@@ -110,7 +110,7 @@
                 android:orientation="horizontal">
 
                 <Spinner
-                    android:id="@+id/spinner_register_route_select_driver"
+                    android:id="@+id/spinner_select_route_for_student"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
@@ -130,6 +130,5 @@
 
             </RelativeLayout>
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>
