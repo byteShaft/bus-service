@@ -141,6 +141,7 @@ public class ManageDrivers extends Fragment {
                         });
                 AlertDialog alertDialogCredentials = alertDialogDriverShowCredentials.create();
                 alertDialogCredentials.show();
+                return true;
         }
         return true;
     }

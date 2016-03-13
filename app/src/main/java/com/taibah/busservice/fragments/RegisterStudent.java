@@ -21,13 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.taibah.busservice.Helpers.WebServiceHelpers;
-import com.taibah.busservice.R;
-import com.taibah.busservice.utils.AppGlobals;
-import com.taibah.busservice.utils.Helpers;
 import com.directions.route.Route;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
@@ -39,6 +36,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.taibah.busservice.Helpers.WebServiceHelpers;
+import com.taibah.busservice.R;
+import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.Helpers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +50,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RegisterStudent extends Fragment {
     public static EditText etStudentFirstName;
@@ -75,19 +78,31 @@ public class RegisterStudent extends Fragment {
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
+    ArrayList<Integer> routeIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapRouteData;
+
+    ArrayList<String> arrayListRouteNames;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
 
-        new RetrieveAllRoutesTask().execute();
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+
+
+        routeIdsList = new ArrayList<>();
+        arrayListRouteNames = new ArrayList<>();
+        hashMapRouteData = new HashMap<>();
+
+        new RetrieveAllRoutesTask().execute();
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs_student);
         tabLayout.setupWithViewPager(mViewPager);
@@ -307,6 +322,8 @@ public class RegisterStudent extends Fragment {
         private GoogleMap mMap;
         private Polyline polyline;
 
+        public static Spinner spinnerRoutesList;
+
         public PlaceholderFragment() {
         }
 
@@ -336,6 +353,8 @@ public class RegisterStudent extends Fragment {
                 etStudentContactNumber = (EditText) rootView.findViewById(R.id.et_student_contact);
                 etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
                 etStudentEmail = (EditText) rootView.findViewById(R.id.et_student_email);
+
+                spinnerRoutesList = (Spinner) rootView.findViewById(R.id.spinner_select_route_for_student);
 
             } else if (tabCount == 2) {
                 rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
@@ -577,6 +596,17 @@ public class RegisterStudent extends Fragment {
                     JSONArray jsonArray = new JSONArray(data);
                     System.out.println(jsonArray);
 
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (!routeIdsList.contains(jsonObject.getInt("id"))) {
+                            routeIdsList.add(jsonObject.getInt("id"));
+                            arrayListRouteNames.add(jsonObject.getString("name"));
+                            hashMapRouteData.put(jsonObject.getInt("id"), arrayListRouteNames);
+                            System.out.println(hashMapRouteData);
+                        }
+                    }
+
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -589,6 +619,11 @@ public class RegisterStudent extends Fragment {
             super.onPostExecute(aVoid);
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_spinner_item , arrayListRouteNames);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                PlaceholderFragment.spinnerRoutesList.setAdapter(adapter);
 
             } else {
                 // TODO Implement correct logic here in case of any failure
