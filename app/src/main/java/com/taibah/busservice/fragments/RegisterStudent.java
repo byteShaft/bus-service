@@ -1,6 +1,7 @@
 package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -19,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -78,10 +80,14 @@ public class RegisterStudent extends Fragment {
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    ArrayList<Integer> routeIdsList;
-    HashMap<Integer, ArrayList<String>> hashMapRouteData;
+    static ArrayList<Integer> routeIdsList;
+    HashMap<Integer, String> hashMapRouteData;
 
-    ArrayList<String> arrayListRouteNames;
+    static Spinner spinnerRoutesList;
+
+    static int routeId = 0;
+
+//    ArrayList<String> arrayListRouteNames;
 
     @Nullable
     @Override
@@ -96,10 +102,8 @@ public class RegisterStudent extends Fragment {
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-
-
         routeIdsList = new ArrayList<>();
-        arrayListRouteNames = new ArrayList<>();
+//        arrayListRouteNames = new ArrayList<>();
         hashMapRouteData = new HashMap<>();
 
         new RetrieveAllRoutesTask().execute();
@@ -307,7 +311,7 @@ public class RegisterStudent extends Fragment {
         PlaceholderFragment.studentStopLatLng = null;
     }
 
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment implements AdapterView.OnItemSelectedListener {
         private static final String ARG_SECTION_NUMBER = "section_number";
         public static LatLng studentStopLatLng = null;
         private static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
@@ -321,8 +325,6 @@ public class RegisterStudent extends Fragment {
         private RoutingListener mRoutingListener;
         private GoogleMap mMap;
         private Polyline polyline;
-
-        public static Spinner spinnerRoutesList;
 
         public PlaceholderFragment() {
         }
@@ -354,7 +356,9 @@ public class RegisterStudent extends Fragment {
                 etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
                 etStudentEmail = (EditText) rootView.findViewById(R.id.et_student_email);
 
+
                 spinnerRoutesList = (Spinner) rootView.findViewById(R.id.spinner_select_route_for_student);
+                spinnerRoutesList.setOnItemSelectedListener(this);
 
             } else if (tabCount == 2) {
                 rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
@@ -444,6 +448,17 @@ public class RegisterStudent extends Fragment {
                     .waypoints(latLngArrayWithWayPoints)
                     .build();
             routing.execute();
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            routeId = RegisterStudent.routeIdsList.get(position);
+            System.out.println(routeId);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
         }
     }
 
@@ -596,13 +611,12 @@ public class RegisterStudent extends Fragment {
                     JSONArray jsonArray = new JSONArray(data);
                     System.out.println(jsonArray);
 
-
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!routeIdsList.contains(jsonObject.getInt("id"))) {
                             routeIdsList.add(jsonObject.getInt("id"));
-                            arrayListRouteNames.add(jsonObject.getString("name"));
-                            hashMapRouteData.put(jsonObject.getInt("id"), arrayListRouteNames);
+//                            arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
+                            hashMapRouteData.put(jsonObject.getInt("id"), jsonObject.getString("name"));
                             System.out.println(hashMapRouteData);
                         }
                     }
@@ -620,10 +634,15 @@ public class RegisterStudent extends Fragment {
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_spinner_item , arrayListRouteNames);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                PlaceholderFragment.spinnerRoutesList.setAdapter(adapter);
+//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+//                        android.R.layout.simple_spinner_item , arrayListRouteNames);
+//                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                PlaceholderFragment.spinnerRoutesList.setAdapter(adapter);
+
+
+                CustomSpinnerListAdapter customSpinnerListAdapter = new CustomSpinnerListAdapter(getActivity(), R.layout.spinner_row, routeIdsList);
+                spinnerRoutesList.setAdapter(customSpinnerListAdapter);
+                spinnerRoutesList.setSelection(0);
 
             } else {
                 // TODO Implement correct logic here in case of any failure
@@ -632,6 +651,52 @@ public class RegisterStudent extends Fragment {
                 getActivity().onBackPressed();
             }
         }
+    }
+
+
+    class CustomSpinnerListAdapter extends ArrayAdapter<String> {
+
+        ArrayList<Integer> arrayListIntIds;
+
+        public CustomSpinnerListAdapter(Context context, int resource, ArrayList<Integer> arrayList) {
+            super(context, resource);
+            arrayListIntIds = arrayList;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+
+        public View getCustomView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                convertView = layoutInflater.inflate(R.layout.spinner_row, parent, false);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            viewHolder.tvSpinner = (TextView) convertView.findViewById(R.id.tv_spinner_row);
+            viewHolder.tvSpinner.setText(hashMapRouteData.get(arrayListIntIds.get(position)));
+            return convertView;
+        }
+
+        @Override
+        public int getCount() {
+            return arrayListIntIds.size();
+        }
+    }
+
+
+    static class ViewHolder {
+        TextView tvSpinner;
     }
 }
 

@@ -1,6 +1,7 @@
 package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,9 +15,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.taibah.busservice.Helpers.WebServiceHelpers;
@@ -36,7 +39,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class RegisterDriver extends Fragment {
+
+public class RegisterDriver extends Fragment implements AdapterView.OnItemSelectedListener {
 
     public static int responseCode;
 
@@ -52,9 +56,8 @@ public class RegisterDriver extends Fragment {
     Spinner spinnerUnAssignedRoutesList;
 
     ArrayList<Integer> unAssignedRouteIdsList;
-    HashMap<Integer, ArrayList<String>> hashMapUnAssignedRouteData;
-
-    ArrayList<String> arrayListUnAssignedRouteNames;
+    HashMap<Integer, String> hashMapUnAssignedRouteData;
+    int routeId = 0;
 
 
     Menu mMenu;
@@ -73,10 +76,11 @@ public class RegisterDriver extends Fragment {
         spinnerUnAssignedRoutesList = (Spinner) convertView.findViewById(R.id.spinner_register_driver_select_route);
 
         unAssignedRouteIdsList = new ArrayList<>();
-        arrayListUnAssignedRouteNames = new ArrayList<>();
         hashMapUnAssignedRouteData = new HashMap<>();
+        spinnerUnAssignedRoutesList.setOnItemSelectedListener(this);
 
         new RetrieveUnassignedRoutesTask().execute();
+
 
         return convertView;
     }
@@ -161,6 +165,17 @@ public class RegisterDriver extends Fragment {
 
     public void onRegistrationFailed() {
         Toast.makeText(getActivity(), "Registration failed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        routeId = unAssignedRouteIdsList.get(position);
+        System.out.println(routeId);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
@@ -321,8 +336,8 @@ public class RegisterDriver extends Fragment {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!unAssignedRouteIdsList.contains(jsonObject.getInt("id"))) {
                             unAssignedRouteIdsList.add(jsonObject.getInt("id"));
-                            arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
-                            hashMapUnAssignedRouteData.put(jsonObject.getInt("id"), arrayListUnAssignedRouteNames);
+//                            arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
+                            hashMapUnAssignedRouteData.put(jsonObject.getInt("id"), jsonObject.getString("name"));
                             System.out.println(hashMapUnAssignedRouteData);
                         }
                     }
@@ -340,11 +355,15 @@ public class RegisterDriver extends Fragment {
                 Helpers.dismissProgressDialog();
                 Toast.makeText(getActivity(), "Success!", Toast.LENGTH_LONG).show();
                 mMenuInflater.inflate(R.menu.menu_done, mMenu);
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_spinner_item , arrayListUnAssignedRouteNames);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                spinnerUnAssignedRoutesList.setAdapter(adapter);
+//
+//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+//                        android.R.layout.simple_spinner_item , arrayListUnAssignedRouteNames);
+//                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                spinnerUnAssignedRoutesList.setAdapter(adapter);
+                CustomSpinnerListAdapter customSpinnerListAdapter = new CustomSpinnerListAdapter(getActivity(), R.layout.spinner_row, unAssignedRouteIdsList);
+                spinnerUnAssignedRoutesList.setAdapter(customSpinnerListAdapter);
+                spinnerUnAssignedRoutesList.setSelection(0);
+//                routeId = unAssignedRouteIdsList.get(spinnerUnAssignedRoutesList.getSelectedItemPosition());
             } else {
                 // TODO Implement correct logic here in case of any failure
                 Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
@@ -352,5 +371,51 @@ public class RegisterDriver extends Fragment {
                 getActivity().onBackPressed();
             }
         }
+    }
+
+
+    class CustomSpinnerListAdapter extends ArrayAdapter<String> {
+
+        ArrayList<Integer> arrayListIntIds;
+
+        public CustomSpinnerListAdapter(Context context, int resource, ArrayList<Integer> arrayList) {
+            super(context, resource);
+            arrayListIntIds = arrayList;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+
+        public View getCustomView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                convertView = layoutInflater.inflate(R.layout.spinner_row, parent, false);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            viewHolder.tvSpinner = (TextView) convertView.findViewById(R.id.tv_spinner_row);
+            viewHolder.tvSpinner.setText(hashMapUnAssignedRouteData.get(arrayListIntIds.get(position)));
+            return convertView;
+        }
+
+        @Override
+        public int getCount() {
+            return arrayListIntIds.size();
+        }
+    }
+
+
+    static class ViewHolder {
+        TextView tvSpinner;
     }
 }
