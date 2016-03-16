@@ -119,13 +119,13 @@ public class MapsFragment extends Fragment {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
 
                 mMap.addMarker(new MarkerOptions().position(startPoint)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_map_simple)));
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
                 mMap.addMarker(new MarkerOptions().position(wayPoint1)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop)));
+                        .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView("Name1", getActivity()))));
                 mMap.addMarker(new MarkerOptions().position(wayPoint2)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop)));
+                        .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView("Name2", getActivity()))));
                 mMap.addMarker(new MarkerOptions().position(endPoint)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_finish)));
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
 
                 Routing routing = new Routing.Builder()
                         .travelMode(Routing.TravelMode.DRIVING)

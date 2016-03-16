@@ -13,6 +13,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.telephony.PhoneNumberUtils;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +36,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -67,17 +70,20 @@ public class RegisterStudent extends Fragment {
     public static int responseCode;
 
     View convertView;
-    String firstNameStudent;
-    String lastNameStudent;
-    String contactNumberStudent;
-    String rollNumberStudent;
-    String emailStudent;
+    static String firstNameStudent = "";
+    static String lastNameStudent;
+    static String contactNumberStudent;
+    static String rollNumberStudent;
+    static String emailStudent;
     String studentRegistrationDetail;
     String studentStop;
 
+
+    static GoogleMap mMap;
+
     HttpURLConnection connection;
 
-    private ViewPager mViewPager;
+    public static ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     static ArrayList<Integer> routeIdsList;
@@ -154,20 +160,18 @@ public class RegisterStudent extends Fragment {
 
             case R.id.action_undo_button:
                 onLongClickCounter = 0;
+                mMap.clear();
+                setInitialMap();
                 menuItemUndo.setVisible(false);
                 PlaceholderFragment.studentStopLatLng = null;
                 tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
-
-
                 return true;
             case R.id.action_done_button:
-
                 firstNameStudent = etStudentFirstName.getText().toString().trim();
                 lastNameStudent = etStudentLastName.getText().toString().trim();
                 contactNumberStudent = etStudentContactNumber.getText().toString().trim();
                 rollNumberStudent = etStudentRollNumber.getText().toString().trim();
                 emailStudent = etStudentEmail.getText().toString().trim();
-
                 try {
                     if (!validateInfo()) {
                         Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
@@ -180,7 +184,6 @@ public class RegisterStudent extends Fragment {
                     e.printStackTrace();
                     return true;
                 }
-
                 new checkInternetTask().execute();
 
                 return true;
@@ -245,7 +248,7 @@ public class RegisterStudent extends Fragment {
 
     }
 
-    public boolean validateInfo() {
+    public static boolean validateInfo() {
         boolean valid = true;
 
         if (firstNameStudent.isEmpty() || firstNameStudent.length() < 3) {
@@ -314,7 +317,7 @@ public class RegisterStudent extends Fragment {
     public static class PlaceholderFragment extends Fragment implements AdapterView.OnItemSelectedListener {
         private static final String ARG_SECTION_NUMBER = "section_number";
         public static LatLng studentStopLatLng = null;
-        private static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
+         static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -322,8 +325,7 @@ public class RegisterStudent extends Fragment {
 
         private FragmentManager fm;
         private SupportMapFragment myMapFragment;
-        private RoutingListener mRoutingListener;
-        private GoogleMap mMap;
+        static RoutingListener mRoutingListener;
         private Polyline polyline;
 
         public PlaceholderFragment() {
@@ -351,6 +353,23 @@ public class RegisterStudent extends Fragment {
                 rootView = inflater.inflate(R.layout.layout_register_student_info, container, false);
 
                 etStudentFirstName = (EditText) rootView.findViewById(R.id.et_student_first_name);
+                etStudentFirstName.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        firstNameStudent = etStudentFirstName.getText().toString().trim();
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
+
                 etStudentLastName = (EditText) rootView.findViewById(R.id.et_student_last_name);
                 etStudentContactNumber = (EditText) rootView.findViewById(R.id.et_student_contact);
                 etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
@@ -370,28 +389,32 @@ public class RegisterStudent extends Fragment {
                     @Override
                     public void onMapReady(GoogleMap googleMap) {
                         mMap = googleMap;
-                        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
-                        mMap.addMarker(new MarkerOptions().position(dummyPosition));
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
-                                taibahUniversityLocation, 13.0f));
-
-                        buildAndDisplayRoute(RegisterRoute.taibahUniversityLocation, dummyPosition);
-
+                        setInitialMap();
                         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                             @Override
                             public void onMapLongClick(LatLng latLng) {
-                                onLongClickCounter++;
-                                if (onLongClickCounter == 1) {
-                                    mMap.clear();
-                                    menuItemUndo.setVisible(true);
-                                    tvMapRegisterStudentInfo.setText("Resolving route points...");
-                                    mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation));
-                                    mMap.addMarker(new MarkerOptions().position(dummyPosition));
-                                    mMap.addMarker(new MarkerOptions().position(latLng));
-                                    LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
-                                            taibahUniversityLocation, latLng, dummyPosition};
-                                    buildAndDisplayRouteWithWayPoints(latLngDummyList);
-                                    studentStopLatLng = latLng;
+                                if (RegisterStudent.firstNameStudent.trim().length() < 3) {
+                                    Toast.makeText(getActivity(), "Put student name first", Toast.LENGTH_SHORT).show();
+                                    mViewPager.setCurrentItem(0);
+                                } else {
+                                    onLongClickCounter++;
+                                    if (onLongClickCounter == 1) {
+                                        mMap.clear();
+                                        menuItemUndo.setVisible(true);
+                                        tvMapRegisterStudentInfo.setText("Resolving route points...");
+                                        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation)
+                                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
+                                        mMap.addMarker(new MarkerOptions().position(dummyPosition).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+
+
+                                        mMap.addMarker(new MarkerOptions().position(latLng)).setIcon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(RegisterStudent.firstNameStudent, getActivity())));
+
+
+                                        LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
+                                                taibahUniversityLocation, latLng, dummyPosition};
+                                        buildAndDisplayRouteWithWayPoints(latLngDummyList);
+                                        studentStopLatLng = latLng;
+                                    }
                                 }
                             }
                         });
@@ -432,7 +455,7 @@ public class RegisterStudent extends Fragment {
             return rootView;
         }
 
-        private void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
+        static void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
             Routing routing = new Routing.Builder()
                     .travelMode(Routing.TravelMode.DRIVING)
                     .withListener(mRoutingListener)
@@ -697,6 +720,16 @@ public class RegisterStudent extends Fragment {
 
     static class ViewHolder {
         TextView tvSpinner;
+    }
+
+    public static void setInitialMap() {
+        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation)
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
+        mMap.addMarker(new MarkerOptions().position(PlaceholderFragment.dummyPosition).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
+                taibahUniversityLocation, 13.0f));
+
+        PlaceholderFragment.buildAndDisplayRoute(RegisterRoute.taibahUniversityLocation, PlaceholderFragment.dummyPosition);
     }
 }
 
