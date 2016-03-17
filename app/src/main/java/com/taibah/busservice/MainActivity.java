@@ -1,23 +1,32 @@
 package com.taibah.busservice;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
 import com.taibah.busservice.fragments.HomeFragment;
@@ -27,6 +36,8 @@ import com.taibah.busservice.fragments.ManageStudent;
 import com.taibah.busservice.fragments.MapsFragment;
 import com.taibah.busservice.fragments.ScheduleFragment;
 import com.taibah.busservice.fragments.TwitterFragment;
+import com.taibah.busservice.gcm.QuickstartPreferences;
+import com.taibah.busservice.gcm.RegistrationIntentService;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
@@ -37,9 +48,36 @@ public class MainActivity extends AppCompatActivity
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
 
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final String TAG = "MainActivity";
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    System.out.println(R.string.gcm_send_message);
+                } else {
+                    System.out.println(R.string.token_error_message);
+                }
+            }
+
+        };
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
 
         if (AppGlobals.isFirstRun()) {
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
@@ -97,7 +135,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                navigationView.removeOnLayoutChangeListener( this );
+                navigationView.removeOnLayoutChangeListener(this);
                 TextView textView = (TextView) navigationView.findViewById(R.id.tv_header_username);
                 textView.setText(AppGlobals.getUsername());
             }
@@ -109,11 +147,11 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (!isHomeFragmentOpen){
+        } else if (!isHomeFragmentOpen) {
             AppGlobals.replaceFragment(getSupportFragmentManager(), new HomeFragment());
             navigationView.getMenu().getItem(0).setChecked(true);
             setTitle(navigationView.getMenu().getItem(0).getTitle());
-            } else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -195,8 +233,8 @@ public class MainActivity extends AppCompatActivity
         alertDialogBuilder
                 .setMessage("Are you sure?")
                 .setCancelable(false)
-                .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,int id) {
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
                         logout();
                     }
                 })
@@ -229,17 +267,36 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
 //        finish();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
     }
 
     public void launchLoginActivity() {
         Intent startIntent = new Intent(MainActivity.this, LoginActivity.class);
         startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         MainActivity.this.startActivity(startIntent);
+    }
+
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }
