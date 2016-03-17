@@ -172,13 +172,17 @@ public class MapsFragment extends Fragment {
 
             @Override
             public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(Color.RED);
-                polyOptions.width(10);
-                polylineOptions.zIndex(102);
-                polyOptions.addAll(polylineOptions.getPoints());
-                mMap.addPolyline(polyOptions);
+                mMap.addPolyline(new PolylineOptions()
+                    .addAll(polylineOptions.getPoints())
+                    .width(12)
+                    .geodesic(true)
+                    .color(Color.parseColor("#80000000")));
 
+                mMap.addPolyline(new PolylineOptions()
+                        .addAll(polylineOptions.getPoints())
+                        .width(6)
+                        .geodesic(true)
+                        .color(Color.RED));
                 if (AppGlobals.getUserType() == 2) {
                     addDriverLocationMarker();
                 }

@@ -435,12 +435,18 @@ public class RegisterStudent extends Fragment {
 
                     @Override
                     public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
-                        PolylineOptions polyoptions = new PolylineOptions();
-                        polyoptions.color(Color.RED);
-                        polyoptions.width(10);
-                        polylineOptions.zIndex(102);
-                        polyoptions.addAll(polylineOptions.getPoints());
-                        mMap.addPolyline(polyoptions);
+//
+                        mMap.addPolyline(new PolylineOptions()
+                                .addAll(polylineOptions.getPoints())
+                                .width(12)
+                                .geodesic(true)
+                                .color(Color.parseColor("#80000000")));
+
+                        mMap.addPolyline(new PolylineOptions()
+                                .addAll(polylineOptions.getPoints())
+                                .width(6)
+                                .geodesic(true)
+                                .color(Color.RED));
                         if (onLongClickCounter == 1) {
                             tvMapRegisterStudentInfo.setText("Stop Successfully Marked");
                         }
@@ -460,6 +466,7 @@ public class RegisterStudent extends Fragment {
                     .travelMode(Routing.TravelMode.DRIVING)
                     .withListener(mRoutingListener)
                     .waypoints(startPoint, endPoint)
+                    .routeMode(Routing.RouteMode.FASTEST)
                     .build();
             routing.execute();
         }
@@ -469,6 +476,7 @@ public class RegisterStudent extends Fragment {
                     .travelMode(Routing.TravelMode.DRIVING)
                     .withListener(mRoutingListener)
                     .waypoints(latLngArrayWithWayPoints)
+                    .routeMode(Routing.RouteMode.FASTEST)
                     .build();
             routing.execute();
         }
