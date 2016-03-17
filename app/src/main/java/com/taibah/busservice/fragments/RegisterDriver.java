@@ -118,10 +118,11 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
         String username = "dvr" + firstNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
         String password = lastNameDriver + contactNumberDriver.substring(contactNumberDriver.length() - 3);
 
-        registrationDetail = "first_name=" + firstNameDriver + "&" + "last_name=" + lastNameDriver
+        registrationDetail = "route_id=" + routeId + "&"
+                + "first_name=" + firstNameDriver + "&" + "last_name=" + lastNameDriver
                 + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=driver"
-                + "&" + "username=" + username;
-        Log.i("Registration Detail: ", registrationDetail);
+                + "&" + "username=" + username
+                + "&" + "phone=" + contactNumberDriver;
 
         new RegisterDriverTask().execute();
     }
