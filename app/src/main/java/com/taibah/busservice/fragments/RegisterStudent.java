@@ -87,11 +87,12 @@ public class RegisterStudent extends Fragment {
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     static ArrayList<Integer> routeIdsList;
-    HashMap<Integer, String> hashMapRouteData;
+    static HashMap<Integer, String> hashMapRouteData;
 
     static Spinner spinnerRoutesList;
 
     static int routeId = 0;
+    static String spinnerText;
 
 //    ArrayList<String> arrayListRouteNames;
 
@@ -484,6 +485,7 @@ public class RegisterStudent extends Fragment {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             routeId = RegisterStudent.routeIdsList.get(position);
+            spinnerText = hashMapRouteData.get(routeIdsList.get(position));
             System.out.println(routeId);
         }
 
@@ -513,7 +515,8 @@ public class RegisterStudent extends Fragment {
             String message = "Student Name:  " + firstNameStudent + " " + lastNameStudent + "\n"
                     + "Contact Number: " + contactNumberStudent
                     + "\n" + "RollNumber: " + rollNumberStudent + "\n" + "Email ID: " + emailStudent
-                    + "\n\n" + "Stop Address: " + Helpers.getAddress(getActivity(), PlaceholderFragment.studentStopLatLng);
+                    + "\n\n" + "Assigned Route: " + spinnerText
+                    + "\n" + "Stop Address: " + Helpers.getAddress(getActivity(), PlaceholderFragment.studentStopLatLng);
 
             Helpers.dismissProgressDialog();
             if (success) {
