@@ -58,6 +58,7 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     ArrayList<Integer> unAssignedRouteIdsList;
     HashMap<Integer, String> hashMapUnAssignedRouteData;
     int routeId = 0;
+    String spinnerText;
 
 
     Menu mMenu;
@@ -170,7 +171,9 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         routeId = unAssignedRouteIdsList.get(position);
+        spinnerText = hashMapUnAssignedRouteData.get(unAssignedRouteIdsList.get(position));
         System.out.println(routeId);
+        System.out.println(spinnerText);
     }
 
     @Override
@@ -199,7 +202,7 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             if (success) {
                 String message = "Driver Name: " + firstNameDriver + " " + lastNameDriver
                         + "\n" + "Driver Contact: " + contactNumberDriver + "\n\n" + "Assigned Route: "
-                        + spinnerUnAssignedRoutesList.getSelectedItem().toString();
+                        + spinnerText;
                 showRegInfoDialog(message);
             } else {
                 showInternetNotWorkingDialog();
