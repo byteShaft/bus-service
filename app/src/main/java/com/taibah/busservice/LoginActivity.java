@@ -252,7 +252,9 @@ public class LoginActivity extends Activity {
                     connection.setRequestProperty("charset", "utf-8");
 
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                    out.writeBytes("username=" + username + "&" + "password=" + password);
+                    String loginDetails = "username=" + username + "&" + "password=" + password;
+                    out.writeBytes(loginDetails);
+                    Log.i("Login Details ", loginDetails);
                     out.flush();
                     out.close();
 
