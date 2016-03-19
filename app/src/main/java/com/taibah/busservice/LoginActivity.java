@@ -33,6 +33,8 @@ public class LoginActivity extends Activity {
 
     JSONObject response;
     public String token = "";
+    static int responseCode;
+    HttpURLConnection connection;
 
     boolean internetNotWorking = false;
 
@@ -48,12 +50,12 @@ public class LoginActivity extends Activity {
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                username = editTextUsername.getText().toString();
-                password = editTextPassword.getText().toString();
+                username = editTextUsername.getText().toString().trim();
+                password = editTextPassword.getText().toString().trim();
                 if (username.equals("adntaibah") && password.equals("12345")) {
                     login();
                 } else {
-                    login();
+                    new LoginDriverAndStudentTask().execute();
                 }
             }
         });
@@ -78,7 +80,7 @@ public class LoginActivity extends Activity {
 
         // TODO: Implement authentication here.
         if (Helpers.isNetworkAvailable()) {
-            new LoginTask().execute();
+            new LoginAdminTask().execute();
         } else {
             Toast.makeText(LoginActivity.this, "Please connect your device to the Internet",
                     Toast.LENGTH_SHORT).show();
@@ -141,7 +143,7 @@ public class LoginActivity extends Activity {
         }
     }
 
-    public class LoginTask extends AsyncTask<Void, Integer, Void> {
+    public class LoginAdminTask extends AsyncTask<Void, Integer, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -155,7 +157,7 @@ public class LoginActivity extends Activity {
                 try {
                     URL url = new URL("http://46.101.75.194:8080/login");
 
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection = (HttpURLConnection) url.openConnection();
                     connection.setDoOutput(true);
                     connection.setDoInput(true);
                     connection.setInstanceFollowRedirects(false);
@@ -223,6 +225,96 @@ public class LoginActivity extends Activity {
             if (!token.isEmpty()) {
                 Helpers.dismissProgressDialog();
                 onLoginSuccess();
+            }
+        }
+    }
+
+    public class LoginDriverAndStudentTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(LoginActivity.this, "Authenticating...");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isInternetWorking()) {
+                try {
+                    URL url = new URL("http://46.101.75.194:8080/login");
+
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    connection.setRequestProperty("charset", "utf-8");
+
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    out.writeBytes("username=" + username + "&" + "password=" + password);
+                    out.flush();
+                    out.close();
+
+                    InputStream in = (InputStream) connection.getContent();
+
+                    int ch;
+                    StringBuilder sb = new StringBuilder();
+                    while((ch = in.read()) != -1)
+                        sb.append((char)ch);
+
+                    Log.d("RESULT", sb.toString());
+
+                    response = new JSONObject(sb.toString());
+                    token = response.getString("token");
+                    AppGlobals.putToken(token);
+                    Log.d("TOKEN", token);
+
+                    connection.disconnect();
+
+                    url = new URL("http://46.101.75.194:8080/user");
+
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(false);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("GET");
+                    connection.setRequestProperty("X-Api-Key", token);
+
+                    responseCode = connection.getResponseCode();
+
+                    in = (InputStream) connection.getContent();
+
+                    sb = new StringBuilder();
+                    while((ch = in.read()) != -1)
+                        sb.append((char)ch);
+
+                    Log.d("RESULT", sb.toString());
+
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                    Log.e("BEFORE", e.getMessage());
+                }
+            } else {
+                internetNotWorking = true;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (internetNotWorking) {
+                Toast.makeText(LoginActivity.this, "Internet is not working. Make sure you are " +
+                        "properly connected to the Internet", Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
+                internetNotWorking = false;
+            } else if (!token.isEmpty()) {
+                Helpers.dismissProgressDialog();
+                onLoginSuccess();
+            } else if (responseCode == 401) {
+                Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
             }
         }
     }
