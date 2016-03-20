@@ -19,6 +19,7 @@ public class AppGlobals extends Application {
     private static final String ROUTE_STATUS = "route_status";
     private static final String STUDENT_TYPE = "student_type";
     private static final String TOKEN = "token";
+    private static final String GCM_TOKEN = "gcm_token";
 
     @Override
     public void onCreate() {
@@ -53,6 +54,14 @@ public class AppGlobals extends Application {
 
     public static String getToken() {
         return sPreferences.getString(TOKEN, null);
+    }
+
+    public static void putGcmToken(String gcmToken) {
+        sPreferences.edit().putString(GCM_TOKEN, gcmToken).apply();
+    }
+
+    public static String getGcmToken() {
+        return sPreferences.getString(GCM_TOKEN, null);
     }
 
     public static String getName() {

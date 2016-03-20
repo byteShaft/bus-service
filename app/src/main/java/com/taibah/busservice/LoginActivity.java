@@ -255,7 +255,7 @@ public class LoginActivity extends Activity {
 
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                     String loginDetails = "username=" + username + "&" + "password=" + password
-                            + "&" + "token=" + GcmSender.API_KEY;
+                            + "&" + "token=" + AppGlobals.getGcmToken();
                     out.writeBytes(loginDetails);
                     Log.i("Login Details ", loginDetails);
                     out.flush();
