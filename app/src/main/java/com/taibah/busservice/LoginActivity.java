@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.taibah.busservice.gcm.GcmSender;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
@@ -252,7 +253,8 @@ public class LoginActivity extends Activity {
                     connection.setRequestProperty("charset", "utf-8");
 
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                    String loginDetails = "username=" + username + "&" + "password=" + password;
+                    String loginDetails = "username=" + username + "&" + "password=" + password
+                            + "&" + "token=" + GcmSender.API_KEY;
                     out.writeBytes(loginDetails);
                     Log.i("Login Details ", loginDetails);
                     out.flush();
