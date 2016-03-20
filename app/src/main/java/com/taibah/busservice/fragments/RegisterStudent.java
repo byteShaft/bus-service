@@ -78,7 +78,6 @@ public class RegisterStudent extends Fragment {
     String studentRegistrationDetail;
     String studentStop;
 
-
     static GoogleMap mMap;
 
     HttpURLConnection connection;
@@ -238,12 +237,17 @@ public class RegisterStudent extends Fragment {
         String username = "sdt" + firstNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
         String password = lastNameStudent + rollNumberStudent.substring(rollNumberStudent.length() - 3);
 
-        studentRegistrationDetail = "first_name=" + firstNameStudent + "&" + "last_name=" + lastNameStudent
+        studentRegistrationDetail = "route_id=" + routeId
+                + "&" + "first_name=" + firstNameStudent + "&" + "last_name=" + lastNameStudent
                 + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=student"
-                + "&" + "username=" + username;
+                + "&" + "username=" + username
+                + "&" + "latitude=" + PlaceholderFragment.studentStopLatLng.latitude
+                + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude;
 
         Log.i("username", " " + username);
         Log.i("password", " " + password);
+
+        Log.i("Registration Detail ", studentRegistrationDetail);
 
         new RegisterStudentTask().execute();
 
@@ -319,6 +323,7 @@ public class RegisterStudent extends Fragment {
         private static final String ARG_SECTION_NUMBER = "section_number";
         public static LatLng studentStopLatLng = null;
          static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
+
         /**
          * The fragment argument representing the section number for this
          * fragment.
