@@ -5,10 +5,13 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -18,13 +21,23 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.taibah.busservice.fragments.MapsFragment;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class DriverService extends Service implements LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     public static boolean driverLocationReportingServiceIsRunning;
+    public static int responseCode;
+    public static int onLocationChangedCounter = 0;
+    public static boolean isRouteCancelled = false;
 
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
+    HttpURLConnection connection;
     public static String driverCurrentSpeedInKilometers;
     public static LatLng driverCurrentLocation = null;
     public static LatLng driverLastKnownLocation = null;
@@ -74,6 +87,10 @@ public class DriverService extends Service implements LocationListener,
 
     @Override
     public void onLocationChanged(Location location) {
+        onLocationChangedCounter++;
+        if (onLocationChangedCounter == 1) {
+            new DriverLocationPosterTask().execute();
+        }
         driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         driverCurrentSpeedInKilometers = String.valueOf((int) ((location.getSpeed() * 3600) / 1000));
         if (MapsFragment.mapsFragmentOpen && driverCurrentLocation != null) {
@@ -124,5 +141,61 @@ public class DriverService extends Service implements LocationListener,
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
+    }
+
+    private class DriverLocationPosterTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL url = new URL("http://46.101.75.194:8080/locations/set");
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.writeBytes("speed=" + driverCurrentSpeedInKilometers +
+                        "&" + "latitude=" + driverCurrentLocation.latitude +
+                        "&" + "longitude=" + driverCurrentLocation.longitude);
+                out.flush();
+                out.close();
+                responseCode = connection.getResponseCode();
+                Log.i("Response", "" + responseCode);
+
+                InputStream in = (InputStream) connection.getContent();
+                int ch;
+                StringBuilder sb;
+
+                sb = new StringBuilder();
+                while ((ch = in.read()) != -1)
+                    sb.append((char) ch);
+
+                Log.d("RESULT", sb.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("BEFORE", e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200 && !isRouteCancelled) {
+                new android.os.Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        new DriverLocationPosterTask().execute();
+                    }
+                }, 4000);
+            }
+        }
     }
 }
