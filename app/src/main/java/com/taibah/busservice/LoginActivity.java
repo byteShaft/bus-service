@@ -261,6 +261,8 @@ public class LoginActivity extends Activity {
                     out.flush();
                     out.close();
 
+                    responseCode = connection.getResponseCode();
+
                     InputStream in = (InputStream) connection.getContent();
 
                     int ch;
@@ -285,8 +287,6 @@ public class LoginActivity extends Activity {
                     connection.setInstanceFollowRedirects(false);
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("X-Api-Key", token);
-
-                    responseCode = connection.getResponseCode();
 
                     in = (InputStream) connection.getContent();
 
@@ -320,6 +320,7 @@ public class LoginActivity extends Activity {
                 onLoginSuccess();
             } else if (responseCode == 401) {
                 Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
             }
         }
     }

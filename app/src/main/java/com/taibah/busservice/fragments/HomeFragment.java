@@ -168,7 +168,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                                             Helpers.showProgressDialog(getActivity(), "Ending Route");
 
-                                            // TODO: Implement route starting logic here.
+                                            DriverService.isRouteCancelled = true;
+                                            DriverService.onLocationChangedCounter = 0;
 
                                             new android.os.Handler().postDelayed(
                                                     new Runnable() {
