@@ -28,9 +28,11 @@ public class MyGcmListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
+        String output = data.toString();
+        String real = output.substring(7, output.length() - 1);
+        System.out.println(real);
         Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
+        Log.d(TAG, "Message: " + real);
 
         if (from.startsWith("/topics/")) {
             // message received from some topic.
@@ -38,7 +40,9 @@ public class MyGcmListenerService extends GcmListenerService {
             // normal downstream message.
         }
 
-        sendNotification(message);
+        if (!MainActivity.isAppLoggedOut) {
+            sendNotification(real);
+        }
     }
     // [END receive_message]
 

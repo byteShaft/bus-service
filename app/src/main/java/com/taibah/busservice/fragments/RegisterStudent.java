@@ -242,7 +242,8 @@ public class RegisterStudent extends Fragment {
                 + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=student"
                 + "&" + "username=" + username
                 + "&" + "latitude=" + PlaceholderFragment.studentStopLatLng.latitude
-                + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude;
+                + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude
+                + "&" + "roll_number=" + rollNumberStudent;
 
         Log.i("username", " " + username);
         Log.i("password", " " + password);

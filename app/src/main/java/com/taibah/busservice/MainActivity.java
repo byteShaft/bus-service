@@ -48,36 +48,12 @@ public class MainActivity extends AppCompatActivity
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
 
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "MainActivity";
-
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    public static boolean isAppLoggedOut = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                SharedPreferences sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context);
-                boolean sentToken = sharedPreferences
-                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
-                if (sentToken) {
-                    System.out.println(R.string.gcm_send_message);
-                } else {
-                    System.out.println(R.string.token_error_message);
-                }
-            }
-
-        };
-
-        if (checkPlayServices()) {
-            // Start IntentService to register this application with GCM.
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        }
 
         if (AppGlobals.isFirstRun()) {
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
@@ -261,6 +237,8 @@ public class MainActivity extends AppCompatActivity
                         AppGlobals.setFirstRun(true);
                         Helpers.dismissProgressDialog();
                         AppGlobals.putToken(null);
+                        AppGlobals.putGcmToken(null);
+                        isAppLoggedOut = true;
                         launchLoginActivity();
                     }
                 }, 1000);
@@ -269,14 +247,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(LoginActivity.mRegistrationBroadcastReceiver);
         finish();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(LoginActivity.mRegistrationBroadcastReceiver,
                 new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
     }
 
@@ -286,19 +264,4 @@ public class MainActivity extends AppCompatActivity
         MainActivity.this.startActivity(startIntent);
     }
 
-    private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
 }

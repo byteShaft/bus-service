@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,10 +34,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
+import com.taibah.busservice.utils.UpdateRouteStatus;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class MapsFragment extends Fragment {
 
@@ -59,6 +72,8 @@ public class MapsFragment extends Fragment {
     private LatLng wayPoint2 = new LatLng(24.500190, 39.581002);
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
+    static int responseCode;
+    HttpURLConnection connection;
 
     public static void addDriverLocationMarker() {
         if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
@@ -86,6 +101,8 @@ public class MapsFragment extends Fragment {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
+
+        new RetrieveStudentsRegisteredAgainstRoute().execute();
 
         tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
         tvDriverCurrentLocationTimeStamp = (TextView) convertView.findViewById(R.id.tv_route_driver_location_timestamp);
@@ -304,4 +321,41 @@ public class MapsFragment extends Fragment {
             }
         }
     }
+
+    private class RetrieveStudentsRegisteredAgainstRoute extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                    String ID = jsonObject.getString("id");
+                    System.out.println(ID);
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes/" + ID + "/students", "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                    System.out.print(responseCode);
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONArray jsonArray = new JSONArray(data);
+                    Log.i("Students Details", "" + jsonArray);
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+               new UpdateRouteStatus(getActivity()).execute("status=1");
+            }
+        }
+    }
+
+
 }

@@ -1,9 +1,13 @@
 package com.taibah.busservice;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +15,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.taibah.busservice.gcm.QuickstartPreferences;
+import com.taibah.busservice.gcm.RegistrationIntentService;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
@@ -35,6 +43,9 @@ public class LoginActivity extends Activity {
     public String token = "";
     static int responseCode;
     HttpURLConnection connection;
+    public static BroadcastReceiver mRegistrationBroadcastReceiver;
+    public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    public static int pushNotificationsEnablerCounter = 0;
 
     boolean internetNotWorking = false;
 
@@ -134,6 +145,22 @@ public class LoginActivity extends Activity {
         } else if (TextUtils.equals(username.substring(0,3), "adn")){
             AppGlobals.putUserType(0);
         }
+    }
+
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i("LoginActivity", "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -253,8 +280,7 @@ public class LoginActivity extends Activity {
                     connection.setRequestProperty("charset", "utf-8");
 
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                    String loginDetails = "username=" + username + "&" + "password=" + password
-                            + "&" + "token=" + AppGlobals.getGcmToken();
+                    String loginDetails = "username=" + username + "&" + "password=" + password;
                     out.writeBytes(loginDetails);
                     Log.i("Login Details ", loginDetails);
                     out.flush();
@@ -322,10 +348,104 @@ public class LoginActivity extends Activity {
             } else if (!token.isEmpty()) {
                 Helpers.dismissProgressDialog();
                 onLoginSuccess();
+                startGcmService();
+                MainActivity.isAppLoggedOut = false;
+                new android.os.Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (AppGlobals.getGcmToken() != null) {
+                            new EnablePushNotificationsTask().execute();
+                        }
+                    }
+                }, 3000);
             } else if (responseCode == 401) {
                 Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
                 Helpers.dismissProgressDialog();
             }
         }
+    }
+
+    public void startGcmService() {
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences sharedPreferences =
+                        PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = sharedPreferences
+                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    System.out.println(R.string.gcm_send_message);
+                } else {
+                    System.out.println(R.string.token_error_message);
+                }
+            }
+
+        };
+
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(LoginActivity.this, RegistrationIntentService.class);
+            startService(intent);
+        }
+    }
+
+    public class EnablePushNotificationsTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                pushNotificationsEnablerCounter++;
+                Log.i("Counter ", "" + pushNotificationsEnablerCounter);
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                String ID = jsonObject.getString("id");
+                System.out.print("User ID " + ID);
+                URL url = new URL("http://46.101.75.194:8080/users/" + ID);
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("PUT");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                System.out.println(" Push Notifications Response Code " + responseCode);
+
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.writeBytes("token=" + AppGlobals.getGcmToken());
+                out.flush();
+                out.close();
+
+                responseCode = connection.getResponseCode();
+
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                Toast.makeText(getApplicationContext(), "Push Notifications Enabled", Toast.LENGTH_LONG).show();
+            } else if (pushNotificationsEnablerCounter < 4) {
+                new EnablePushNotificationsTask().execute();
+            } else {
+                Toast.makeText(getApplicationContext(), "Cannot enable push notifications", Toast.LENGTH_LONG).show();
+                AppGlobals.setFirstRun(true);
+                AppGlobals.putToken(null);
+                AppGlobals.putGcmToken(null);
+                pushNotificationsEnablerCounter = 0;
+                launchLoginActivity();
+            }
+        }
+    }
+
+    public void launchLoginActivity() {
+        Intent startIntent = new Intent(LoginActivity.this, LoginActivity.class);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        LoginActivity.this.startActivity(startIntent);
     }
 }

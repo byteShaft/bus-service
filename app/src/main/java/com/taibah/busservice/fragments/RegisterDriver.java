@@ -59,8 +59,6 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     HashMap<Integer, String> hashMapUnAssignedRouteData;
     int routeId = 0;
     String spinnerText;
-
-
     Menu mMenu;
     MenuInflater mMenuInflater;
 
@@ -376,7 +374,6 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             }
         }
     }
-
 
     class CustomSpinnerListAdapter extends ArrayAdapter<String> {
 
