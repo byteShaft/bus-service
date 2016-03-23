@@ -79,7 +79,6 @@
                 android:id="@+id/tv_arrival_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10:00 AM"
                 android:layout_marginLeft="60dp"
                 android:textSize="26dp" />
 
@@ -94,7 +93,6 @@
                 android:id="@+id/tv_departure_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="02:00 PM"
                 android:layout_marginLeft="60dp"
                 android:textSize="26dp" />
         </LinearLayout>
