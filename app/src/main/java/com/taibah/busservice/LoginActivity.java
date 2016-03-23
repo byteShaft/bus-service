@@ -269,7 +269,7 @@ public class LoginActivity extends Activity {
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
 
-                    Log.d("RESULT", sb.toString());
+                    Log.d("LoginRESULT", sb.toString());
 
                     response = new JSONObject(sb.toString());
                     token = response.getString("token");
@@ -277,17 +277,6 @@ public class LoginActivity extends Activity {
                     Log.d("TOKEN", token);
 
                     AppGlobals.putStudentDriverRouteID(response.getString("route"));
-
-//                    JSONArray jsonArray = response.getJSONArray("user");
-//
-//                    for (int i = 0; i < jsonArray.length(); i++) {
-//                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-//                            String name =  jsonObject.getString("first_name") + " " + jsonObject.getString("last_name");
-//                            String route = jsonObject.getString("route");
-//                        Log.i("Name", name);
-//                        Log.i("Route", route);
-//                    }
-
                     connection.disconnect();
 
                     url = new URL("http://46.101.75.194:8080/user");
@@ -305,7 +294,11 @@ public class LoginActivity extends Activity {
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
 
-                    Log.d("RESULT", sb.toString());
+                    Log.d("UserdetailRESULT", sb.toString());
+
+                    JSONObject jsonObjectUser = new JSONObject(sb.toString());
+
+                    AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
 
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();

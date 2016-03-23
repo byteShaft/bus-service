@@ -138,6 +138,8 @@ public class MainActivity extends AppCompatActivity
                 navigationView.removeOnLayoutChangeListener(this);
                 TextView textView = (TextView) navigationView.findViewById(R.id.tv_header_username);
                 textView.setText(AppGlobals.getUsername());
+                TextView textView1 = (TextView) navigationView.findViewById(R.id.tv_header_name);
+                textView1.setText(AppGlobals.getName());
             }
         });
     }
