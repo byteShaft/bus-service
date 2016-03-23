@@ -37,6 +37,9 @@ import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MapsFragment extends Fragment {
 
     public static boolean mapsFragmentOpen;
@@ -53,8 +56,9 @@ public class MapsFragment extends Fragment {
     private RoutingListener mRoutingListener;
     private LocationManager mLocationManager;
     private LatLng currentLatLngAuto = null;
-    private LatLng startPoint = new LatLng(24.546198, 39.590284);
-    private LatLng endPoint = new LatLng(24.481133, 39.5432913);
+
+    private LatLng startPoint;
+    private LatLng endPoint;
     private LatLng wayPoint1 = new LatLng(24.522815, 39.572929);
     private LatLng wayPoint2 = new LatLng(24.500190, 39.581002);
     private Menu actionsMenu;
@@ -94,6 +98,14 @@ public class MapsFragment extends Fragment {
 
         mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
+
+        try {
+            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+            startPoint = new LatLng(Double.parseDouble(jsonObject.getString("start_latitude")), Double.parseDouble(jsonObject.getString("start_longitude")));
+            endPoint = new LatLng(Double.parseDouble(jsonObject.getString("end_latitude")), Double.parseDouble(jsonObject.getString("end_longitude")));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         myMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override

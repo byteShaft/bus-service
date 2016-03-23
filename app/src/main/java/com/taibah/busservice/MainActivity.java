@@ -139,7 +139,11 @@ public class MainActivity extends AppCompatActivity
                 TextView textView = (TextView) navigationView.findViewById(R.id.tv_header_username);
                 textView.setText(AppGlobals.getUsername());
                 TextView textView1 = (TextView) navigationView.findViewById(R.id.tv_header_name);
-                textView1.setText(AppGlobals.getName());
+                if (AppGlobals.getUserType() == 0) {
+                    textView1.setText("Admin");
+                } else {
+                    textView1.setText(AppGlobals.getName());
+                }
             }
         });
     }
