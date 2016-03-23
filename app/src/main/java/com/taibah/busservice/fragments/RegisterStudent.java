@@ -11,6 +11,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
@@ -39,7 +40,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
@@ -86,14 +86,16 @@ public class RegisterStudent extends Fragment {
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     static ArrayList<Integer> routeIdsList;
-    static HashMap<Integer, String> hashMapRouteData;
+    static HashMap<Integer, ArrayList<String>> hashMapRouteData;
 
     static Spinner spinnerRoutesList;
 
     static int routeId = 0;
     static String spinnerText;
 
-//    ArrayList<String> arrayListRouteNames;
+    public static LatLng latLngA;
+    public static LatLng latLngB;
+
 
     @Nullable
     @Override
@@ -104,12 +106,12 @@ public class RegisterStudent extends Fragment {
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
+
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         routeIdsList = new ArrayList<>();
-//        arrayListRouteNames = new ArrayList<>();
         hashMapRouteData = new HashMap<>();
 
         new RetrieveAllRoutesTask().execute();
@@ -125,7 +127,13 @@ public class RegisterStudent extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 Helpers.closeKeyboard(getActivity());
+                Log.i("OnPageSelected", "Main");
                 if (position == 1) {
+                    Log.i("OnPageSelected", "PositionOne");
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.detach(RegisterStudent.PlaceholderFragment.newInstance(position)).attach(RegisterStudent.PlaceholderFragment.newInstance(position)).commit();
+                    RegisterStudent.PlaceholderFragment.newInstance(position);
+
                     if (onLongClickCounter != 0) {
                         menuItemUndo.setVisible(true);
                     }
@@ -140,8 +148,7 @@ public class RegisterStudent extends Fragment {
             }
         });
 
-
-        mViewPager.setOffscreenPageLimit(2);
+        mViewPager.setOffscreenPageLimit(0);
 
         return convertView;
     }
@@ -244,11 +251,6 @@ public class RegisterStudent extends Fragment {
                 + "&" + "latitude=" + PlaceholderFragment.studentStopLatLng.latitude
                 + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude;
 
-        Log.i("username", " " + username);
-        Log.i("password", " " + password);
-
-        Log.i("Registration Detail ", studentRegistrationDetail);
-
         new RegisterStudentTask().execute();
 
     }
@@ -291,7 +293,6 @@ public class RegisterStudent extends Fragment {
             etStudentEmail.setError(null);
         }
 
-        Log.i("Status", "Valid" + valid);
         return valid;
     }
 
@@ -332,7 +333,6 @@ public class RegisterStudent extends Fragment {
         private FragmentManager fm;
         private SupportMapFragment myMapFragment;
         static RoutingListener mRoutingListener;
-        private Polyline polyline;
 
         public PlaceholderFragment() {
         }
@@ -385,7 +385,7 @@ public class RegisterStudent extends Fragment {
                 spinnerRoutesList = (Spinner) rootView.findViewById(R.id.spinner_select_route_for_student);
                 spinnerRoutesList.setOnItemSelectedListener(this);
 
-            } else if (tabCount == 2) {
+            } else if (tabCount == 2 && latLngA != null) {
                 rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
                 fm = getChildFragmentManager();
                 myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.register_student_map);
@@ -408,9 +408,9 @@ public class RegisterStudent extends Fragment {
                                         mMap.clear();
                                         menuItemUndo.setVisible(true);
                                         tvMapRegisterStudentInfo.setText("Resolving route points...");
-                                        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation)
+                                        mMap.addMarker(new MarkerOptions().position(latLngB)
                                                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
-                                        mMap.addMarker(new MarkerOptions().position(dummyPosition).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+                                        mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
 
 
                                         mMap.addMarker(new MarkerOptions().position(latLng)).setIcon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(RegisterStudent.firstNameStudent, getActivity())));
@@ -490,8 +490,10 @@ public class RegisterStudent extends Fragment {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             routeId = RegisterStudent.routeIdsList.get(position);
-            spinnerText = hashMapRouteData.get(routeIdsList.get(position));
-            System.out.println(routeId);
+            spinnerText = hashMapRouteData.get(routeIdsList.get(position)).get(0);
+            latLngA = new LatLng(Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(1)), Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(3)));
+            latLngB = new LatLng(Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(2)), Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(4)));
+            System.out.println(latLngA);
         }
 
         @Override
@@ -654,8 +656,14 @@ public class RegisterStudent extends Fragment {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!routeIdsList.contains(jsonObject.getInt("id"))) {
                             routeIdsList.add(jsonObject.getInt("id"));
-//                            arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
-                            hashMapRouteData.put(jsonObject.getInt("id"), jsonObject.getString("name"));
+                            ArrayList<String> arrayList = new ArrayList<>();
+                            arrayList.add(jsonObject.getString("name"));
+                            arrayList.add(jsonObject.getString("start_latitude"));
+                            arrayList.add(jsonObject.getString("end_latitude"));
+                            arrayList.add(jsonObject.getString("start_longitude"));
+                            arrayList.add(jsonObject.getString("end_longitude"));
+
+                            hashMapRouteData.put(jsonObject.getInt("id"), arrayList);
                             System.out.println(hashMapRouteData);
                         }
                     }
@@ -672,12 +680,6 @@ public class RegisterStudent extends Fragment {
             super.onPostExecute(aVoid);
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
-
-//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-//                        android.R.layout.simple_spinner_item , arrayListRouteNames);
-//                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//                PlaceholderFragment.spinnerRoutesList.setAdapter(adapter);
-
 
                 CustomSpinnerListAdapter customSpinnerListAdapter = new CustomSpinnerListAdapter(getActivity(), R.layout.spinner_row, routeIdsList);
                 spinnerRoutesList.setAdapter(customSpinnerListAdapter);
@@ -723,7 +725,7 @@ public class RegisterStudent extends Fragment {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
             viewHolder.tvSpinner = (TextView) convertView.findViewById(R.id.tv_spinner_row);
-            viewHolder.tvSpinner.setText(hashMapRouteData.get(arrayListIntIds.get(position)));
+            viewHolder.tvSpinner.setText(hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
             return convertView;
         }
 
@@ -739,13 +741,13 @@ public class RegisterStudent extends Fragment {
     }
 
     public static void setInitialMap() {
-        mMap.addMarker(new MarkerOptions().position(RegisterRoute.taibahUniversityLocation)
+        mMap.addMarker(new MarkerOptions().position(latLngB)
                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
-        mMap.addMarker(new MarkerOptions().position(PlaceholderFragment.dummyPosition).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+        mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
                 taibahUniversityLocation, 13.0f));
 
-        PlaceholderFragment.buildAndDisplayRoute(RegisterRoute.taibahUniversityLocation, PlaceholderFragment.dummyPosition);
+        PlaceholderFragment.buildAndDisplayRoute(latLngB, latLngA);
     }
 }
 

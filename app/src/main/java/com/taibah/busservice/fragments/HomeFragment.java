@@ -24,6 +24,9 @@ import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
     View convertView;
@@ -37,6 +40,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     TextView tvUserType;
     TextView tvRouteStatus;
     TextView tvRouteClickToRestore;
+    TextView tvRouteArrivalTime;
+    TextView tvRouteDepartureTime;
 
     @Nullable
     @Override
@@ -45,6 +50,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         tvUserType = (TextView) convertView.findViewById(R.id.tv_user_type);
         tvRouteStatus = (TextView) convertView.findViewById(R.id.tv_route_status);
+        tvRouteArrivalTime = (TextView) convertView.findViewById(R.id.tv_arrival_time);
+        tvRouteDepartureTime = (TextView) convertView.findViewById(R.id.tv_departure_time);
         tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
@@ -61,6 +68,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         setAppView();
         setRouteStatus(AppGlobals.getRouteStatus());
+
+        if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
+            try {
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                String arrivalTime = jsonObject.getString("arrival_time");
+                String departureTime = jsonObject.getString("departure_time");
+                tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
+                tvRouteDepartureTime.setText(departureTime.substring(departureTime.length() - 8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
 
         return convertView;
     }

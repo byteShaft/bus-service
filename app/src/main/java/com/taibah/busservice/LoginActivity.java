@@ -300,6 +300,7 @@ public class LoginActivity extends Activity {
 
                     AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
 
+
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                     Log.e("BEFORE", e.getMessage());
