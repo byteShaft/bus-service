@@ -9,4 +9,7 @@
     <item
         android:id="@+id/item_context_menu_student_list_allow_deny_service"
         android:title="Allow/Deny Service" />
+    <item
+        android:id="@+id/item_context_menu_student_list_delete"
+        android:title="Delete Student" />
 </menu>

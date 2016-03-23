@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.taibah.busservice.gcm.GcmSender;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
@@ -295,6 +294,9 @@ public class LoginActivity extends Activity {
                         sb.append((char)ch);
 
                     Log.d("RESULT", sb.toString());
+
+
+                    String driverRouteID = response.getString("route").;
 
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
