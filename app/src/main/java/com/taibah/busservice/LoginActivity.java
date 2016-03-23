@@ -276,6 +276,18 @@ public class LoginActivity extends Activity {
                     AppGlobals.putToken(token);
                     Log.d("TOKEN", token);
 
+                    AppGlobals.putStudentDriverRouteID(response.getString("route"));
+
+//                    JSONArray jsonArray = response.getJSONArray("user");
+//
+//                    for (int i = 0; i < jsonArray.length(); i++) {
+//                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+//                            String name =  jsonObject.getString("first_name") + " " + jsonObject.getString("last_name");
+//                            String route = jsonObject.getString("route");
+//                        Log.i("Name", name);
+//                        Log.i("Route", route);
+//                    }
+
                     connection.disconnect();
 
                     url = new URL("http://46.101.75.194:8080/user");
@@ -294,9 +306,6 @@ public class LoginActivity extends Activity {
                         sb.append((char)ch);
 
                     Log.d("RESULT", sb.toString());
-
-
-                    String driverRouteID = response.getString("route").;
 
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
