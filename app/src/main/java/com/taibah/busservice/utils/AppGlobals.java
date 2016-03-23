@@ -20,6 +20,7 @@ public class AppGlobals extends Application {
     private static final String STUDENT_TYPE = "student_type";
     private static final String TOKEN = "token";
     private static final String GCM_TOKEN = "gcm_token";
+    private static final String ROUTE_ID = "route_id";
 
     @Override
     public void onCreate() {
@@ -50,6 +51,14 @@ public class AppGlobals extends Application {
 
     public static void putToken(String token) {
         sPreferences.edit().putString(TOKEN, token).apply();
+    }
+
+    public static void putStudentDriverRouteID(String routeID) {
+        sPreferences.edit().putString(ROUTE_ID, routeID).apply();
+    }
+
+    public static String getStudentDriverRouteID() {
+        return sPreferences.getString(ROUTE_ID, null);
     }
 
     public static String getToken() {
