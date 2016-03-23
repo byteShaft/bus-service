@@ -6,4 +6,7 @@
     <item
         android:id="@+id/item_context_menu_drivers_list_show_credentials"
         android:title="Show Credentials" />
+    <item
+        android:id="@+id/item_context_menu_drivers_list_call"
+        android:title="Call" />
 </menu>

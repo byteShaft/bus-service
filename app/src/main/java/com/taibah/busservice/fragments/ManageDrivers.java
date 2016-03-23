@@ -3,6 +3,8 @@ package com.taibah.busservice.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -109,30 +111,12 @@ public class ManageDrivers extends Fragment {
         System.out.println(driversIdsList.get(index));
 
         switch (item.getItemId()) {
-//            case R.id.item_context_menu_drivers_list_delete:
-//                AlertDialog.Builder alertDialogDriverDelete = new AlertDialog.Builder(
-//                        getActivity()).setTitle("Delete Driver")
-//                        .setMessage("Are you sure you wanna delete " +
-//                                item.getTitle() + "?")
-//                        .setCancelable(false)
-//                        .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog,int id) {
-//                            }
-//                        })
-//                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int id) {
-//                            dialog.cancel();
-//                        }
-//                        });
-//                AlertDialog alertDialogDelete = alertDialogDriverDelete.create();
-//                alertDialogDelete.show();
-//                return true;
             case R.id.item_context_menu_drivers_list_show_credentials:
                 AlertDialog.Builder alertDialogDriverShowCredentials = new AlertDialog.Builder(
                         getActivity()).setTitle(driversName)
                         .setMessage("Username: " +
                                 hashMapDriverData.get(driversIdsList.get(info.position)).get(2) +
-                        "\nPassword: " + hashMapDriverData.get(driversIdsList.get(info.position)).get(2))
+                        "\nPassword: " + hashMapDriverData.get(driversIdsList.get(info.position)).get(3))
                         .setCancelable(false)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -141,6 +125,11 @@ public class ManageDrivers extends Fragment {
                         });
                 AlertDialog alertDialogCredentials = alertDialogDriverShowCredentials.create();
                 alertDialogCredentials.show();
+                return true;
+            case R.id.item_context_menu_drivers_list_call:
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + hashMapDriverData.get(driversIdsList.get(info.position)).get(4)));
+                startActivity(intent);
                 return true;
         }
         return true;
@@ -177,6 +166,8 @@ public class ManageDrivers extends Fragment {
                             arrayListString.add(jsonObject.getString("first_name"));
                             arrayListString.add(jsonObject.getString("last_name"));
                             arrayListString.add(jsonObject.getString("username"));
+                            arrayListString.add(jsonObject.getString("password"));
+                            arrayListString.add(jsonObject.getString("phone"));
                             hashMapDriverData.put(jsonObject.getInt("id"), arrayListString);
                         }
                     }

@@ -114,7 +114,7 @@ public class ManageStudent extends Fragment {
                         getActivity()).setTitle(studentName)
                         .setMessage("Username: " +
                                 hashMapStudentData.get(studentIdsList.get(info.position)).get(2) +
-                                "\nPassword: " + hashMapStudentData.get(studentIdsList.get(info.position)).get(2))
+                                "\nPassword: " + hashMapStudentData.get(studentIdsList.get(info.position)).get(3))
                         .setCancelable(false)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -140,6 +140,23 @@ public class ManageStudent extends Fragment {
                         });
                 AlertDialog alertDialogService = alertDialogStudentService.create();
                 alertDialogService.show();
+                return true;
+            case R.id.item_context_menu_student_list_delete:
+                AlertDialog.Builder alertDialogStudentDelete = new AlertDialog.Builder(
+                        getActivity()).setTitle(studentName)
+                        .setMessage("Really want to delete?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // TODO Implement correct logic here
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialogDelete = alertDialogStudentDelete.create();
+                alertDialogDelete.show();
                 return true;
         }
         return true;
@@ -177,7 +194,8 @@ public class ManageStudent extends Fragment {
                             arrayListString.add(jsonObject.getString("first_name"));
                             arrayListString.add(jsonObject.getString("last_name"));
                             arrayListString.add(jsonObject.getString("username"));
-//                            arrayListString.add(jsonObject.getString("roll_number"));
+                            arrayListString.add(jsonObject.getString("password"));
+                            arrayListString.add(jsonObject.getString("roll_number"));
                             hashMapStudentData.put(jsonObject.getInt("id"), arrayListString);
                         }
                     }
@@ -232,7 +250,7 @@ public class ManageStudent extends Fragment {
             }
             viewHolder.tvStudentListName.setText("Name: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(0) + " " + hashMapStudentData.get(arrayListIntIds.get(position)).get(1));
             viewHolder.tvStudentUsername.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(2));
-//            viewHolder.tvStudentRollNumber.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(3));
+            viewHolder.tvStudentRollNumber.setText("RollNumber: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(4));
             return convertView;
         }
 
