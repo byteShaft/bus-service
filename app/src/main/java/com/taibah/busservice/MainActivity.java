@@ -48,12 +48,13 @@ public class MainActivity extends AppCompatActivity
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
 
-    private static final String TAG = "MainActivity";
     public static boolean isAppLoggedOut = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        AppGlobals.putBoolean(isAppLoggedOut);
 
         if (AppGlobals.isFirstRun()) {
             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
@@ -242,7 +243,7 @@ public class MainActivity extends AppCompatActivity
                         Helpers.dismissProgressDialog();
                         AppGlobals.putToken(null);
                         AppGlobals.putGcmToken(null);
-                        isAppLoggedOut = true;
+                        AppGlobals.putBoolean(isAppLoggedOut = true);
                         launchLoginActivity();
                     }
                 }, 1000);

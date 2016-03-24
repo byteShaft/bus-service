@@ -181,7 +181,7 @@ public class LoginActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if (Helpers.isInternetWorking()) {
+            if (Helpers.isInternetWorking() && Helpers.isNetworkAvailable()) {
                 try {
                     URL url = new URL("http://46.101.75.194:8080/login");
 
@@ -267,7 +267,7 @@ public class LoginActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if (Helpers.isInternetWorking()) {
+            if (Helpers.isInternetWorking() && Helpers.isNetworkAvailable()) {
                 try {
                     URL url = new URL("http://46.101.75.194:8080/login");
 
@@ -361,6 +361,7 @@ public class LoginActivity extends Activity {
                 }, 3000);
             } else if (responseCode == 401) {
                 Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
+                AppGlobals.putBoolean(MainActivity.isAppLoggedOut = false);
                 Helpers.dismissProgressDialog();
             }
         }

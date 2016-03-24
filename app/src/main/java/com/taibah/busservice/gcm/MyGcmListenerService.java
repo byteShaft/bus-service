@@ -13,6 +13,7 @@ import android.util.Log;
 import com.taibah.busservice.MainActivity;
 import com.taibah.busservice.R;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.taibah.busservice.utils.AppGlobals;
 
 public class MyGcmListenerService extends GcmListenerService {
 
@@ -40,7 +41,7 @@ public class MyGcmListenerService extends GcmListenerService {
             // normal downstream message.
         }
 
-        if (!MainActivity.isAppLoggedOut) {
+        if (!AppGlobals.isAppLoggedOut()) {
             sendNotification(real);
         }
     }
