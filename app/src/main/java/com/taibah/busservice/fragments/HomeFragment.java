@@ -2,6 +2,7 @@ package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -52,6 +53,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     TextView tvRouteClickToRestore;
     TextView tvRouteArrivalTime;
     TextView tvRouteDepartureTime;
+
+    static int responseCode;
+    int radioIndex;
+    HttpURLConnection connection;
+    public static boolean isRouteStartedByDriver = false;
+
 
     @Nullable
     @Override
@@ -162,6 +169,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                         public void onClick(DialogInterface dialog, int id) {
 
                                             getActivity().startService(new Intent(getActivity(), DriverService.class));
+                                            isRouteStartedByDriver = true;
                                             buttonStartStopRoute.setText("End Route");
                                             Helpers.dismissProgressDialog();
                                             AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
@@ -232,7 +240,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                                         Helpers.showProgressDialog(getActivity(), "Restoring Route");
 
-                                        // TODO: Implement restoration logic here.
+                                        new UpdateRouteStatus(getActivity()).execute("status=0");
 
                                         new android.os.Handler().postDelayed(
                                                 new Runnable() {
@@ -284,29 +292,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                                     reportSituationDialog.dismiss();
 
-                                    Helpers.showProgressDialog(getActivity(), "Reporting situation");
-
                                     int id = radioGroupReportSituation.getCheckedRadioButtonId();
                                     View radioButton = radioGroupReportSituation.findViewById(id);
-                                    final int radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
+                                    radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
                                     Log.i("BusService", "SituationReportingIndex: " + radioIndex);
 
-                                    // TODO: Implement reporting logic here.
+                                    new SituationReportTask().execute("status=" + radioIndex);
 
-                                    new android.os.Handler().postDelayed(
-                                            new Runnable() {
-                                                public void run() {
-                                                    AppGlobals.putRouteStatus(radioIndex);
-                                                    setRouteStatus(radioIndex);
-                                                    Helpers.dismissProgressDialog();
-                                                }
-                                            }, 2000);
                                 } else {
                                     Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
                         reportSituationDialog.show();
+
                     } else {
                         Toast.makeText(getActivity(), "Error: Driver Service is running", Toast.LENGTH_SHORT).show();
                     }
@@ -327,5 +326,59 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         MainActivity.isHomeFragmentOpen = false;
+    }
+
+    public class SituationReportTask extends AsyncTask<String, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Reporting Situation...");
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Log.i("UpdateRouteStatus", "Called");
+            try {
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                String ID = jsonObject.getString("id");
+                URL url = new URL("http://46.101.75.194:8080/routes/" + ID);
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("PUT");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                System.out.println(" Update Status Response Code: " + responseCode);
+
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.writeBytes(params[0]);
+                out.flush();
+                out.close();
+
+                responseCode = connection.getResponseCode();
+
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                AppGlobals.putRouteStatus(radioIndex);
+                setRouteStatus(radioIndex);
+                Helpers.dismissProgressDialog();
+                Toast.makeText(getActivity(), "Situation Reported Successfully", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), "Situation reporting failed. Please try again", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

@@ -351,7 +351,8 @@ public class LoginActivity extends Activity {
                 Helpers.dismissProgressDialog();
                 onLoginSuccess();
                 startGcmService();
-                MainActivity.isAppLoggedOut = false;
+                AppGlobals.putBoolean(MainActivity.isAppLoggedOut = false);
+                System.out.print(AppGlobals.isAppLoggedOut());
                 new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -362,7 +363,6 @@ public class LoginActivity extends Activity {
                 }, 3000);
             } else if (responseCode == 401) {
                 Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_LONG).show();
-                AppGlobals.putBoolean(MainActivity.isAppLoggedOut = false);
                 Helpers.dismissProgressDialog();
             }
         }
