@@ -262,7 +262,7 @@ public class LoginActivity extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(LoginActivity.this, "Authenticating...");
+            Helpers.showProgressDialog(LoginActivity.this, "Authenticating");
         }
 
         @Override
@@ -325,8 +325,7 @@ public class LoginActivity extends Activity {
                     JSONObject jsonObjectUser = new JSONObject(sb.toString());
 
                     AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
-
-
+                    AppGlobals.putUserPassword(jsonObjectUser.getString("password"));
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                     Log.e("BEFORE", e.getMessage());
@@ -360,7 +359,7 @@ public class LoginActivity extends Activity {
                     }
                 }, 3000);
             } else if (responseCode == 401) {
-                Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_LONG).show();
                 AppGlobals.putBoolean(MainActivity.isAppLoggedOut = false);
                 Helpers.dismissProgressDialog();
             }
@@ -412,7 +411,7 @@ public class LoginActivity extends Activity {
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-                System.out.println(" Push Notifications Response Code " + responseCode);
+                System.out.println("Push Notifications Response Code " + responseCode);
 
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                 out.writeBytes("token=" + AppGlobals.getGcmToken());
