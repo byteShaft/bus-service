@@ -137,7 +137,7 @@ public class Helpers {
 
     public static void showNoNetworkDialog(final Context context) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-        alertDialogBuilder.setTitle("Network Disconnected").setCancelable(false);
+        alertDialogBuilder.setTitle("Network Not Available").setCancelable(false);
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton("Recheck", new DialogInterface.OnClickListener() {
@@ -146,6 +146,7 @@ public class Helpers {
                             dialog.dismiss();
                         } else {
                             Toast.makeText(context, "No network available", Toast.LENGTH_SHORT).show();
+                            showNoNetworkDialog(context);
                         }
                     }
                 })
