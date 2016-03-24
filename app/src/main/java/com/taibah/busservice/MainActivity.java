@@ -1,15 +1,11 @@
 package com.taibah.busservice;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,13 +16,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
 import com.taibah.busservice.fragments.HomeFragment;
@@ -37,7 +30,6 @@ import com.taibah.busservice.fragments.MapsFragment;
 import com.taibah.busservice.fragments.ScheduleFragment;
 import com.taibah.busservice.fragments.TwitterFragment;
 import com.taibah.busservice.gcm.QuickstartPreferences;
-import com.taibah.busservice.gcm.RegistrationIntentService;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
@@ -49,6 +41,7 @@ public class MainActivity extends AppCompatActivity
     public static NavigationView navigationView;
 
     public static boolean isAppLoggedOut = true;
+    public static boolean isAppForeground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -252,6 +245,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
+        isAppForeground = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(LoginActivity.mRegistrationBroadcastReceiver);
         finish();
     }
@@ -259,8 +253,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        isAppForeground = true;
         LocalBroadcastManager.getInstance(this).registerReceiver(LoginActivity.mRegistrationBroadcastReceiver,
                 new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+        if (!Helpers.isNetworkAvailable()) {
+            Helpers.showNoNetworkDialog(MainActivity.this);
+        }
     }
 
     public void launchLoginActivity() {

@@ -11,7 +11,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
@@ -78,6 +77,8 @@ public class RegisterStudent extends Fragment {
     String studentRegistrationDetail;
     String studentStop;
 
+    public static boolean spinnerValueChanged;
+
     static GoogleMap mMap;
 
     HttpURLConnection connection;
@@ -93,8 +94,8 @@ public class RegisterStudent extends Fragment {
     static int routeId = 0;
     static String spinnerText;
 
-    public static LatLng latLngA;
-    public static LatLng latLngB;
+    public static LatLng latLngA = new LatLng(24.513371, 39.576058);
+    public static LatLng latLngB = new LatLng(24.913371, 39.876058);
 
 
     @Nullable
@@ -130,12 +131,21 @@ public class RegisterStudent extends Fragment {
                 Log.i("OnPageSelected", "Main");
                 if (position == 1) {
                     Log.i("OnPageSelected", "PositionOne");
-                    FragmentTransaction ft = getFragmentManager().beginTransaction();
-                    ft.detach(RegisterStudent.PlaceholderFragment.newInstance(position)).attach(RegisterStudent.PlaceholderFragment.newInstance(position)).commit();
-                    RegisterStudent.PlaceholderFragment.newInstance(position);
-
                     if (onLongClickCounter != 0) {
                         menuItemUndo.setVisible(true);
+                    }
+                    if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
+                        mMap.clear();
+                        setInitialMap();
+                        onLongClickCounter = 0;
+                        menuItemUndo.setVisible(false);
+                        PlaceholderFragment.studentStopLatLng = null;
+                        tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
+                        spinnerValueChanged = false;
+                    } else if (spinnerValueChanged && mMap != null) {
+                        mMap.clear();
+                        setInitialMap();
+                        spinnerValueChanged = false;
                     }
                 } else {
                     menuItemUndo.setVisible(false);
@@ -147,9 +157,7 @@ public class RegisterStudent extends Fragment {
 
             }
         });
-
         mViewPager.setOffscreenPageLimit(0);
-
         return convertView;
     }
 
@@ -157,14 +165,12 @@ public class RegisterStudent extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_done, menu);
-
         menuItemUndo = menu.findItem(R.id.action_undo_button);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
             case R.id.action_undo_button:
                 onLongClickCounter = 0;
                 mMap.clear();
@@ -324,7 +330,6 @@ public class RegisterStudent extends Fragment {
     public static class PlaceholderFragment extends Fragment implements AdapterView.OnItemSelectedListener {
         private static final String ARG_SECTION_NUMBER = "section_number";
         public static LatLng studentStopLatLng = null;
-         static LatLng dummyPosition = new LatLng(24.513371, 39.576058);
 
         /**
          * The fragment argument representing the section number for this
@@ -386,7 +391,7 @@ public class RegisterStudent extends Fragment {
                 spinnerRoutesList = (Spinner) rootView.findViewById(R.id.spinner_select_route_for_student);
                 spinnerRoutesList.setOnItemSelectedListener(this);
 
-            } else if (tabCount == 2 && latLngA != null) {
+            } else if (tabCount == 2) {
                 rootView = inflater.inflate(R.layout.layout_register_student_route, container, false);
                 fm = getChildFragmentManager();
                 myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.register_student_map);
@@ -396,7 +401,6 @@ public class RegisterStudent extends Fragment {
                     @Override
                     public void onMapReady(GoogleMap googleMap) {
                         mMap = googleMap;
-                        setInitialMap();
                         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                             @Override
                             public void onMapLongClick(LatLng latLng) {
@@ -417,8 +421,7 @@ public class RegisterStudent extends Fragment {
                                         mMap.addMarker(new MarkerOptions().position(latLng)).setIcon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(RegisterStudent.firstNameStudent, getActivity())));
 
 
-                                        LatLng[] latLngDummyList = new LatLng[]{RegisterRoute.
-                                                taibahUniversityLocation, latLng, dummyPosition};
+                                        LatLng[] latLngDummyList = new LatLng[]{latLngB, latLng, latLngA};
                                         buildAndDisplayRouteWithWayPoints(latLngDummyList);
                                         studentStopLatLng = latLng;
                                     }
@@ -494,7 +497,7 @@ public class RegisterStudent extends Fragment {
             spinnerText = hashMapRouteData.get(routeIdsList.get(position)).get(0);
             latLngA = new LatLng(Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(1)), Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(3)));
             latLngB = new LatLng(Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(2)), Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(4)));
-            System.out.println(latLngA);
+            spinnerValueChanged = true;
         }
 
         @Override
@@ -621,15 +624,13 @@ public class RegisterStudent extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            Helpers.dismissProgressDialog();
             if (responseCode == 201) {
-                Helpers.dismissProgressDialog();
-                Toast.makeText(getActivity(), "Registration Successful", Toast.LENGTH_LONG).show();
-                Helpers.closeKeyboard(getActivity());
-                getActivity().onBackPressed();
+                onRegistrationSuccess();
             } else {
                 // TODO Implement correct logic here
                 Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_LONG).show();
-                Helpers.dismissProgressDialog();
+                onRegistrationFailed();
             }
         }
     }
@@ -748,8 +749,7 @@ public class RegisterStudent extends Fragment {
         mMap.addMarker(new MarkerOptions().position(latLngB)
                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
         mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(RegisterRoute.
-                taibahUniversityLocation, 13.0f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLngB, 12.0f));
 
         PlaceholderFragment.buildAndDisplayRoute(latLngB, latLngA);
     }
