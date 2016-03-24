@@ -22,6 +22,7 @@ public class AppGlobals extends Application {
     private static final String GCM_TOKEN = "gcm_token";
     private static final String ROUTE_ID = "route_id";
     private static final String IS_APP_LOGGED_OUT = "logged_out";
+    private static final String USER_PASSWORD = "user_password";
 
     @Override
     public void onCreate() {
@@ -99,6 +100,14 @@ public class AppGlobals extends Application {
 
     public static void putUserType(int userType) {
         sPreferences.edit().putInt(STUDENT_TYPE, userType).apply();
+    }
+
+    public static void putUserPassword(String password) {
+        sPreferences.edit().putString(USER_PASSWORD, password).apply();
+    }
+
+    public static String getUserPassword() {
+        return sPreferences.getString(USER_PASSWORD, null);
     }
 
     public static void putRouteStatus(int status) {

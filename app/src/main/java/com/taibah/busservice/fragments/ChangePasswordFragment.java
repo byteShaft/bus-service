@@ -4,12 +4,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.taibah.busservice.LoginActivity;
@@ -38,6 +38,9 @@ public class ChangePasswordFragment extends Fragment {
     String passwordNew;
     String passwordRepeat;
 
+    TextView tvChangePasswordName;
+    TextView tvChangePasswordUserName;
+
     static int responseCode;
     HttpURLConnection connection;
 
@@ -46,10 +49,15 @@ public class ChangePasswordFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBaseView = inflater.inflate(R.layout.layout_change_password, container, false);
+        tvChangePasswordName = (TextView) mBaseView.findViewById(R.id.tv_changepassword_firstname_lastname);
+        tvChangePasswordUserName = (TextView) mBaseView.findViewById(R.id.tv_changepassword_username);
         editTextPasswordOld = (EditText) mBaseView.findViewById(R.id.input_password_old);
         editTextPasswordNew = (EditText) mBaseView.findViewById(R.id.input_password_new);
         editTextPasswordRepeat = (EditText) mBaseView.findViewById(R.id.input_password_repeat);
         buttonDone = (Button) mBaseView.findViewById(R.id.btn_change_password);
+
+        tvChangePasswordName.setText(AppGlobals.getName());
+        tvChangePasswordUserName.setText(AppGlobals.getUsername());
 
         buttonDone.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,17 +70,12 @@ public class ChangePasswordFragment extends Fragment {
     }
 
     public void change() {
-        Log.d("BusService", "PasswordChange");
-
         if (!validate()) {
             onChangeFailed();
             return;
         }
-
         buttonDone.setEnabled(false);
-
         new ChangePasswordTask().execute();
-
     }
 
     public void onChangeSuccess() {
@@ -81,7 +84,7 @@ public class ChangePasswordFragment extends Fragment {
     }
 
     public void onChangeFailed() {
-        Toast.makeText(getActivity(), "Password Change failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Password change failed", Toast.LENGTH_LONG).show();
         buttonDone.setEnabled(true);
     }
 
@@ -92,25 +95,25 @@ public class ChangePasswordFragment extends Fragment {
         passwordNew = editTextPasswordNew.getText().toString();
         passwordRepeat = editTextPasswordRepeat.getText().toString();
 
-        if (passwordOld.trim().isEmpty() || passwordOld.length() < 4 ) {
-            editTextPasswordOld.setError("at least 4 characters");
+        if (passwordOld.trim().isEmpty() || passwordOld.length() < 6 ) {
+            editTextPasswordOld.setError("at least 6 characters");
+            valid = false;
+        } else if (!passwordOld.equals(AppGlobals.getUserPassword())) {
+            editTextPasswordOld.setError("current password is invalid");
             valid = false;
         } else {
                 editTextPasswordOld.setError(null);
         }
 
-        if (passwordNew.trim().isEmpty() || passwordNew.length() < 4 ) {
-            editTextPasswordNew.setError("at least 4 characters");
-            valid = false;
-        } else if (passwordOld.contains(" ")) {
-            editTextPasswordOld.setError("must not contain a white space");
+        if (passwordNew.trim().isEmpty() || passwordNew.length() < 6 ) {
+            editTextPasswordNew.setError("at least 6 characters");
             valid = false;
         } else {
             editTextPasswordNew.setError(null);
         }
 
-        if (passwordRepeat.trim().isEmpty() || passwordRepeat.length() < 4) {
-            editTextPasswordRepeat.setError("at least 4 characters");
+        if (passwordRepeat.trim().isEmpty() || passwordRepeat.length() < 6) {
+            editTextPasswordRepeat.setError("at least 6 characters");
             valid = false;
         } else {
             editTextPasswordRepeat.setError(null);
@@ -131,7 +134,7 @@ public class ChangePasswordFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Changing password...");
+            Helpers.showProgressDialog(getActivity(), "Changing password");
         }
 
         @Override
@@ -173,24 +176,22 @@ public class ChangePasswordFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            Helpers.dismissProgressDialog();
             if (internetNotWorking) {
                 Toast.makeText(getActivity(), "Internet is not working. Make sure you are " +
                         "properly connected to the Internet", Toast.LENGTH_SHORT).show();
-                Helpers.dismissProgressDialog();
                 internetNotWorking = false;
             }
             if (responseCode == 200) {
-                Toast.makeText(getActivity(), "Password Successfully Changed", Toast.LENGTH_LONG).show();
-                Helpers.dismissProgressDialog();
+                Toast.makeText(getActivity(), "Password successfully changed", Toast.LENGTH_LONG).show();
                 AppGlobals.setFirstRun(true);
-                Helpers.dismissProgressDialog();
                 AppGlobals.putToken(null);
                 AppGlobals.putGcmToken(null);
                 AppGlobals.putBoolean(MainActivity.isAppLoggedOut = true);
                 launchLoginActivity();
                 onChangeSuccess();
             } else {
-                Toast.makeText(getActivity(), "Password Change Failed. Please try again later", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Password change failed. Please try again", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -200,6 +201,5 @@ public class ChangePasswordFragment extends Fragment {
         startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getActivity().startActivity(startIntent);
     }
-
 
 }
