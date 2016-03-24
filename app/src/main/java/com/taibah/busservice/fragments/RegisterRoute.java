@@ -56,7 +56,6 @@ public class RegisterRoute extends Fragment {
     public static int onLongClickCounter = 0;
     public static TimePicker timePickerArrivalTime;
     public static TimePicker timePickerDepartureTime;
-    public static LatLng taibahUniversityLocation = new LatLng(24.481778, 39.545373);
     public static LatLng[] latLngList;
     public static int responseCode;
     HttpURLConnection connection;
