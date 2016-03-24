@@ -249,7 +249,8 @@ public class RegisterStudent extends Fragment {
                 + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=student"
                 + "&" + "username=" + username
                 + "&" + "latitude=" + PlaceholderFragment.studentStopLatLng.latitude
-                + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude;
+                + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude
+                + "&" + "roll_number=" + rollNumberStudent;
 
         new RegisterStudentTask().execute();
 
@@ -576,41 +577,44 @@ public class RegisterStudent extends Fragment {
 
         @Override
         protected Void doInBackground(Void... params) {
-            try {
-                URL url = new URL("http://46.101.75.194:8080/register");
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    URL url = new URL("http://46.101.75.194:8080/register");
 
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setDoOutput(true);
-                connection.setDoInput(true);
-                connection.setInstanceFollowRedirects(false);
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                connection.setRequestProperty("charset", "utf-8");
-                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    connection.setRequestProperty("charset", "utf-8");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-                Log.i("Token", AppGlobals.getToken());
+                    Log.i("Token", AppGlobals.getToken());
 
-                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                out.writeBytes(studentRegistrationDetail);
-                out.flush();
-                out.close();
-                responseCode = connection.getResponseCode();
-                Log.i("Response", "" + responseCode);
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    out.writeBytes(studentRegistrationDetail);
+                    out.flush();
+                    out.close();
+                    responseCode = connection.getResponseCode();
+                    Log.i("Response", "" + responseCode);
 
-                InputStream in = (InputStream) connection.getContent();
-                int ch;
-                StringBuilder sb;
+                    InputStream in = (InputStream) connection.getContent();
+                    int ch;
+                    StringBuilder sb;
 
-                sb = new StringBuilder();
-                while ((ch = in.read()) != -1)
-                    sb.append((char) ch);
+                    sb = new StringBuilder();
+                    while ((ch = in.read()) != -1)
+                        sb.append((char) ch);
 
-                Log.d("RESULT", sb.toString());
+                    Log.d("RESULT", sb.toString());
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e("BEFORE", e.getMessage());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("BEFORE", e.getMessage());
+                }
             }
+
             return null;
         }
 

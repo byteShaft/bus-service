@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,15 @@ import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
+import com.taibah.busservice.utils.UpdateRouteStatus;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -151,21 +161,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
 
-                                            Helpers.showProgressDialog(getActivity(), "Starting Route");
+                                            getActivity().startService(new Intent(getActivity(), DriverService.class));
+                                            buttonStartStopRoute.setText("End Route");
+                                            Helpers.dismissProgressDialog();
+                                            AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
 
-                                            // TODO: Implement route starting logic here.
-
-                                            new android.os.Handler().postDelayed(
-                                                    new Runnable() {
-                                                        public void run() {
-                                                            getActivity().startService(new Intent(getActivity(), DriverService.class));
-                                                            buttonStartStopRoute.setText("End Route");
-                                                            Helpers.dismissProgressDialog();
-                                                            AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
-
-                                                            MainActivity.navigationView.getMenu().getItem(1).setChecked(true);
-                                                        }
-                                                    }, 2000);
+                                            MainActivity.navigationView.getMenu().getItem(1).setChecked(true);
                                         }
                                     })
                                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -189,6 +190,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                                             DriverService.isRouteCancelled = true;
                                             DriverService.onLocationChangedCounter = 0;
+
+                                            new UpdateRouteStatus(getActivity()).execute("status=0");
 
                                             new android.os.Handler().postDelayed(
                                                     new Runnable() {
