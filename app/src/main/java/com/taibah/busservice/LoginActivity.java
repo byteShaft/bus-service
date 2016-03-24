@@ -81,6 +81,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        MainActivity.isAppForeground = true;
     }
 
     public void login() {
@@ -166,6 +167,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        MainActivity.isAppForeground = false;
         if (!AppGlobals.isFirstRun()) {
             finish();
         }
