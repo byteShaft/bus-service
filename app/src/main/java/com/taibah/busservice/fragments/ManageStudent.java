@@ -125,21 +125,39 @@ public class ManageStudent extends Fragment {
                 alertDialogCredentials.show();
                 return true;
             case R.id.item_context_menu_student_list_allow_deny_service:
-                AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
-                        getActivity()).setTitle(studentName)
-                        .setMessage("Allow/Deny service")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // TODO Implement correct logic here
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alertDialogService = alertDialogStudentService.create();
-                alertDialogService.show();
+                if (hashMapStudentData.get(studentIdsList.get(info.position)).get(6) == "1") {
+                    AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
+                            getActivity()).setTitle(studentName)
+                            .setMessage("Deny Service")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // TODO Implement correct logic here
+                                }
+                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog alertDialogService = alertDialogStudentService.create();
+                    alertDialogService.show();
+                } else {
+                    AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
+                            getActivity()).setTitle(studentName)
+                            .setMessage("Allow Service")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // TODO Implement correct logic here
+                                }
+                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog alertDialogService = alertDialogStudentService.create();
+                    alertDialogService.show();
+                }
                 return true;
             case R.id.item_context_menu_student_list_delete:
                 AlertDialog.Builder alertDialogStudentDelete = new AlertDialog.Builder(
@@ -196,6 +214,8 @@ public class ManageStudent extends Fragment {
                             arrayListString.add(jsonObject.getString("username"));
                             arrayListString.add(jsonObject.getString("password"));
                             arrayListString.add(jsonObject.getString("roll_number"));
+                            arrayListString.add(jsonObject.getString("attending"));
+                            arrayListString.add(jsonObject.getString("allowed"));
                             hashMapStudentData.put(jsonObject.getInt("id"), arrayListString);
                         }
                     }
@@ -244,6 +264,8 @@ public class ManageStudent extends Fragment {
                 viewHolder.tvStudentListName = (TextView) convertView.findViewById(R.id.tv_student_list_name);
                 viewHolder.tvStudentUsername = (TextView) convertView.findViewById(R.id.tv_student_list_username);
                 viewHolder.tvStudentRollNumber = (TextView) convertView.findViewById(R.id.tv_student_list_roll_number);
+                viewHolder.tvStudentAttending = (TextView) convertView.findViewById(R.id.tv_student_list_attending);
+                viewHolder.tvStudentAllowed = (TextView) convertView.findViewById(R.id.tv_student_list_allowed);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
@@ -251,6 +273,19 @@ public class ManageStudent extends Fragment {
             viewHolder.tvStudentListName.setText("Name: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(0) + " " + hashMapStudentData.get(arrayListIntIds.get(position)).get(1));
             viewHolder.tvStudentUsername.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(2));
             viewHolder.tvStudentRollNumber.setText("RollNumber: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(4));
+
+            if (hashMapStudentData.get(arrayListIntIds.get(position)).get(5) == "1") {
+                viewHolder.tvStudentAttending.setText("Attending Route: Yes");
+            } else {
+                viewHolder.tvStudentAttending.setText("Attending Route: No");
+            }
+
+            if (hashMapStudentData.get(arrayListIntIds.get(position)).get(6) == "1") {
+                viewHolder.tvStudentAllowed.setText("Allowed by Admin: Yes" );
+            } else {
+                viewHolder.tvStudentAllowed.setText("Allowed by Admin: No" );
+            }
+
             return convertView;
         }
 
@@ -264,5 +299,7 @@ public class ManageStudent extends Fragment {
         TextView tvStudentListName;
         TextView tvStudentUsername;
         TextView tvStudentRollNumber;
+        TextView tvStudentAttending;
+        TextView tvStudentAllowed;
     }
 }
