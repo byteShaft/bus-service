@@ -187,7 +187,6 @@ public class ChangePasswordFragment extends Fragment {
                 AppGlobals.setFirstRun(true);
                 AppGlobals.putToken(null);
                 AppGlobals.putGcmToken(null);
-                AppGlobals.putBoolean(MainActivity.isAppLoggedOut = true);
                 launchLoginActivity();
                 onChangeSuccess();
             } else {

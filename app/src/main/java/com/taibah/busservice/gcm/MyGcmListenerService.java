@@ -41,7 +41,7 @@ public class MyGcmListenerService extends GcmListenerService {
             // normal downstream message.
         }
 
-        if (!AppGlobals.isAppLoggedOut()) {
+        if (!AppGlobals.isFirstRun()) {
             sendNotification(real);
         }
     }
