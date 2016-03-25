@@ -107,9 +107,8 @@ public class MapsFragment extends Fragment {
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
         if (AppGlobals.getUserType() == 2) {
-            if (HomeFragment.isRouteStartedByDriver) {
                 new RetrieveStudentsRegisteredAgainstRoute().execute();
-            }
+
         }
 
         tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
@@ -371,7 +370,9 @@ public class MapsFragment extends Fragment {
                 Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
                 getActivity().onBackPressed();
             } else if (responseCode == 200) {
-               new UpdateRouteStatus(getActivity()).execute("status=1");
+                if (DriverService.driverLocationReportingServiceIsRunning) {
+                    new UpdateRouteStatus(getActivity()).execute("status=1");
+                }
                 isNetworkNotAvailable = true;
             }
         }
