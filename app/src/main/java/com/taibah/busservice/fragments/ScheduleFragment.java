@@ -1,7 +1,5 @@
 package com.taibah.busservice.fragments;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,14 +11,13 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.taibah.busservice.LoginActivity;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
-import com.taibah.busservice.utils.UpdateRouteStatus;
 import com.taibah.busservice.utils.UpdateStudentStatus;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,11 +28,11 @@ public class ScheduleFragment extends Fragment {
 
     View convertView;
     Switch switchStudentSchedule;
-    boolean service;
 
     static int responseCode;
     HttpURLConnection connection;
     boolean internetNotWorking = false;
+    boolean isAttending;
 
     @Nullable
     @Override
@@ -49,39 +46,16 @@ public class ScheduleFragment extends Fragment {
         switchStudentSchedule.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message;
-                if (service) {
-                    message = "Turn the service off";
+                if (isAttending) {
+                    new UpdateStudentStatus(getActivity()).execute("attending=0");
                 } else {
-                    message = "Turn the service on";
+                    new UpdateStudentStatus(getActivity()).execute("attending=1");
                 }
-                showSwitchingDialog(message);
+                getActivity().onBackPressed();
             }
         });
+
         return convertView;
-    }
-
-    public void showSwitchingDialog(String message) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setTitle("Are you sure?");
-        alertDialogBuilder.setMessage(message);
-        alertDialogBuilder.setCancelable(false);
-        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                new UpdateStudentStatus(getActivity()).execute("attending=0");
-
-            }
-        });
-        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alertDialogBuilder.create();
-        alertDialogBuilder.show();
     }
 
     public class RetrieveStudentDetails extends AsyncTask<Void, Integer, Void> {
@@ -89,7 +63,7 @@ public class ScheduleFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Retrieving status...");
+            Helpers.showProgressDialog(getActivity(), "Retrieving status");
         }
 
         @Override
@@ -116,11 +90,18 @@ public class ScheduleFragment extends Fragment {
                     StringBuilder sb = new StringBuilder();
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
-
                     Log.d("Details", sb.toString());
+                    JSONObject jsonObject = new JSONObject(sb.toString());
+                    if (jsonObject.getString("attending").equalsIgnoreCase("1")) {
+                        isAttending = true;
+                    } else {
+                        isAttending = false;
+                    }
 
                 } catch (IOException e) {
                     Log.e("BEFORE", e.getMessage());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             } else {
                 internetNotWorking = true;
@@ -138,6 +119,12 @@ public class ScheduleFragment extends Fragment {
                 getActivity().onBackPressed();
                 internetNotWorking = false;
             } else if (responseCode == 200) {
+                switchStudentSchedule.setVisibility(View.VISIBLE);
+                if (isAttending) {
+                    switchStudentSchedule.setChecked(true);
+                } else {
+                    switchStudentSchedule.setChecked(false);
+                }
                 Helpers.dismissProgressDialog();
             }
         }

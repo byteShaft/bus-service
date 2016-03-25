@@ -104,6 +104,11 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                     Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
                     return true;
                 }
+
+                if (spinnerText == null) {
+                    Toast.makeText(getActivity(), "Incomplete info. Route not found", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 new checkInternetTask().execute();
                 return true;
             default:
@@ -302,12 +307,11 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             super.onPostExecute(aVoid);
             if (responseCode == 201) {
                 Helpers.dismissProgressDialog();
-                Toast.makeText(getActivity(), "Registration Successful", Toast.LENGTH_LONG).show();
-                Helpers.closeKeyboard(getActivity());
-                getActivity().onBackPressed();
+                onRegistrationSuccess();
             } else {
                 // TODO Implement correct logic here
-                Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_LONG).show();
+                onRegistrationFailed();
+                Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -338,7 +342,6 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!unAssignedRouteIdsList.contains(jsonObject.getInt("id"))) {
                             unAssignedRouteIdsList.add(jsonObject.getInt("id"));
-//                            arrayListUnAssignedRouteNames.add(jsonObject.getString("name"));
                             hashMapUnAssignedRouteData.put(jsonObject.getInt("id"), jsonObject.getString("name"));
                             System.out.println(hashMapUnAssignedRouteData);
                         }
@@ -355,19 +358,11 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             super.onPostExecute(aVoid);
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
-                Toast.makeText(getActivity(), "Success!", Toast.LENGTH_LONG).show();
                 mMenuInflater.inflate(R.menu.menu_done, mMenu);
-//
-//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-//                        android.R.layout.simple_spinner_item , arrayListUnAssignedRouteNames);
-//                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//                spinnerUnAssignedRoutesList.setAdapter(adapter);
                 CustomSpinnerListAdapter customSpinnerListAdapter = new CustomSpinnerListAdapter(getActivity(), R.layout.spinner_row, unAssignedRouteIdsList);
                 spinnerUnAssignedRoutesList.setAdapter(customSpinnerListAdapter);
                 spinnerUnAssignedRoutesList.setSelection(0);
-//                routeId = unAssignedRouteIdsList.get(spinnerUnAssignedRoutesList.getSelectedItemPosition());
             } else {
-                // TODO Implement correct logic here in case of any failure
                 Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
                 Helpers.dismissProgressDialog();
                 getActivity().onBackPressed();
