@@ -416,6 +416,8 @@ public class MapsFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
                     String ID = jsonObject.getString("id");
+                    String routeStatus = jsonObject.getString("status");
+                    System.out.print("Route Status" + routeStatus);
                     System.out.println(ID);
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/locations/get?user_id=" + ID, "GET");
