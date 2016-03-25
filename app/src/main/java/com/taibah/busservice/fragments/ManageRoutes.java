@@ -119,7 +119,7 @@ public class ManageRoutes extends Fragment {
         TextView tvRouteListDepartureTime;
     }
 
-    private class RetrieveAllRegisteredRoutes extends AsyncTask<Void, Integer, Void> {
+    public class RetrieveAllRegisteredRoutes extends AsyncTask<Void, Integer, Void> {
 
         @Override
         protected void onPreExecute() {
