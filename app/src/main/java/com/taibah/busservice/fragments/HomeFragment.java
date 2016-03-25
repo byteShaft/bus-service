@@ -378,7 +378,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         MainActivity.isHomeFragmentOpen = false;
-        mTask.cancel(true);
+        if (AppGlobals.getUserType() == 0) {
+            mTask.cancel(true);
+        }
     }
 
     public class SituationReportTask extends AsyncTask<String, Integer, Void> {

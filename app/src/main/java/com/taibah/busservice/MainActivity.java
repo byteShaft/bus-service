@@ -42,7 +42,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -299,7 +298,6 @@ public class MainActivity extends AppCompatActivity
                     JSONArray jsonArray = new JSONArray(data);
                     System.out.println(jsonArray);
                     responseCode = connection.getResponseCode();
-
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -314,7 +312,6 @@ public class MainActivity extends AppCompatActivity
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
             } else {
-                // TODO Implement correct logic here in case of any failure
                 Toast.makeText(MainActivity.this, "Please connect your device to the internet and try again", Toast.LENGTH_LONG).show();
                 ActivityCompat.finishAfterTransition(MainActivity.this);
             }
