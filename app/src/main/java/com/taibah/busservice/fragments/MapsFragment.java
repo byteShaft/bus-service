@@ -78,6 +78,7 @@ public class MapsFragment extends Fragment {
     private Boolean simpleMapView = true;
     static int responseCode;
     HttpURLConnection connection;
+    private static boolean isNetworkNotAvailable = true;
 
     public static void addDriverLocationMarker() {
         if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
@@ -105,8 +106,11 @@ public class MapsFragment extends Fragment {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
-
-        new RetrieveStudentsRegisteredAgainstRoute().execute();
+        if (AppGlobals.getUserType() == 2) {
+            if (HomeFragment.isRouteStartedByDriver) {
+                new RetrieveStudentsRegisteredAgainstRoute().execute();
+            }
+        }
 
         tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
         tvDriverCurrentLocationTimeStamp = (TextView) convertView.findViewById(R.id.tv_route_driver_location_timestamp);
@@ -352,7 +356,7 @@ public class MapsFragment extends Fragment {
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
                     Log.i("Students Details", "" + jsonArray);
-
+                    isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -363,11 +367,53 @@ public class MapsFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (responseCode == 200) {
+            if (isNetworkNotAvailable) {
+                Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
+                getActivity().onBackPressed();
+            } else if (responseCode == 200) {
                new UpdateRouteStatus(getActivity()).execute("status=1");
+                isNetworkNotAvailable = true;
             }
         }
     }
 
+    private class GetDriverLocationTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                    String ID = jsonObject.getString("id");
+                    System.out.println(ID);
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/locations/get?user_id=" + ID, "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                    System.out.print(responseCode);
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONArray jsonArray = new JSONArray(data);
+                    Log.i("Students Details", "" + jsonArray);
+                    isNetworkNotAvailable = false;
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (isNetworkNotAvailable) {
+                Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
+                getActivity().onBackPressed();
+            } else if (responseCode == 200) {
+                new GetDriverLocationTask().execute();
+                isNetworkNotAvailable = true;
+            }
+        }
+    }
 
 }

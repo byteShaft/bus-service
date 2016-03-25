@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Switch;
 
 import com.taibah.busservice.R;
+import com.taibah.busservice.utils.UpdateRouteStatus;
+import com.taibah.busservice.utils.UpdateStudentStatus;
 
 public class ScheduleFragment extends Fragment {
 
@@ -49,7 +51,7 @@ public class ScheduleFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                // TODO: Implement registration here.
+                new UpdateStudentStatus(getActivity()).execute("attending=0");
 
             }
         });
