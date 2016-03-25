@@ -2,23 +2,33 @@ package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.MainActivity;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
@@ -26,6 +36,7 @@ import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
 import com.taibah.busservice.utils.UpdateRouteStatus;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,6 +44,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
@@ -44,17 +57,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     RelativeLayout layoutDriverButtons;
     RelativeLayout layoutRouteCancelled;
     RelativeLayout layoutRouteInfo;
+    LinearLayout layoutListCancelledRoutes;
     LinearLayout layoutAdminInfo;
     TextView tvUserType;
     TextView tvRouteStatus;
     TextView tvRouteClickToRestore;
     TextView tvRouteArrivalTime;
     TextView tvRouteDepartureTime;
+    TextView tvStatusRetrievingCancelledRoutes;
 
     static int responseCode;
     int radioIndex;
     HttpURLConnection connection;
-    public static boolean isRouteStartedByDriver = false;
+
+    String cancelledRouteName;
+
+    ArrayList<Integer> routeIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapRouteData;
+
+    ListView listViewCancelledRoutes;
+
+    public static int responseCodeRoutes;
+    HttpURLConnection connectionRoutes;
+    public RetrieveAllCancelledRoutes mTask;
 
 
     @Nullable
@@ -67,12 +92,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         tvRouteArrivalTime = (TextView) convertView.findViewById(R.id.tv_arrival_time);
         tvRouteDepartureTime = (TextView) convertView.findViewById(R.id.tv_departure_time);
         tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
+        tvStatusRetrievingCancelledRoutes = (TextView) convertView.findViewById(R.id.tv_status_retrieving_cancelled_routes);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
+        layoutListCancelledRoutes = (LinearLayout) convertView.findViewById(R.id.layout_list_cancelled_routes);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
 
+        routeIdsList = new ArrayList<>();
+        hashMapRouteData = new HashMap<>();
+        listViewCancelledRoutes = (ListView) convertView.findViewById(R.id.lv_cancelled_routes);
+
         layoutRouteInfo = (RelativeLayout) convertView.findViewById(R.id.layout_route_info);
+        registerForContextMenu(listViewCancelledRoutes);
+
 
         buttonStartStopRoute = (Button) convertView.findViewById(R.id.btn_route_switch);
         buttonStartStopRoute.setOnClickListener(this);
@@ -96,6 +129,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
 
         return convertView;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        cancelledRouteName = hashMapRouteData.get(routeIdsList.get(info.position)).get(0);
+        menu.setHeaderTitle(cancelledRouteName);
+        MenuInflater inflater = this.getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_cancelled_routes_list, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.item_context_menu_cancelled_routes_list_call_driver:
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + hashMapRouteData.get(routeIdsList.get(info.position)).get(3)));
+                startActivity(intent);
+                return true;
+        }
+        return true;
     }
 
     private void setRouteStatus(int status) {
@@ -142,6 +198,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             layoutAdminInfo.setVisibility(View.GONE);
             layoutRouteCancelled.setClickable(false);
         } else if (AppGlobals.getUserType() == 0) {
+            mTask = (RetrieveAllCancelledRoutes) new RetrieveAllCancelledRoutes().execute();
             layoutDriverButtons.setVisibility(View.GONE);
             layoutAdminInfo.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Admin");
@@ -321,6 +378,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         MainActivity.isHomeFragmentOpen = false;
+        mTask.cancel(true);
     }
 
     public class SituationReportTask extends AsyncTask<String, Integer, Void> {
@@ -328,7 +386,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Reporting Situation...");
+            Helpers.showProgressDialog(getActivity(), "Reporting Situation");
         }
 
         @Override
@@ -375,5 +433,117 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Toast.makeText(getActivity(), "Situation reporting failed. Please try again", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    public class RetrieveAllCancelledRoutes extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            tvStatusRetrievingCancelledRoutes.setText("Retrieving cancelled routes list...");
+            tvStatusRetrievingCancelledRoutes.setTextColor(Color.GRAY);
+            tvStatusRetrievingCancelledRoutes.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    connectionRoutes = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes", "GET");
+                    connectionRoutes.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connectionRoutes.connect();
+                    responseCodeRoutes = connectionRoutes.getResponseCode();
+                    String data = WebServiceHelpers.readResponse(connectionRoutes);
+                    JSONArray jsonArray = new JSONArray(data);
+                    System.out.println("AllRoutes: " + jsonArray);
+                    responseCodeRoutes = connectionRoutes.getResponseCode();
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (!routeIdsList.contains(jsonObject.getInt("id"))
+                                && !jsonObject.getString("status").equalsIgnoreCase("0")
+                                || !jsonObject.getString("status").equalsIgnoreCase("1")) {
+                            routeIdsList.add(jsonObject.getInt("id"));
+                            ArrayList<String> arrayListString = new ArrayList<>();
+                            arrayListString.add(jsonObject.getString("name"));
+                            arrayListString.add(jsonObject.getString("bus_number"));
+                            arrayListString.add(jsonObject.getString("status"));
+
+                            String driverObject = jsonObject.getString("driver");
+                            JSONObject jsonObjectDriver = new JSONObject(driverObject);
+                            arrayListString.add(jsonObjectDriver.getString("phone"));
+
+                            hashMapRouteData.put(jsonObject.getInt("id"), arrayListString);
+                        }
+                    }
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Helpers.dismissProgressDialog();
+            if (responseCodeRoutes == 200) {
+                if (!routeIdsList.isEmpty()) {
+                    tvStatusRetrievingCancelledRoutes.setVisibility(View.GONE);
+                    layoutListCancelledRoutes.setVisibility(View.VISIBLE);
+                    CustomRoutesListAdapter customRoutesListAdapter = new CustomRoutesListAdapter(getContext(), R.layout.routes_cancelled_list_row, routeIdsList);
+                    listViewCancelledRoutes.setAdapter(customRoutesListAdapter);
+                } else {
+                    tvStatusRetrievingCancelledRoutes.setText("No cancelled route found.");
+                    tvStatusRetrievingCancelledRoutes.setTextColor(Color.GREEN);
+                    
+                }
+            } else {
+                tvStatusRetrievingCancelledRoutes.setText("Error retrieving cancelled routes status");
+                tvStatusRetrievingCancelledRoutes.setTextColor(Color.RED);
+            }
+        }
+    }
+
+
+    class CustomRoutesListAdapter extends ArrayAdapter<String> {
+        ArrayList<Integer> arrayListIntIds;
+        public CustomRoutesListAdapter(Context context, int resource, ArrayList<Integer> arrayList) {
+            super(context, resource);
+            arrayListIntIds = arrayList;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolderCancelledRoutes viewHolder;
+            if (convertView == null) {
+                viewHolder = new ViewHolderCancelledRoutes();
+                LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                convertView = layoutInflater.inflate(R.layout.routes_cancelled_list_row, parent, false);
+                viewHolder.tvRoutesCancelledName = (TextView) convertView.findViewById(R.id.tv_routes_cancelled_name);
+                viewHolder.tvRoutesCancelledReason = (TextView) convertView.findViewById(R.id.tv_routes_cancelled_reason);
+                viewHolder.tvRoutesCancelledBusNumber = (TextView) convertView.findViewById(R.id.tv_routes_cancelled_bus_number);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolderCancelledRoutes) convertView.getTag();
+            }
+            viewHolder.tvRoutesCancelledName.setText("Name: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
+            viewHolder.tvRoutesCancelledBusNumber.setText("Bus Number: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(1));
+            viewHolder.tvRoutesCancelledReason.setText("Reason: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(2));
+            return convertView;
+        }
+
+        @Override
+        public int getCount() {
+            return arrayListIntIds.size();
+        }
+    }
+
+    static class ViewHolderCancelledRoutes {
+        TextView tvRoutesCancelledName;
+        TextView tvRoutesCancelledReason;
+        TextView tvRoutesCancelledBusNumber;
     }
 }

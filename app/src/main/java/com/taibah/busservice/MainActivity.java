@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity
     Fragment fragment;
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
-
     public static boolean isAppForeground;
 
     @Override

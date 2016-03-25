@@ -76,42 +76,6 @@ public class ManageRoutes extends Fragment {
         }
     }
 
-
-    //    Used for getting context menu in routes list for when needed
-
-//
-//    @Override
-//    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-//        super.onActivityCreated(savedInstanceState);
-//        registerForContextMenu(routesListView);
-//    }
-////
-//    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//        super.onCreateContextMenu(menu, v, menuInfo);
-//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-//        menu.setHeaderTitle("Route Name: " + hashMapRouteData.get(routeIdsList.get(info.position)).get(0));
-//        MenuInflater inflater = this.getActivity().getMenuInflater();
-//        inflater.inflate(R.menu.context_menu_routes_list, menu);
-//
-//    }
-//
-//    @Override
-//    public boolean onContextItemSelected(MenuItem item) {
-//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-//        int index = info.position;
-//        System.out.println(routeIdsList.get(index));
-//
-//        switch (item.getItemId()) {
-//            case R.id.item_context_menu_routes_list_delete:
-//                item.getTitle();
-//                return true;
-//        }
-//        return true;
-//    }
-
-
-
     static class ViewHolder {
         TextView tvRouteListName;
         TextView tvRouteListBusNumber;
@@ -119,7 +83,7 @@ public class ManageRoutes extends Fragment {
         TextView tvRouteListDepartureTime;
     }
 
-    private class RetrieveAllRegisteredRoutes extends AsyncTask<Void, Integer, Void> {
+    public class RetrieveAllRegisteredRoutes extends AsyncTask<Void, Integer, Void> {
 
         @Override
         protected void onPreExecute() {
