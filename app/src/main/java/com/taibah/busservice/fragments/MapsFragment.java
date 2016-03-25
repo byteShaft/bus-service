@@ -332,6 +332,7 @@ public class MapsFragment extends Fragment {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                    System.out.println(jsonObject);
                     String ID = jsonObject.getString("id");
                     System.out.println(ID);
                     connection = WebServiceHelpers.openConnectionForUrl
@@ -345,13 +346,13 @@ public class MapsFragment extends Fragment {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObjectArray = jsonArray.getJSONObject(i);
-                        if (!studentIdsList.contains(jsonObject.getInt("id"))) {
-                            studentIdsList.add(jsonObject.getInt("id"));
+                        if (!studentIdsList.contains(jsonObjectArray.getInt("id"))) {
+                            studentIdsList.add(jsonObjectArray.getInt("id"));
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObjectArray.getString("first_name"));
                             arrayListString.add(jsonObjectArray.getString("latitude"));
                             arrayListString.add(jsonObjectArray.getString("longitude"));
-                            hashMapStudentData.put(jsonObject.getInt("id"), arrayListString);
+                            hashMapStudentData.put(jsonObjectArray.getInt("id"), arrayListString);
                             Log.i("LoopJson", ": " + arrayListString);
                         }
                     }
