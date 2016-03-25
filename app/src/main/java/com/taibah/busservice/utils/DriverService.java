@@ -36,7 +36,6 @@ public class DriverService extends Service implements LocationListener,
     public static boolean driverLocationReportingServiceIsRunning;
     public static int responseCode;
     public static int onLocationChangedCounter = 0;
-    public static boolean isRouteCancelled = false;
 
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
@@ -191,7 +190,7 @@ public class DriverService extends Service implements LocationListener,
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (responseCode == 200 && !isRouteCancelled) {
+            if (responseCode == 200 && DriverService.driverLocationReportingServiceIsRunning) {
                 new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
