@@ -408,8 +408,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-                System.out.println(" Update Status Response Code: " + responseCode);
-
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                 out.writeBytes(params[0]);
                 out.flush();
@@ -465,7 +463,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!routeIdsList.contains(jsonObject.getInt("id"))
                                 && !jsonObject.getString("status").equalsIgnoreCase("0")
-                                || !jsonObject.getString("status").equalsIgnoreCase("1")) {
+                                && !jsonObject.getString("status").equalsIgnoreCase("1")) {
                             routeIdsList.add(jsonObject.getInt("id"));
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObject.getString("name"));
