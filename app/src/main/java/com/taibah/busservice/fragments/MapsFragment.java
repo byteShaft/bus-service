@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -46,7 +47,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,8 +76,11 @@ public class MapsFragment extends Fragment {
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
     static int responseCode;
+    String routeStatus;
     HttpURLConnection connection;
+    JSONObject response;
     private static boolean isNetworkNotAvailable = true;
+    public GetDriverLocationTask mTask;
 
 
     ArrayList<Integer> studentIdsList;
@@ -221,6 +227,7 @@ public class MapsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mapsFragmentOpen = false;
+        mTask.cancel(true);
     }
 
     @Override
@@ -332,7 +339,6 @@ public class MapsFragment extends Fragment {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
-                    System.out.println(jsonObject);
                     String ID = jsonObject.getString("id");
                     System.out.println(ID);
                     connection = WebServiceHelpers.openConnectionForUrl
@@ -341,6 +347,7 @@ public class MapsFragment extends Fragment {
                     connection.connect();
                     responseCode = connection.getResponseCode();
                     System.out.print(responseCode);
+
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
 
@@ -359,6 +366,21 @@ public class MapsFragment extends Fragment {
 
                     Log.i("Students Details", "" + jsonArray);
                     isNetworkNotAvailable = false;
+
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes/" + ID, "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                    System.out.print(responseCode);
+
+                    String data1 = WebServiceHelpers.readResponse(connection);
+                    JSONObject jsonObject1 = new JSONObject(data1);
+
+                    routeStatus = jsonObject1.getString("status");
+
+                    Log.i("Route Details", "" + jsonObject1);
+
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -397,8 +419,12 @@ public class MapsFragment extends Fragment {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
 
                 buildAndDisplayRouteWithWayPoints(studentStops);
-                if (DriverService.driverLocationReportingServiceIsRunning) {
+                if (AppGlobals.getUserType() == 2 && DriverService.driverLocationReportingServiceIsRunning) {
                     new UpdateRouteStatus(getActivity()).execute("status=1");
+                } else if (AppGlobals.getUserType() == 1) {
+                    if (routeStatus.equals("1")) {
+                        mTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                    }
                 }
                 isNetworkNotAvailable = true;
             } else {
@@ -414,18 +440,21 @@ public class MapsFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
+                    Log.i("Get Driver Location", "Called");
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
                     String ID = jsonObject.getString("id");
+                    routeStatus = jsonObject.getString("status");
+                    System.out.print("Route Status: " + routeStatus);
                     System.out.println(ID);
                     connection = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/locations/get?user_id=" + ID, "GET");
+                            ("http://46.101.75.194:8080/locations/get?route_id=" + ID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
                     System.out.print(responseCode);
                     String data = WebServiceHelpers.readResponse(connection);
-                    JSONArray jsonArray = new JSONArray(data);
-                    Log.i("Students Details", "" + jsonArray);
+                    JSONObject jsonObject1 = new JSONObject(data);
+                    Log.i("Driver Location Details", "" + jsonObject1);
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -441,7 +470,7 @@ public class MapsFragment extends Fragment {
                 Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
                 getActivity().onBackPressed();
             } else if (responseCode == 200) {
-                new GetDriverLocationTask().execute();
+                mTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
                 isNetworkNotAvailable = true;
             }
         }
