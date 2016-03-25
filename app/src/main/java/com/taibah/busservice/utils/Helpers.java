@@ -167,4 +167,16 @@ public class Helpers {
         NetworkInfo mobile = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         return wifi != null && wifi.isConnectedOrConnecting() || mobile != null && mobile.isConnectedOrConnecting();
     }
+
+    public static String parseRouteCancelledReason(String status) {
+        String reason = "";
+        if (status.equals("2")) {
+            reason = "Accident";
+        } else if (status.equals("3")) {
+            reason = "Driver unavailable";
+        } else if (status.equals("4")) {
+            reason = "Bus out of service";
+        }
+        return reason;
+    }
 }
