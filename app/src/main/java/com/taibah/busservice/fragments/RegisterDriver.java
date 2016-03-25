@@ -142,14 +142,14 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             etDriverLastName.setError(null);
         }
 
-        if (contactNumberDriver.isEmpty()) {
+        if (contactNumberDriver.trim().isEmpty()) {
             etDriverContactNumber.setError("Contact is required");
             valid = false;
         } else {
             etDriverContactNumber.setError(null);
         }
 
-        if (valid && !PhoneNumberUtils.isGlobalPhoneNumber(contactNumberDriver)) {
+        if (valid && !PhoneNumberUtils.isGlobalPhoneNumber(contactNumberDriver) || contactNumberDriver.length() < 3) {
             etDriverContactNumber.setError("Contact is invalid");
             valid = false;
         }
