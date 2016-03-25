@@ -353,7 +353,7 @@ public class MapsFragment extends Fragment {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObjectArray = jsonArray.getJSONObject(i);
-                        if (!studentIdsList.contains(jsonObjectArray.getInt("id"))) {
+                        if (!studentIdsList.contains(jsonObjectArray.getInt("id")) && !jsonObjectArray.getString("attending").equals("0")) {
                             studentIdsList.add(jsonObjectArray.getInt("id"));
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObjectArray.getString("first_name"));

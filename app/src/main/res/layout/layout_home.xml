@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
-            android:textSize="12dp"/>
+            android:textSize="14dp"/>
         <LinearLayout
             android:id="@+id/layout_list_cancelled_routes"
             android:layout_width="match_parent"

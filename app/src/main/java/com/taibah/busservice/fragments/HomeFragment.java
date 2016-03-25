@@ -192,6 +192,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             } else {
                 buttonStartStopRoute.setText("Start Route");
             }
+
+            if (AppGlobals.getRouteStatus() == 1 && !DriverService.driverLocationReportingServiceIsRunning) {
+                getActivity().startService(new Intent(getActivity(), DriverService.class));
+                buttonStartStopRoute.setText("End Route");
+                Toast.makeText(getActivity(), "Route was active. Location reporting started", Toast.LENGTH_LONG).show();
+            }
         } else if (AppGlobals.getUserType() == 1) {
             layoutDriverButtons.setVisibility(View.GONE);
             tvUserType.setText("UserType: Student");
@@ -408,8 +414,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-                System.out.println(" Update Status Response Code: " + responseCode);
-
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                 out.writeBytes(params[0]);
                 out.flush();
@@ -442,7 +446,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            tvStatusRetrievingCancelledRoutes.setText("Retrieving cancelled routes list...");
+            tvStatusRetrievingCancelledRoutes.setText("Retrieving cancelled routes list . . .");
             tvStatusRetrievingCancelledRoutes.setTextColor(Color.GRAY);
             tvStatusRetrievingCancelledRoutes.setVisibility(View.VISIBLE);
         }
@@ -465,7 +469,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!routeIdsList.contains(jsonObject.getInt("id"))
                                 && !jsonObject.getString("status").equalsIgnoreCase("0")
-                                || !jsonObject.getString("status").equalsIgnoreCase("1")) {
+                                && !jsonObject.getString("status").equalsIgnoreCase("1")) {
                             routeIdsList.add(jsonObject.getInt("id"));
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObject.getString("name"));
@@ -499,7 +503,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     listViewCancelledRoutes.setAdapter(customRoutesListAdapter);
                 } else {
                     tvStatusRetrievingCancelledRoutes.setText("No cancelled route found.");
-                    tvStatusRetrievingCancelledRoutes.setTextColor(Color.GREEN);
+                    tvStatusRetrievingCancelledRoutes.setTextColor(Color.BLACK);
                     
                 }
             } else {
@@ -533,7 +537,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
             viewHolder.tvRoutesCancelledName.setText("Name: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
             viewHolder.tvRoutesCancelledBusNumber.setText("Bus Number: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(1));
-            viewHolder.tvRoutesCancelledReason.setText("Reason: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(2));
+            String status = hashMapRouteData.get(arrayListIntIds.get(position)).get(2);
+            viewHolder.tvRoutesCancelledReason.setText("Reason: " + Helpers.parseRouteCancelledReason(status));
             return convertView;
         }
 
