@@ -28,7 +28,7 @@ public class UpdateStudentStatus extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Helpers.showProgressDialog(mContext, "Updating your status please wait...");
+        Helpers.showProgressDialog(mContext, "Updating your status please wait..");
     }
 
     @Override
@@ -67,7 +67,8 @@ public class UpdateStudentStatus extends AsyncTask<String, Integer, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         if (responseCode != 200) {
-            Toast.makeText(mContext, "Response Code " + responseCode, Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "Failed to update", Toast.LENGTH_LONG).show();
+            Helpers.dismissProgressDialog();
         } else {
             Toast.makeText(mContext, "Status updated successfully", Toast.LENGTH_LONG).show();
             Helpers.dismissProgressDialog();

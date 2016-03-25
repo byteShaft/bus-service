@@ -25,11 +25,13 @@ import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
+import com.taibah.busservice.utils.UpdateStudentStatus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -140,7 +142,7 @@ public class ManageStudent extends Fragment {
                             .setCancelable(false)
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    // TODO Implement correct logic here
+                                    new AllowOrDenyStudentServiceTask().execute("allowed=0");
                                 }
                             }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -156,7 +158,7 @@ public class ManageStudent extends Fragment {
                             .setCancelable(false)
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    // TODO Implement correct logic here
+                                    new AllowOrDenyStudentServiceTask().execute("allowed=1");
                                 }
                             }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -349,6 +351,60 @@ public class ManageStudent extends Fragment {
             super.onPostExecute(aVoid);
             if (responseCode == 204) {
                 Toast.makeText(getActivity(), "Student deleted", Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
+            }
+        }
+    }
+
+    public class AllowOrDenyStudentServiceTask extends AsyncTask<String, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Updating status..");
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            Log.i("UpdateRouteStatus", "Called");
+            try {
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                String ID = jsonObject.getString("id");
+                URL url = new URL("http://46.101.75.194:8080/users/" + studentIdsList.get(index));
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("PUT");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                System.out.println("Update Status Response Code: " + responseCode);
+
+                DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                out.writeBytes(params[0]);
+                out.flush();
+                out.close();
+
+                responseCode = connection.getResponseCode();
+
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode != 200) {
+                Toast.makeText(getActivity(), "Failed to update", Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
+            } else {
+                Toast.makeText(getActivity(), "Status updated successfully", Toast.LENGTH_LONG).show();
                 Helpers.dismissProgressDialog();
                 getActivity().onBackPressed();
             }
