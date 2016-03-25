@@ -30,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -47,6 +46,7 @@ public class ManageStudent extends Fragment {
 
 
     ListView studentListView;
+    CustomStudentsListAdapter customRoutesListAdapter;
 
     View convertView;
     HttpURLConnection connection;
@@ -103,6 +103,11 @@ public class ManageStudent extends Fragment {
         menu.setHeaderTitle(studentName);
         MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.context_menu_students_list, menu);
+        if (hashMapStudentData.get(studentIdsList.get(info.position)).get(6).equalsIgnoreCase("1")) {
+            menu.getItem(1).setTitle("Deny Service");
+        } else {
+            menu.getItem(1).setTitle("Allow Service");
+        }
     }
 
     @Override
@@ -128,7 +133,7 @@ public class ManageStudent extends Fragment {
                 alertDialogCredentials.show();
                 return true;
             case R.id.item_context_menu_student_list_allow_deny_service:
-                if (hashMapStudentData.get(studentIdsList.get(info.position)).get(6) == "1") {
+                if (item.getTitle().equals("Deny Service")) {
                     AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
                             getActivity()).setTitle(studentName)
                             .setMessage("Service allowed. Want to Deny")
@@ -236,7 +241,7 @@ public class ManageStudent extends Fragment {
             Helpers.dismissProgressDialog();
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
-                CustomStudentsListAdapter customRoutesListAdapter = new CustomStudentsListAdapter(getContext(), R.layout.route_list_row, studentIdsList);
+                customRoutesListAdapter = new CustomStudentsListAdapter(getContext(), R.layout.route_list_row, studentIdsList);
                 studentListView.setAdapter(customRoutesListAdapter);
             } else {
 
@@ -312,7 +317,7 @@ public class ManageStudent extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(getActivity(), "Deleting...");
+            Helpers.showProgressDialog(getActivity(), "Deleting");
         }
 
         @Override
@@ -343,9 +348,9 @@ public class ManageStudent extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             if (responseCode == 204) {
-                Toast.makeText(getActivity(), "Student Deleted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Student deleted", Toast.LENGTH_SHORT).show();
                 Helpers.dismissProgressDialog();
-                new RetrieveAllRegisteredStudentsTask().execute();
+                getActivity().onBackPressed();
             }
         }
     }
