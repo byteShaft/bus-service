@@ -440,7 +440,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            tvStatusRetrievingCancelledRoutes.setText("Retrieving cancelled routes list...");
+            tvStatusRetrievingCancelledRoutes.setText("Retrieving cancelled routes list . . .");
             tvStatusRetrievingCancelledRoutes.setTextColor(Color.GRAY);
             tvStatusRetrievingCancelledRoutes.setVisibility(View.VISIBLE);
         }
@@ -497,7 +497,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     listViewCancelledRoutes.setAdapter(customRoutesListAdapter);
                 } else {
                     tvStatusRetrievingCancelledRoutes.setText("No cancelled route found.");
-                    tvStatusRetrievingCancelledRoutes.setTextColor(Color.GREEN);
+                    tvStatusRetrievingCancelledRoutes.setTextColor(Color.BLACK);
                     
                 }
             } else {
@@ -531,7 +531,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
             viewHolder.tvRoutesCancelledName.setText("Name: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
             viewHolder.tvRoutesCancelledBusNumber.setText("Bus Number: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(1));
-            viewHolder.tvRoutesCancelledReason.setText("Reason: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(2));
+            String status = hashMapRouteData.get(arrayListIntIds.get(position)).get(2);
+            viewHolder.tvRoutesCancelledReason.setText("Reason: " + Helpers.parseRouteCancelledReason(status));
             return convertView;
         }
 

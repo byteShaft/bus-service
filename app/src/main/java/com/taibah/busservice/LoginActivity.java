@@ -285,7 +285,6 @@ public class LoginActivity extends Activity {
                     out.close();
 
                     responseCode = connection.getResponseCode();
-
                     InputStream in = (InputStream) connection.getContent();
 
                     int ch;
@@ -301,6 +300,10 @@ public class LoginActivity extends Activity {
                     Log.d("TOKEN", token);
 
                     AppGlobals.putStudentDriverRouteID(response.getString("route"));
+                    String routeData = response.getString("route");
+                    JSONObject jsonObject = new JSONObject(routeData);
+                    int routeStatus = Integer.parseInt(jsonObject.getString("status"));
+                    AppGlobals.putRouteStatus(routeStatus);
                     connection.disconnect();
 
                     url = new URL("http://46.101.75.194:8080/user");
