@@ -8,9 +8,9 @@
         android:id="@+id/switch_student_schedule"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checked="true"
         android:padding="16dp"
-        android:text="Service"/>
+        android:text="Service"
+        android:visibility="invisible"/>
 
     <TextView
         android:layout_width="match_parent"
