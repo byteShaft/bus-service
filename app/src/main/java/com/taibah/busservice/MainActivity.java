@@ -4,11 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -21,9 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
 import com.taibah.busservice.fragments.HomeFragment;
@@ -37,12 +33,6 @@ import com.taibah.busservice.gcm.QuickstartPreferences;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -50,7 +40,6 @@ public class MainActivity extends AppCompatActivity
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
     public static int responseCode;
-    HttpURLConnection connection;
 
     public static boolean isAppForeground;
 
@@ -91,8 +80,6 @@ public class MainActivity extends AppCompatActivity
             navigationView.getMenu().getItem(4).setVisible(true);
             navigationView.getMenu().getItem(5).setVisible(true);
             navigationView.getMenu().getItem(6).getSubMenu().getItem(0).setVisible(false);
-
-            new RetrieveAllRegisteredRoutes().execute();
 
         } else if (AppGlobals.getUserType() == 1) {
 
@@ -276,46 +263,4 @@ public class MainActivity extends AppCompatActivity
         startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         MainActivity.this.startActivity(startIntent);
     }
-
-    public class RetrieveAllRegisteredRoutes extends AsyncTask<Void, Integer, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Helpers.showProgressDialog(MainActivity.this, "Retrieving routes list");
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
-                try {
-                    connection = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/routes", "GET");
-                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-                    connection.connect();
-                    responseCode = connection.getResponseCode();
-                    String data = WebServiceHelpers.readResponse(connection);
-                    JSONArray jsonArray = new JSONArray(data);
-                    System.out.println(jsonArray);
-                    responseCode = connection.getResponseCode();
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Helpers.dismissProgressDialog();
-            if (responseCode == 200) {
-                Helpers.dismissProgressDialog();
-            } else {
-                Toast.makeText(MainActivity.this, "Please connect your device to the internet and try again", Toast.LENGTH_LONG).show();
-                ActivityCompat.finishAfterTransition(MainActivity.this);
-            }
-        }
-    }
-
 }
