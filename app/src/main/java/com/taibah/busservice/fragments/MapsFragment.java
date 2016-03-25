@@ -106,10 +106,7 @@ public class MapsFragment extends Fragment {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
-        if (AppGlobals.getUserType() == 2) {
                 new RetrieveStudentsRegisteredAgainstRoute().execute();
-
-        }
 
         tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
         tvDriverCurrentLocationTimeStamp = (TextView) convertView.findViewById(R.id.tv_route_driver_location_timestamp);

@@ -30,8 +30,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -49,6 +51,7 @@ public class ManageStudent extends Fragment {
     View convertView;
     HttpURLConnection connection;
     String studentName;
+    int index;
 
     @Nullable
     @Override
@@ -105,7 +108,7 @@ public class ManageStudent extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int index = info.position;
+        index = info.position;
         System.out.println(studentIdsList.get(index));
 
         switch (item.getItemId()) {
@@ -166,7 +169,7 @@ public class ManageStudent extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                // TODO Implement correct logic here
+                                new DeleteStudentTask().execute();
                             }
                         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -302,5 +305,48 @@ public class ManageStudent extends Fragment {
         TextView tvStudentRollNumber;
         TextView tvStudentAttending;
         TextView tvStudentAllowed;
+    }
+
+    public class DeleteStudentTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Deleting...");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL url = new URL("http://46.101.75.194:8080/users/" + studentIdsList.get(index));
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestMethod("DELETE");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                responseCode = connection.getResponseCode();
+
+                System.out.println("Delete Student Response Code: " + responseCode);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 204) {
+                Toast.makeText(getActivity(), "Student Deleted", Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
+                new RetrieveAllRegisteredStudentsTask().execute();
+            }
+        }
     }
 }

@@ -21,7 +21,6 @@ public class AppGlobals extends Application {
     private static final String TOKEN = "token";
     private static final String GCM_TOKEN = "gcm_token";
     private static final String ROUTE_ID = "route_id";
-    private static final String IS_APP_LOGGED_OUT = "logged_out";
     private static final String USER_PASSWORD = "user_password";
 
     @Override
@@ -39,16 +38,8 @@ public class AppGlobals extends Application {
         return sPreferences.getBoolean(FIRST_RUN, true);
     }
 
-    public static boolean isAppLoggedOut() {
-        return sPreferences.getBoolean(IS_APP_LOGGED_OUT, true);
-    }
-
     public static void setFirstRun(boolean firstRun) {
         sPreferences.edit().putBoolean(FIRST_RUN, firstRun).apply();
-    }
-
-    public static void putBoolean(boolean isAppLoggedOut) {
-        sPreferences.edit().putBoolean(IS_APP_LOGGED_OUT, isAppLoggedOut).apply();
     }
 
     public static String getUsername() {
