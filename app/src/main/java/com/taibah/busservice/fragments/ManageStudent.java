@@ -284,7 +284,6 @@ public class ManageStudent extends Fragment {
             viewHolder.tvStudentUsername.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(2));
             viewHolder.tvStudentRollNumber.setText("RollNumber: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(4));
 
-            System.out.println("yoooyoyo" + hashMapStudentData.get(arrayListIntIds.get(position)).get(5));
             if (hashMapStudentData.get(arrayListIntIds.get(position)).get(5).equalsIgnoreCase("1")) {
                 viewHolder.tvStudentAttending.setText("Attending Route: Yes");
             } else {
@@ -337,8 +336,6 @@ public class ManageStudent extends Fragment {
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
                 responseCode = connection.getResponseCode();
-
-                System.out.println("Delete Student Response Code: " + responseCode);
 
             } catch (IOException e) {
                 e.printStackTrace();

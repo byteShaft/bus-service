@@ -45,13 +45,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class MapsFragment extends Fragment {
 
@@ -72,13 +70,15 @@ public class MapsFragment extends Fragment {
 
     private LatLng startPoint;
     private LatLng endPoint;
-    private LatLng wayPoint1 = new LatLng(24.522815, 39.572929);
-    private LatLng wayPoint2 = new LatLng(24.500190, 39.581002);
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
     static int responseCode;
     HttpURLConnection connection;
     private static boolean isNetworkNotAvailable = true;
+
+
+    ArrayList<Integer> studentIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapStudentData;
 
     public static void addDriverLocationMarker() {
         if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
@@ -107,6 +107,9 @@ public class MapsFragment extends Fragment {
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
                 new RetrieveStudentsRegisteredAgainstRoute().execute();
+
+        studentIdsList = new ArrayList<>();
+        hashMapStudentData = new HashMap<>();
 
         tvDriverCurrentSpeed = (TextView) convertView.findViewById(R.id.tv_route_driver_speed);
         tvDriverCurrentLocationTimeStamp = (TextView) convertView.findViewById(R.id.tv_route_driver_location_timestamp);
@@ -144,24 +147,6 @@ public class MapsFragment extends Fragment {
                     mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     mMap.getUiSettings().setCompassEnabled(true);
                 }
-
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
-
-                mMap.addMarker(new MarkerOptions().position(startPoint)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
-                mMap.addMarker(new MarkerOptions().position(wayPoint1)
-                        .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView("Name1", getActivity()))));
-                mMap.addMarker(new MarkerOptions().position(wayPoint2)
-                        .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView("Name2", getActivity()))));
-                mMap.addMarker(new MarkerOptions().position(endPoint)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
-
-                Routing routing = new Routing.Builder()
-                        .travelMode(Routing.TravelMode.DRIVING)
-                        .withListener(mRoutingListener)
-                        .waypoints(startPoint, wayPoint1, wayPoint2, endPoint)
-                        .build();
-                routing.execute();
 
                 if (AppGlobals.getUserType() == 2) {
                     tvDriverCurrentLocationTimeStamp.setVisibility(View.GONE);
@@ -337,6 +322,12 @@ public class MapsFragment extends Fragment {
     private class RetrieveStudentsRegisteredAgainstRoute extends AsyncTask<Void, Integer, Void> {
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Retrieving route");
+        }
+
+        @Override
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
@@ -351,6 +342,20 @@ public class MapsFragment extends Fragment {
                     System.out.print(responseCode);
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObjectArray = jsonArray.getJSONObject(i);
+                        if (!studentIdsList.contains(jsonObject.getInt("id"))) {
+                            studentIdsList.add(jsonObject.getInt("id"));
+                            ArrayList<String> arrayListString = new ArrayList<>();
+                            arrayListString.add(jsonObjectArray.getString("first_name"));
+                            arrayListString.add(jsonObjectArray.getString("latitude"));
+                            arrayListString.add(jsonObjectArray.getString("longitude"));
+                            hashMapStudentData.put(jsonObject.getInt("id"), arrayListString);
+                            Log.i("LoopJson", ": " + arrayListString);
+                        }
+                    }
+
                     Log.i("Students Details", "" + jsonArray);
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
@@ -363,14 +368,41 @@ public class MapsFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (isNetworkNotAvailable) {
-                Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
-                getActivity().onBackPressed();
-            } else if (responseCode == 200) {
+            Helpers.dismissProgressDialog();
+            if (responseCode == 200) {
+                mMap.clear();
+
+                mMap.addMarker(new MarkerOptions().position(startPoint)
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+
+                mMap.addMarker(new MarkerOptions().position(endPoint)
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
+
+                List<LatLng> studentStops = new ArrayList<>();
+                studentStops.add(startPoint);
+
+                for (int i = 0; i < studentIdsList.size(); i++) {
+                    LatLng stop = new LatLng(Double.parseDouble(hashMapStudentData.get(studentIdsList.get(i)).get(1)), Double.parseDouble(hashMapStudentData.get(studentIdsList.get(i)).get(2)));
+                    mMap.addMarker(new MarkerOptions().position(stop)
+                            .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(hashMapStudentData.get(studentIdsList.get(i)).get(0), getActivity()))));
+                    studentStops.add(stop);
+                    Log.i("MapsFrag", "ForLoop" + stop);
+                }
+
+                studentStops.add(endPoint);
+
+                Log.i("stops", ": " + studentStops);
+
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
+
+                buildAndDisplayRouteWithWayPoints(studentStops);
                 if (DriverService.driverLocationReportingServiceIsRunning) {
                     new UpdateRouteStatus(getActivity()).execute("status=1");
                 }
                 isNetworkNotAvailable = true;
+            } else {
+                    Toast.makeText(getActivity(), "Server Error", Toast.LENGTH_LONG).show();
+                    getActivity().onBackPressed();
             }
         }
     }
@@ -412,6 +444,16 @@ public class MapsFragment extends Fragment {
                 isNetworkNotAvailable = true;
             }
         }
+    }
+
+    private void buildAndDisplayRouteWithWayPoints(List<LatLng> latLngArrayWithWayPoints) {
+        Routing routing = new Routing.Builder()
+                .travelMode(Routing.TravelMode.DRIVING)
+                .withListener(mRoutingListener)
+                .waypoints(latLngArrayWithWayPoints)
+                .routeMode(Routing.RouteMode.FASTEST)
+                .build();
+        routing.execute();
     }
 
 }

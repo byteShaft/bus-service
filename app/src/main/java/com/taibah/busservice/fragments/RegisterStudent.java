@@ -417,11 +417,9 @@ public class RegisterStudent extends Fragment {
                                                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
                                         mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
 
-
                                         mMap.addMarker(new MarkerOptions().position(latLng)).setIcon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(RegisterStudent.firstNameStudent, getActivity())));
 
-
-                                        LatLng[] latLngDummyList = new LatLng[]{latLngB, latLng, latLngA};
+                                        LatLng[] latLngDummyList = new LatLng[]{latLngA, latLng, latLngB};
                                         buildAndDisplayRouteWithWayPoints(latLngDummyList);
                                         studentStopLatLng = latLng;
                                     }
@@ -476,7 +474,6 @@ public class RegisterStudent extends Fragment {
                     .travelMode(Routing.TravelMode.DRIVING)
                     .withListener(mRoutingListener)
                     .waypoints(startPoint, endPoint)
-                    .routeMode(Routing.RouteMode.FASTEST)
                     .build();
             routing.execute();
         }
@@ -486,7 +483,6 @@ public class RegisterStudent extends Fragment {
                     .travelMode(Routing.TravelMode.DRIVING)
                     .withListener(mRoutingListener)
                     .waypoints(latLngArrayWithWayPoints)
-                    .routeMode(Routing.RouteMode.FASTEST)
                     .build();
             routing.execute();
         }
