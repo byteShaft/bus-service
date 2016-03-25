@@ -128,7 +128,7 @@ public class ManageStudent extends Fragment {
                 if (hashMapStudentData.get(studentIdsList.get(info.position)).get(6) == "1") {
                     AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
                             getActivity()).setTitle(studentName)
-                            .setMessage("Deny Service")
+                            .setMessage("Service allowed. Want to Deny")
                             .setCancelable(false)
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -144,7 +144,7 @@ public class ManageStudent extends Fragment {
                 } else {
                     AlertDialog.Builder alertDialogStudentService = new AlertDialog.Builder(
                             getActivity()).setTitle(studentName)
-                            .setMessage("Allow Service")
+                            .setMessage("Service denied. Want to Allow?")
                             .setCancelable(false)
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -274,13 +274,14 @@ public class ManageStudent extends Fragment {
             viewHolder.tvStudentUsername.setText("Username: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(2));
             viewHolder.tvStudentRollNumber.setText("RollNumber: " + hashMapStudentData.get(arrayListIntIds.get(position)).get(4));
 
-            if (hashMapStudentData.get(arrayListIntIds.get(position)).get(5) == "1") {
+            System.out.println("yoooyoyo" + hashMapStudentData.get(arrayListIntIds.get(position)).get(5));
+            if (hashMapStudentData.get(arrayListIntIds.get(position)).get(5).equalsIgnoreCase("1")) {
                 viewHolder.tvStudentAttending.setText("Attending Route: Yes");
             } else {
                 viewHolder.tvStudentAttending.setText("Attending Route: No");
             }
 
-            if (hashMapStudentData.get(arrayListIntIds.get(position)).get(6) == "1") {
+            if (hashMapStudentData.get(arrayListIntIds.get(position)).get(6).equalsIgnoreCase("1")) {
                 viewHolder.tvStudentAllowed.setText("Allowed by Admin: Yes" );
             } else {
                 viewHolder.tvStudentAllowed.setText("Allowed by Admin: No" );
