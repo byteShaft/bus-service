@@ -2,7 +2,6 @@ package com.taibah.busservice.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -35,8 +34,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
