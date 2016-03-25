@@ -29,31 +29,34 @@
         android:layout_below="@+id/layout_heading"
         android:orientation="vertical"
         android:layout_margin="20dp">
-
         <TextView
+            android:id="@+id/tv_status_retrieving_cancelled_routes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Active Routes"
-            android:textSize="16dp"
-            android:textStyle="bold"/>
-        <ListView
-            android:id="@+id/lv_active_routes"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:textSize="12dp"/>
+        <LinearLayout
+            android:id="@+id/layout_list_cancelled_routes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </ListView>
-
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="Cancelled Routes"
             android:textSize="16dp"
+            android:layout_gravity="center_horizontal"
             android:textStyle="bold"/>
         <ListView
             android:id="@+id/lv_cancelled_routes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:divider="@null">
         </ListView>
+        </LinearLayout>
     </LinearLayout>
 
     <RelativeLayout

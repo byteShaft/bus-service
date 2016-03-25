@@ -39,7 +39,6 @@ import com.taibah.busservice.utils.Helpers;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -51,7 +50,6 @@ public class MainActivity extends AppCompatActivity
     Fragment fragment;
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
-
     public static int responseCode;
     HttpURLConnection connection;
 

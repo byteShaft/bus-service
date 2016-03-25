@@ -197,6 +197,11 @@ public class RegisterStudent extends Fragment {
                     e.printStackTrace();
                     return true;
                 }
+
+                if (spinnerText == null) {
+                    Toast.makeText(getActivity(), "Incomplete info. No route found", Toast.LENGTH_SHORT).show();
+                }
+
                 new checkInternetTask().execute();
 
                 return true;

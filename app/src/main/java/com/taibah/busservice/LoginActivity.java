@@ -63,11 +63,7 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 username = editTextUsername.getText().toString().trim();
                 password = editTextPassword.getText().toString().trim();
-                if (username.equals("adntaibah") && password.equals("12345")) {
-                    login();
-                } else {
-                    new LoginDriverAndStudentTask().execute();
-                }
+                login();
             }
         });
     }
@@ -91,16 +87,16 @@ public class LoginActivity extends Activity {
             return;
         }
 
-        // TODO: Implement authentication here.
         if (Helpers.isNetworkAvailable()) {
-            new LoginAdminTask().execute();
+            if (username.equals("adntaibah") && password.equals("12345")) {
+                new LoginAdminTask().execute();
+            } else {
+                new LoginDriverAndStudentTask().execute();
+            }
         } else {
             Toast.makeText(LoginActivity.this, "Please connect your device to the Internet",
                     Toast.LENGTH_SHORT).show();
         }
-
-        // TODO: fetch Route Status here.
-
     }
 
     public boolean validate() {
@@ -178,7 +174,7 @@ public class LoginActivity extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Helpers.showProgressDialog(LoginActivity.this, "Authenticating...");
+            Helpers.showProgressDialog(LoginActivity.this, "Authenticating");
         }
 
         @Override
