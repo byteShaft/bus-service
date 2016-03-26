@@ -336,6 +336,10 @@ public class MapsFragment extends Fragment {
         }
     }
 
+    public static void cancelDriveLocation() {
+
+    }
+
     private void buildAndDisplayRouteWithWayPoints(List<LatLng> latLngArrayWithWayPoints) {
         Routing routing = new Routing.Builder()
                 .travelMode(Routing.TravelMode.DRIVING)

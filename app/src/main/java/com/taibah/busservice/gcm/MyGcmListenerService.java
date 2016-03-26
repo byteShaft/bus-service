@@ -13,11 +13,23 @@ import android.util.Log;
 import com.taibah.busservice.MainActivity;
 import com.taibah.busservice.R;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.taibah.busservice.fragments.HomeFragment;
+import com.taibah.busservice.fragments.MapsFragment;
 import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.Helpers;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Map;
 
 public class MyGcmListenerService extends GcmListenerService {
 
     private static final String TAG = "MyGcmListenerService";
+    String notificationStatus;
+    JSONObject jsonObject;
+    int value;
+    public static boolean studentStatusChanged;
 
     /**
      * Called when message is received.
@@ -32,19 +44,48 @@ public class MyGcmListenerService extends GcmListenerService {
         String output = data.toString();
         String real = output.substring(7, output.length() - 1);
         System.out.println(real);
+        try {
+            jsonObject = new JSONObject(real);
+            notificationStatus = jsonObject.getString("activity");
+            value = Integer.parseInt(jsonObject.getString("value"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + real);
 
-        if (from.startsWith("/topics/")) {
-            // message received from some topic.
-        } else {
-            // normal downstream message.
+        if (notificationStatus.equals("bus_status")) {
+            if (AppGlobals.getUserType() == 1) {
+
+                AppGlobals.putRouteStatus(value);
+
+                if (!AppGlobals.isFirstRun()) {
+                    if (AppGlobals.getRouteStatus() < 1) {
+                        showNotification("Route Stopped");
+                    } else if (AppGlobals.getRouteStatus() == 1) {
+                        showNotification("Route Started");
+                    } else if (AppGlobals.getRouteStatus() > 1) {
+                        showNotification(Helpers.parseRouteCancelledReason(AppGlobals.getRouteStatus()));
+                        if (MainActivity.isHomeFragmentOpen) {
+                            System.exit(0);
+                        }
+                    }
+                }
+            }
+        } else if (notificationStatus.equals("student_allowed")) {
+            if (AppGlobals.getUserType() == 1) {
+                if (value == 0) {
+                    showNotification("Your service is suspended by the admin");
+                } else if (value == 1) {
+                    showNotification("Your service has been restored by the admin");
+                } else if (AppGlobals.getUserType() == 2 && MapsFragment.mapsFragmentOpen) {
+                    studentStatusChanged = true;
+                }
+            }
         }
 
-        if (!AppGlobals.isFirstRun()) {
-            sendNotification(real);
-        }
     }
+
     // [END receive_message]
 
     /**
@@ -52,7 +93,7 @@ public class MyGcmListenerService extends GcmListenerService {
      *
      * @param message GCM message received.
      */
-    private void sendNotification(String message) {
+    private void showNotification(String message) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -61,7 +102,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.cast_ic_notification_on)
-                .setContentTitle("GCM Message")
+                .setContentTitle("BusService")
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
