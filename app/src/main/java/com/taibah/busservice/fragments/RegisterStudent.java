@@ -593,15 +593,11 @@ public class RegisterStudent extends Fragment {
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     connection.setRequestProperty("charset", "utf-8");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-
-                    Log.i("Token", AppGlobals.getToken());
-
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                     out.writeBytes(studentRegistrationDetail);
                     out.flush();
                     out.close();
                     responseCode = connection.getResponseCode();
-                    Log.i("Response", "" + responseCode);
 
                     InputStream in = (InputStream) connection.getContent();
                     int ch;
@@ -611,11 +607,8 @@ public class RegisterStudent extends Fragment {
                     while ((ch = in.read()) != -1)
                         sb.append((char) ch);
 
-                    Log.d("RESULT", sb.toString());
-
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e("BEFORE", e.getMessage());
                 }
             }
 
@@ -653,10 +646,8 @@ public class RegisterStudent extends Fragment {
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
-                    System.out.print(responseCode);
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
-                    System.out.println(jsonArray);
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -670,7 +661,6 @@ public class RegisterStudent extends Fragment {
                             arrayList.add(jsonObject.getString("end_longitude"));
 
                             hashMapRouteData.put(jsonObject.getInt("id"), arrayList);
-                            System.out.println(hashMapRouteData);
                         }
                     }
 

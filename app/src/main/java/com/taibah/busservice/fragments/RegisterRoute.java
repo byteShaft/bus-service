@@ -195,7 +195,6 @@ public class RegisterRoute extends Fragment {
                         + "&" + "start_longitude=" + PlaceholderFragment.pointA.longitude
                         + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
                         + "&" + "total_stops=10";
-                Log.i("routeInfo", routeInfo);
                 new RegisterRouteTask().execute();
             }
         });
@@ -454,15 +453,11 @@ public class RegisterRoute extends Fragment {
                     connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     connection.setRequestProperty("charset", "utf-8");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-
-                    Log.i("Token", AppGlobals.getToken());
-
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                     out.writeBytes(routeInfo);
                     out.flush();
                     out.close();
                     responseCode = connection.getResponseCode();
-                    Log.i("Response", "" + responseCode);
 
                     InputStream in = (InputStream) connection.getContent();
                     int ch;
@@ -471,9 +466,6 @@ public class RegisterRoute extends Fragment {
                     sb = new StringBuilder();
                     while ((ch = in.read()) != -1)
                         sb.append((char) ch);
-
-                    Log.d("RESULT", sb.toString());
-
                 } catch (IOException e) {
                     e.printStackTrace();
                     onRegistrationFailed();

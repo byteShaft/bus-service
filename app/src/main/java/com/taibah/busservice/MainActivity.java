@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,11 +19,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
@@ -38,14 +35,6 @@ import com.taibah.busservice.fragments.TwitterFragment;
 import com.taibah.busservice.gcm.QuickstartPreferences;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -237,9 +226,6 @@ public class MainActivity extends AppCompatActivity
     public void logout() {
 
         Helpers.showProgressDialog(MainActivity.this, "Logging out");
-
-        // TODO: Implement logout logic here.
-
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     @TargetApi(Build.VERSION_CODES.KITKAT)

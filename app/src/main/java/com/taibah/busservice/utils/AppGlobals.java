@@ -22,6 +22,7 @@ public class AppGlobals extends Application {
     private static final String GCM_TOKEN = "gcm_token";
     private static final String ROUTE_ID = "route_id";
     private static final String USER_PASSWORD = "user_password";
+    private static final String STUDENT_ALLOWED_VALUE = "student_allowed";
 
     @Override
     public void onCreate() {
@@ -103,6 +104,14 @@ public class AppGlobals extends Application {
 
     public static void putRouteStatus(int status) {
         sPreferences.edit().putInt(ROUTE_STATUS, status).apply();
+    }
+
+    public static void putStudentServiceAllowed(int status) {
+        sPreferences.edit().putInt(STUDENT_ALLOWED_VALUE, status).apply();
+    }
+
+    public static int getStudentServiceAllowed() {
+        return sPreferences.getInt(STUDENT_ALLOWED_VALUE, 0);
     }
 
     public static void replaceFragment(android.support.v4.app.FragmentManager fragMan, android.support.v4.app.Fragment frag) {

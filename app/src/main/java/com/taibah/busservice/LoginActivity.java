@@ -71,7 +71,6 @@ public class LoginActivity extends Activity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-//        finish();
     }
 
     @Override
@@ -203,12 +202,9 @@ public class LoginActivity extends Activity {
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
 
-                    Log.d("RESULT", sb.toString());
-
                     response = new JSONObject(sb.toString());
                     token = response.getString("token");
                     AppGlobals.putToken(token);
-                    Log.d("TOKEN", token);
 
                     connection.disconnect();
 
@@ -227,10 +223,8 @@ public class LoginActivity extends Activity {
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
 
-                    Log.d("RESULT", sb.toString());
-
                 } catch (JSONException | IOException e) {
-                    Log.e("BEFORE", e.getMessage());
+
                 }
             } else {
                 internetNotWorking = true;
@@ -280,7 +274,6 @@ public class LoginActivity extends Activity {
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                     String loginDetails = "username=" + username + "&" + "password=" + password;
                     out.writeBytes(loginDetails);
-                    Log.i("Login Details ", loginDetails);
                     out.flush();
                     out.close();
 
@@ -292,18 +285,14 @@ public class LoginActivity extends Activity {
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
 
-                    Log.d("LoginRESULT", sb.toString());
-
                     response = new JSONObject(sb.toString());
                     token = response.getString("token");
                     AppGlobals.putToken(token);
-                    Log.d("TOKEN", token);
 
                     AppGlobals.putStudentDriverRouteDetails(response.getString("route"));
                     String routeData = response.getString("route");
                     JSONObject jsonObject = new JSONObject(routeData);
                     int routeStatus = Integer.parseInt(jsonObject.getString("status"));
-                    Log.i("routeStatus", "ssada: " + routeStatus);
                     AppGlobals.putRouteStatus(routeStatus);
                     connection.disconnect();
 
@@ -322,15 +311,13 @@ public class LoginActivity extends Activity {
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
 
-                    Log.d("UserdetailRESULT", sb.toString());
-
                     JSONObject jsonObjectUser = new JSONObject(sb.toString());
 
                     AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
                     AppGlobals.putUserPassword(jsonObjectUser.getString("password"));
+                    AppGlobals.putStudentServiceAllowed(Integer.parseInt(jsonObjectUser.getString("allowed")));
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
-                    Log.e("BEFORE", e.getMessage());
                 }
             } else {
                 internetNotWorking = true;
@@ -396,10 +383,8 @@ public class LoginActivity extends Activity {
         protected Void doInBackground(Void... params) {
             try {
                 pushNotificationsEnablerCounter++;
-                Log.i("Counter ", "" + pushNotificationsEnablerCounter);
                 JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                 String ID = jsonObject.getString("id");
-                System.out.print("User ID " + ID);
                 URL url = new URL("http://46.101.75.194:8080/users/" + ID);
 
                 connection = (HttpURLConnection) url.openConnection();
@@ -410,9 +395,6 @@ public class LoginActivity extends Activity {
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-
-                System.out.println("Push Notifications Response Code " + responseCode);
-
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                 out.writeBytes("token=" + AppGlobals.getGcmToken());
                 out.flush();

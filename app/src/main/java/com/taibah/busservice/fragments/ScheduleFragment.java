@@ -79,8 +79,6 @@ public class ScheduleFragment extends Fragment {
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-                    Log.i("Token", AppGlobals.getToken());
-
                     responseCode = connection.getResponseCode();
 
                     InputStream in = (InputStream) connection.getContent();
@@ -90,7 +88,6 @@ public class ScheduleFragment extends Fragment {
                     StringBuilder sb = new StringBuilder();
                     while((ch = in.read()) != -1)
                         sb.append((char)ch);
-                    Log.d("Details", sb.toString());
                     JSONObject jsonObject = new JSONObject(sb.toString());
                     if (jsonObject.getString("attending").equalsIgnoreCase("1")) {
                         isAttending = true;
