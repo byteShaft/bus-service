@@ -366,8 +366,6 @@ public class ManageStudent extends Fragment {
         protected Void doInBackground(String... params) {
             Log.i("UpdateRouteStatus", "Called");
             try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
-                String ID = jsonObject.getString("id");
                 URL url = new URL("http://46.101.75.194:8080/users/" + studentIdsList.get(index));
 
                 connection = (HttpURLConnection) url.openConnection();
@@ -388,7 +386,7 @@ public class ManageStudent extends Fragment {
 
                 responseCode = connection.getResponseCode();
 
-            } catch (IOException | JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return null;

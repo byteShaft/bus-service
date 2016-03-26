@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
+import com.taibah.busservice.gcm.MyGcmListenerService;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
@@ -341,6 +342,10 @@ public class MapsFragment extends Fragment {
         }
     }
 
+    public static void cancelDriveLocation() {
+
+    }
+
     private void buildAndDisplayRouteWithWayPoints(List<LatLng> latLngArrayWithWayPoints) {
         Routing routing = new Routing.Builder()
                 .travelMode(Routing.TravelMode.DRIVING)
@@ -446,7 +451,14 @@ public class MapsFragment extends Fragment {
                 buildAndDisplayRouteWithWayPoints(studentStops);
                 if (AppGlobals.getUserType() == 1) {
                     if (routeStatus == 1) {
-                        driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                        if (MyGcmListenerService.studentStatusChanged) {
+                            Toast.makeText(getActivity(), "Students list updated", Toast.LENGTH_LONG).show();
+                            mMap.clear();
+                            retrieveStudentsTask.execute();
+                            MyGcmListenerService.studentStatusChanged = false;
+                        } else {
+                            driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                        }
                     }
                 }
                 isNetworkNotAvailable = true;

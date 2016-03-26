@@ -54,13 +54,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     Button buttonReportSituation;
     Button buttonStartStopRoute;
     RadioGroup radioGroupReportSituation;
-    RelativeLayout layoutDriverButtons;
-    RelativeLayout layoutRouteCancelled;
-    RelativeLayout layoutRouteInfo;
+    static RelativeLayout layoutDriverButtons;
+    static RelativeLayout layoutRouteCancelled;
+    static RelativeLayout layoutRouteInfo;
     LinearLayout layoutListCancelledRoutes;
     LinearLayout layoutAdminInfo;
     TextView tvUserType;
-    TextView tvRouteStatus;
+    static TextView tvRouteStatus;
     TextView tvRouteClickToRestore;
     TextView tvRouteArrivalTime;
     TextView tvRouteDepartureTime;
@@ -154,7 +154,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         return true;
     }
 
-    private void setRouteStatus(int status) {
+    public static void setRouteStatus(int status) {
         if (status == 0) {
             if (AppGlobals.getUserType() == 2) {
                 layoutDriverButtons.setVisibility(View.VISIBLE);
@@ -537,7 +537,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
             viewHolder.tvRoutesCancelledName.setText("Name: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
             viewHolder.tvRoutesCancelledBusNumber.setText("Bus Number: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(1));
-            String status = hashMapRouteData.get(arrayListIntIds.get(position)).get(2);
+            int status = Integer.parseInt(hashMapRouteData.get(arrayListIntIds.get(position)).get(2));
             viewHolder.tvRoutesCancelledReason.setText("Reason: " + Helpers.parseRouteCancelledReason(status));
             return convertView;
         }

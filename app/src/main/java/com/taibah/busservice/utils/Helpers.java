@@ -168,13 +168,13 @@ public class Helpers {
         return wifi != null && wifi.isConnectedOrConnecting() || mobile != null && mobile.isConnectedOrConnecting();
     }
 
-    public static String parseRouteCancelledReason(String status) {
+    public static String parseRouteCancelledReason(int status) {
         String reason = "";
-        if (status.equals("2")) {
+        if (status == 2) {
             reason = "Accident";
-        } else if (status.equals("3")) {
+        } else if (status == 3) {
             reason = "Driver unavailable";
-        } else if (status.equals("4")) {
+        } else if (status == 4) {
             reason = "Bus out of service";
         }
         return reason;
