@@ -1,13 +1,10 @@
 package com.taibah.busservice.fragments;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -47,9 +44,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,32 +54,30 @@ public class MapsFragment extends Fragment {
     public static boolean mapsFragmentOpen;
     public static LinearLayout layoutRouteMapInfoStrip;
     public static Marker driverLocationMarker;
+    public static LatLng latLngDriverForStudent;
+    public int locationRetrievalCounterForStudent = 0;
+    public static String locationSpeedAndTimeStampForStudent;
+    static int responseCode;
     private static GoogleMap mMap = null;
     private static boolean isZooming;
     private static TextView tvDriverCurrentSpeed;
     private static TextView tvDriverCurrentLocationTimeStamp;
     private static float previousZoomLevel = -1.0f;
+    private static boolean isNetworkNotAvailable = true;
+    public GetDriverLocationTask mTask;
+    String routeStatus;
+    HttpURLConnection connection;
+    ArrayList<Integer> studentIdsList;
+    HashMap<Integer, ArrayList<String>> hashMapStudentData;
     private View convertView;
     private FragmentManager fm;
     private SupportMapFragment myMapFragment;
     private RoutingListener mRoutingListener;
-    private LocationManager mLocationManager;
     private LatLng currentLatLngAuto = null;
-
     private LatLng startPoint;
     private LatLng endPoint;
     private Menu actionsMenu;
     private Boolean simpleMapView = true;
-    static int responseCode;
-    String routeStatus;
-    HttpURLConnection connection;
-    JSONObject response;
-    private static boolean isNetworkNotAvailable = true;
-    public GetDriverLocationTask mTask;
-
-
-    ArrayList<Integer> studentIdsList;
-    HashMap<Integer, ArrayList<String>> hashMapStudentData;
 
     public static void addDriverLocationMarker() {
         if (DriverService.driverLocationReportingServiceIsRunning && mapsFragmentOpen) {
@@ -107,12 +100,28 @@ public class MapsFragment extends Fragment {
         }
     }
 
+    public static void addDriverLocationMarkerForStudent() {
+        MarkerOptions a = new MarkerOptions();
+        a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
+        a.position(latLngDriverForStudent);
+        driverLocationMarker = mMap.addMarker(a);
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLngDriverForStudent));
+    }
+
+    public static void updateDriverLocationForStudent() {
+        if (driverLocationMarker != null) {
+            layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
+            driverLocationMarker.setPosition(latLngDriverForStudent);
+            tvDriverCurrentSpeed.setText("Speed: " + locationSpeedAndTimeStampForStudent + " Km/h");
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
-                new RetrieveStudentsRegisteredAgainstRoute().execute();
+        new RetrieveStudentsRegisteredAgainstRoute().execute();
 
         studentIdsList = new ArrayList<>();
         hashMapStudentData = new HashMap<>();
@@ -122,7 +131,6 @@ public class MapsFragment extends Fragment {
 
         layoutRouteMapInfoStrip = (LinearLayout) convertView.findViewById(R.id.layout_route_map_info_strip);
 
-        mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
 
         try {
@@ -193,10 +201,10 @@ public class MapsFragment extends Fragment {
             @Override
             public void onRoutingSuccess(PolylineOptions polylineOptions, Route route) {
                 mMap.addPolyline(new PolylineOptions()
-                    .addAll(polylineOptions.getPoints())
-                    .width(12)
-                    .geodesic(true)
-                    .color(Color.parseColor("#80000000")));
+                        .addAll(polylineOptions.getPoints())
+                        .width(12)
+                        .geodesic(true)
+                        .color(Color.parseColor("#80000000")));
 
                 mMap.addPolyline(new PolylineOptions()
                         .addAll(polylineOptions.getPoints())
@@ -227,7 +235,9 @@ public class MapsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mapsFragmentOpen = false;
-        mTask.cancel(true);
+        if (AppGlobals.getUserType() == 1 && routeStatus.equals("1")) {
+            mTask.cancel(true);
+        }
     }
 
     @Override
@@ -260,10 +270,10 @@ public class MapsFragment extends Fragment {
                     isZooming = true;
                     if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
                         CameraPosition cameraPosition =
-                            new CameraPosition.Builder()
-                                    .target(DriverService.driverCurrentLocation)
-                                    .zoom(16.0f)
-                                    .build();
+                                new CameraPosition.Builder()
+                                        .target(DriverService.driverCurrentLocation)
+                                        .zoom(16.0f)
+                                        .build();
                         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
                             @Override
                             public void onFinish() {
@@ -324,6 +334,16 @@ public class MapsFragment extends Fragment {
                 item.setIcon(R.mipmap.ic_map_simple);
             }
         }
+    }
+
+    private void buildAndDisplayRouteWithWayPoints(List<LatLng> latLngArrayWithWayPoints) {
+        Routing routing = new Routing.Builder()
+                .travelMode(Routing.TravelMode.DRIVING)
+                .withListener(mRoutingListener)
+                .waypoints(latLngArrayWithWayPoints)
+                .routeMode(Routing.RouteMode.FASTEST)
+                .build();
+        routing.execute();
     }
 
     private class RetrieveStudentsRegisteredAgainstRoute extends AsyncTask<Void, Integer, Void> {
@@ -428,8 +448,8 @@ public class MapsFragment extends Fragment {
                 }
                 isNetworkNotAvailable = true;
             } else {
-                    Toast.makeText(getActivity(), "Server Error", Toast.LENGTH_LONG).show();
-                    getActivity().onBackPressed();
+                Toast.makeText(getActivity(), "Server Error", Toast.LENGTH_LONG).show();
+                getActivity().onBackPressed();
             }
         }
     }
@@ -455,6 +475,11 @@ public class MapsFragment extends Fragment {
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObject1 = new JSONObject(data);
                     Log.i("Driver Location Details", "" + jsonObject1);
+
+                    latLngDriverForStudent = new LatLng(Double.parseDouble(jsonObject1.getString("latitude"))
+                            , Double.parseDouble(jsonObject1.getString("longitude")));
+                    locationSpeedAndTimeStampForStudent = jsonObject1.getString("speed");
+
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -467,23 +492,28 @@ public class MapsFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             if (isNetworkNotAvailable) {
-                Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Error: Server not responding", Toast.LENGTH_LONG).show();
+                layoutRouteMapInfoStrip.setVisibility(View.INVISIBLE);
                 getActivity().onBackPressed();
             } else if (responseCode == 200) {
-                mTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                if (latLngDriverForStudent != null) {
+                    if (locationRetrievalCounterForStudent < 1) {
+                        addDriverLocationMarkerForStudent();
+                        locationRetrievalCounterForStudent++;
+                    } else {
+                        updateDriverLocationForStudent();
+                    }
+                }
+                new android.os.Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                    }
+                }, 4000);
                 isNetworkNotAvailable = true;
             }
-        }
-    }
 
-    private void buildAndDisplayRouteWithWayPoints(List<LatLng> latLngArrayWithWayPoints) {
-        Routing routing = new Routing.Builder()
-                .travelMode(Routing.TravelMode.DRIVING)
-                .withListener(mRoutingListener)
-                .waypoints(latLngArrayWithWayPoints)
-                .routeMode(Routing.RouteMode.FASTEST)
-                .build();
-        routing.execute();
+        }
     }
 
 }
