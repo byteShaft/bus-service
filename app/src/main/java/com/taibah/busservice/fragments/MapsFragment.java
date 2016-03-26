@@ -239,8 +239,9 @@ public class MapsFragment extends Fragment {
         if (!retrieveStudentsTask.isCancelled()) {
             retrieveStudentsTask.cancel(true);
         }
-        if (AppGlobals.getUserType() == 1) {
-            if (!driverLocationTask.isCancelled()) {
+        if (AppGlobals.getUserType() == 1 ) {
+            driverLocationTask = new GetDriverLocationTask();
+            if (!driverLocationTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
             driverLocationTask.cancel(true);
             }
         }
