@@ -103,9 +103,7 @@ public class RegisterStudent extends Fragment {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
 
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
-
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
@@ -118,6 +116,7 @@ public class RegisterStudent extends Fragment {
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs_student);
         tabLayout.setupWithViewPager(mViewPager);
+
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -128,29 +127,24 @@ public class RegisterStudent extends Fragment {
             public void onPageSelected(int position) {
                 Helpers.closeKeyboard(getActivity());
                 if (position == 1) {
-                    if (spinnerText != null) {
-                        if (onLongClickCounter != 0) {
-                            menuItemUndo.setVisible(true);
-                        }
-                        if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
-                            mMap.clear();
-                            setInitialMap();
-                            onLongClickCounter = 0;
-                            menuItemUndo.setVisible(false);
-                            PlaceholderFragment.studentStopLatLng = null;
-                            tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
-                            spinnerValueChanged = false;
-                        } else if (spinnerValueChanged && mMap != null) {
-                            mMap.clear();
-                            setInitialMap();
-                            spinnerValueChanged = false;
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), "Error: Route not found", Toast.LENGTH_SHORT).show();
-                        mViewPager.setCurrentItem(0);
+                    if (onLongClickCounter != 0) {
+                        menuItemUndo.setVisible(true);
                     }
-                } else {
-                    menuItemUndo.setVisible(false);
+                    if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
+                        mMap.clear();
+                        setInitialMap();
+                        onLongClickCounter = 0;
+                        menuItemUndo.setVisible(false);
+                        PlaceholderFragment.studentStopLatLng = null;
+                        tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
+                        spinnerValueChanged = false;
+                    } else if (spinnerValueChanged && mMap != null) {
+                        mMap.clear();
+                        setInitialMap();
+                        spinnerValueChanged = false;
+                    } else {
+                        menuItemUndo.setVisible(false);
+                    }
                 }
             }
 
@@ -159,7 +153,7 @@ public class RegisterStudent extends Fragment {
 
             }
         });
-        mViewPager.setOffscreenPageLimit(0);
+        mViewPager.setOffscreenPageLimit(1);
         return convertView;
     }
 
@@ -188,6 +182,11 @@ public class RegisterStudent extends Fragment {
                 rollNumberStudent = etStudentRollNumber.getText().toString().trim();
                 emailStudent = etStudentEmail.getText().toString().trim();
                 try {
+                    if (spinnerText == null) {
+                        Toast.makeText(getActivity(), "Incomplete info. Route not found", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+
                     if (!validateInfo()) {
                         Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
                         return true;
