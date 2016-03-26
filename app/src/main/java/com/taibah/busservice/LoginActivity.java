@@ -324,8 +324,12 @@ public class LoginActivity extends Activity {
                     AppGlobals.putStudentDriverRouteDetails(response.getString("route"));
                     String routeData = response.getString("route");
                     JSONObject jsonObject = new JSONObject(routeData);
-                    int routeStatus = Integer.parseInt(jsonObject.getString("status"));
-                    AppGlobals.putRouteStatus(routeStatus);
+                    try {
+                        int routeStatus = Integer.parseInt(jsonObject.getString("status"));
+                        AppGlobals.putRouteStatus(routeStatus);
+                    } catch (NumberFormatException nfe) {
+                        AppGlobals.putRouteStatus(0);
+                    }
                     connection.disconnect();
 
                     url = new URL("http://46.101.75.194:8080/user");
