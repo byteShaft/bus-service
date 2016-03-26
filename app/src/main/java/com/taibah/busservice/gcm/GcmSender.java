@@ -43,7 +43,6 @@ public class GcmSender {
             // Read GCM response.
             InputStream inputStream = conn.getInputStream();
             String resp = IOUtils.toString(inputStream);
-            System.out.println(resp);
             System.out.println("Check your device/emulator for notification or logcat for " +
                     "confirmation of the receipt of the GCM message.");
         } catch (IOException e) {

@@ -74,7 +74,7 @@ public class MapsFragment extends Fragment {
     private FragmentManager fm;
     private SupportMapFragment myMapFragment;
     private RoutingListener mRoutingListener;
-    private LatLng currentLatLngAuto = null;
+    private LatLng currentLatLngAuto;
     private LatLng startPoint;
     private LatLng endPoint;
     private Menu actionsMenu;
@@ -106,7 +106,23 @@ public class MapsFragment extends Fragment {
         a.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_bus_location));
         a.position(latLngDriverForStudent);
         driverLocationMarker = mMap.addMarker(a);
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLngDriverForStudent));
+        isZooming = true;
+        CameraPosition cameraPosition =
+                new CameraPosition.Builder()
+                        .target(latLngDriverForStudent)
+                        .zoom(16.0f)
+                        .build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+            @Override
+            public void onFinish() {
+                isZooming = false;
+            }
+
+            @Override
+            public void onCancel() {
+                isZooming = false;
+            }
+        });
     }
 
     public static void updateDriverLocationForStudent() {
@@ -235,13 +251,14 @@ public class MapsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        latLngDriverForStudent = null;
         mapsFragmentOpen = false;
         if (!retrieveStudentsTask.isCancelled()) {
             retrieveStudentsTask.cancel(true);
         }
         if (AppGlobals.getUserType() == 1 ) {
             driverLocationTask = new GetDriverLocationTask();
-            if (!driverLocationTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+            if (driverLocationTask.getStatus().equals(AsyncTask.Status.RUNNING)) {
             driverLocationTask.cancel(true);
             }
         }
@@ -267,53 +284,69 @@ public class MapsFragment extends Fragment {
                 if (!Helpers.isAnyLocationServiceAvailable()) {
                     Toast.makeText(getActivity(), "Error: Location Service disabled", Toast.LENGTH_SHORT).show();
                 } else if (AppGlobals.getUserType() == 1) {
-                    if (mMap != null) {
-                        currentLatLngAuto = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLngAuto, 16.0f));
-                    } else {
-                        Toast.makeText(getActivity(), "Error: Location unavailable", Toast.LENGTH_SHORT).show();
-                    }
-                } else if (AppGlobals.getUserType() == 2) {
-                    isZooming = true;
-                    if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
-                        CameraPosition cameraPosition =
-                                new CameraPosition.Builder()
-                                        .target(DriverService.driverCurrentLocation)
-                                        .zoom(16.0f)
-                                        .build();
-                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
-                            @Override
-                            public void onFinish() {
-                                isZooming = false;
-                            }
-
-                            @Override
-                            public void onCancel() {
-                                isZooming = false;
-                            }
-                        });
-                    } else if (!DriverService.driverLocationReportingServiceIsRunning && mMap != null) {
+                    if (mMap != null && latLngDriverForStudent != null) {
                         isZooming = true;
                         currentLatLngAuto = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                        CameraPosition cameraPosition =
-                                new CameraPosition.Builder()
-                                        .target(currentLatLngAuto)
-                                        .zoom(16.0f)
-                                        .build();
-                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
-                            @Override
-                            public void onFinish() {
-                                isZooming = false;
-                            }
+                            CameraPosition cameraPosition =
+                                    new CameraPosition.Builder()
+                                            .target(latLngDriverForStudent)
+                                            .zoom(16.0f)
+                                            .build();
+                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+                                @Override
+                                public void onFinish() {
+                                    isZooming = false;
+                                }
 
-                            @Override
-                            public void onCancel() {
-                                isZooming = false;
-                            }
-                        });
-                    } else {
-                        Toast.makeText(getActivity(), "Error: Location unavailable", Toast.LENGTH_SHORT).show();
-                    }
+                                @Override
+                                public void onCancel() {
+                                    isZooming = false;
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getActivity(), "Driver Location unavailable", Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (AppGlobals.getUserType() == 2) {
+                        isZooming = true;
+                        if (DriverService.driverLocationReportingServiceIsRunning && DriverService.driverCurrentLocation != null) {
+                            CameraPosition cameraPosition =
+                                    new CameraPosition.Builder()
+                                            .target(DriverService.driverCurrentLocation)
+                                            .zoom(16.0f)
+                                            .build();
+                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+                                @Override
+                                public void onFinish() {
+                                    isZooming = false;
+                                }
+
+                                @Override
+                                public void onCancel() {
+                                    isZooming = false;
+                                }
+                            });
+                        } else if (!DriverService.driverLocationReportingServiceIsRunning && mMap != null) {
+                            isZooming = true;
+                            currentLatLngAuto = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                            CameraPosition cameraPosition =
+                                    new CameraPosition.Builder()
+                                            .target(currentLatLngAuto)
+                                            .zoom(16.0f)
+                                            .build();
+                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), new GoogleMap.CancelableCallback() {
+                                @Override
+                                public void onFinish() {
+                                    isZooming = false;
+                                }
+
+                                @Override
+                                public void onCancel() {
+                                    isZooming = false;
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getActivity(), "Location not available at the moment", Toast.LENGTH_SHORT).show();
+                        }
                 }
                 return true;
             case R.id.action_change_map:
@@ -380,34 +413,29 @@ public class MapsFragment extends Fragment {
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObjectArray = jsonArray.getJSONObject(i);
-                        if (!studentIdsList.contains(jsonObjectArray.getInt("id")) && !jsonObjectArray.getString("attending").equals("0")) {
+                        if (!studentIdsList.contains(jsonObjectArray.getInt("id")) && !jsonObjectArray.getString("attending").equals("0")
+                                && !jsonObjectArray.getString("allowed").equals("0")) {
                             studentIdsList.add(jsonObjectArray.getInt("id"));
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObjectArray.getString("first_name"));
                             arrayListString.add(jsonObjectArray.getString("latitude"));
                             arrayListString.add(jsonObjectArray.getString("longitude"));
                             hashMapStudentData.put(jsonObjectArray.getInt("id"), arrayListString);
-                            Log.i("LoopJson", ": " + arrayListString);
                         }
                     }
-
-                    Log.i("Students Details", "" + jsonArray);
-                    isNetworkNotAvailable = false;
 
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/routes/" + ID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
-                    System.out.println(responseCode);
 
                     String data1 = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObject1 = new JSONObject(data1);
 
                     routeStatus = Integer.parseInt(jsonObject1.getString("status"));
 
-                    Log.i("Route Details", "" + jsonObject1);
-
+                    isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
@@ -436,12 +464,9 @@ public class MapsFragment extends Fragment {
                     mMap.addMarker(new MarkerOptions().position(stop)
                             .icon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(hashMapStudentData.get(studentIdsList.get(i)).get(0), getActivity()))));
                     studentStops.add(stop);
-                    Log.i("MapsFrag", "ForLoop" + stop);
                 }
 
                 studentStops.add(endPoint);
-
-                Log.i("stops", ": " + studentStops);
 
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
 
@@ -475,10 +500,6 @@ public class MapsFragment extends Fragment {
                     Log.i("Get Driver Location", "Called");
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                     String ID = jsonObject.getString("id");
-                    routeStatus = Integer.parseInt(jsonObject.getString("status"));
-                    System.out.println("Route Status: " + routeStatus);
-                    System.out.println(ID);
-                    AppGlobals.putRouteStatus(routeStatus);
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/locations/get?route_id=" + ID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
@@ -487,12 +508,21 @@ public class MapsFragment extends Fragment {
                     System.out.print(responseCode);
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObject1 = new JSONObject(data);
-                    Log.i("Driver Location Details", "" + jsonObject1);
-
                     latLngDriverForStudent = new LatLng(Double.parseDouble(jsonObject1.getString("latitude"))
                             , Double.parseDouble(jsonObject1.getString("longitude")));
                     locationSpeedAndTimeStampForStudent = jsonObject1.getString("speed");
 
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes/" + ID, "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+
+                    String data1 = WebServiceHelpers.readResponse(connection);
+                    JSONObject jsonObjectRouteStatus = new JSONObject(data1);
+                    routeStatus = Integer.parseInt(jsonObjectRouteStatus.getString("status"));
+
+                    AppGlobals.putRouteStatus(routeStatus);
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -512,30 +542,31 @@ public class MapsFragment extends Fragment {
                 if (latLngDriverForStudent != null) {
                     if (locationRetrievalCounterForStudent < 1) {
                         addDriverLocationMarkerForStudent();
+                        updateDriverLocationForStudent();
                         locationRetrievalCounterForStudent++;
                     } else {
                         updateDriverLocationForStudent();
                     }
                 }
+
                 new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (routeStatus == 1) {
                             driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
                         } else if (routeStatus == 0 && locationRetrievalCounterForStudent > 0) {
-                            Toast.makeText(getActivity(), "Route Stopped", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Route Stopped", Toast.LENGTH_LONG).show();
                             layoutRouteMapInfoStrip.setVisibility(View.GONE);
                             driverLocationMarker.remove();
                         } else if (routeStatus > 1 && locationRetrievalCounterForStudent > 0) {
-                            Toast.makeText(getActivity(), "Route Unavailable", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Route Unavailable", Toast.LENGTH_LONG).show();
                             layoutRouteMapInfoStrip.setVisibility(View.GONE);
                             getActivity().onBackPressed();
                         }
+                        isNetworkNotAvailable = true;
                     }
                 }, 4000);
-                isNetworkNotAvailable = true;
             }
-
         }
     }
 

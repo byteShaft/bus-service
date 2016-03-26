@@ -9,7 +9,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/action_current_location"
-        android:title="Current Location"
+        android:title="Current/Driver Location"
         android:icon="@mipmap/ic_action_current_location"
         android:orderInCategory="100"
         app:showAsAction="always" />

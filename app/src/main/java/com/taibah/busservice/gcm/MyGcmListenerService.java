@@ -56,11 +56,17 @@ public class MyGcmListenerService extends GcmListenerService {
         if (notificationStatus.equals("bus_status")) {
             if (AppGlobals.getUserType() == 1) {
 
+                int currentRouteStatus = AppGlobals.getRouteStatus();
+
                 AppGlobals.putRouteStatus(value);
 
                 if (!AppGlobals.isFirstRun()) {
                     if (AppGlobals.getRouteStatus() < 1) {
-                        showNotification("Route Stopped");
+                        if (currentRouteStatus != 1) {
+                            showNotification("Route Available");
+                        } else {
+                            showNotification("Route Stopped");
+                        }
                     } else if (AppGlobals.getRouteStatus() == 1) {
                         showNotification("Route Started");
                         routeStartedNotification = true;
@@ -76,8 +82,10 @@ public class MyGcmListenerService extends GcmListenerService {
             if (AppGlobals.getUserType() == 1) {
                 if (value == 0) {
                     showNotification("Your service is suspended by the admin");
+                    AppGlobals.putStudentServiceAllowed(value);
                 } else if (value == 1) {
                     showNotification("Your service has been restored by the admin");
+                    AppGlobals.putStudentServiceAllowed(value);
                 } else if (AppGlobals.getUserType() == 2 && MapsFragment.mapsFragmentOpen) {
                     studentStatusChanged = true;
                 }
