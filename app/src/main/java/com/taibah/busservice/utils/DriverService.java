@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -101,7 +100,6 @@ public class DriverService extends Service implements LocationListener,
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-
         Toast.makeText(getApplicationContext(), "Failed to start Location Service", Toast.LENGTH_LONG).show();
     }
 
@@ -168,7 +166,6 @@ public class DriverService extends Service implements LocationListener,
                 out.flush();
                 out.close();
                 responseCode = connection.getResponseCode();
-                Log.i("Response", "" + responseCode);
 
                 InputStream in = (InputStream) connection.getContent();
                 int ch;
@@ -178,11 +175,8 @@ public class DriverService extends Service implements LocationListener,
                 while ((ch = in.read()) != -1)
                     sb.append((char) ch);
 
-                Log.d("RESULT", sb.toString());
-
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("BEFORE", e.getMessage());
             }
             return null;
         }

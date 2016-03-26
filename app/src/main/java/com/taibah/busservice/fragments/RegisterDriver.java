@@ -176,8 +176,6 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         routeId = unAssignedRouteIdsList.get(position);
         spinnerText = hashMapUnAssignedRouteData.get(unAssignedRouteIdsList.get(position));
-        System.out.println(routeId);
-        System.out.println(spinnerText);
     }
 
     @Override
@@ -275,16 +273,11 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-
-                Log.i("Token", AppGlobals.getToken());
-
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
                 out.writeBytes(registrationDetail);
                 out.flush();
                 out.close();
                 responseCode = connection.getResponseCode();
-                Log.i("Response", "" + responseCode);
-
                 InputStream in = (InputStream) connection.getContent();
                 int ch;
                 StringBuilder sb;
@@ -293,11 +286,8 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                 while ((ch = in.read()) != -1)
                     sb.append((char) ch);
 
-                Log.d("RESULT", sb.toString());
-
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("BEFORE", e.getMessage());
             }
             return null;
         }

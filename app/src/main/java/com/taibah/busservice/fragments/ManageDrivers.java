@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -154,8 +153,6 @@ public class ManageDrivers extends Fragment {
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObj = new JSONObject(data);
                     responseCode = connection.getResponseCode();
-                    Log.i("Driver", ": " + jsonObj);
-                    Log.i("Response Code: ", "" + connection.getResponseCode());
                     JSONArray jsonArray = jsonObj.getJSONArray("users");
 
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -186,7 +183,6 @@ public class ManageDrivers extends Fragment {
                 CustomDriverListAdapter customRoutesListAdapter = new CustomDriverListAdapter(getContext(), R.layout.route_list_row, driversIdsList);
                 driversListView.setAdapter(customRoutesListAdapter);
             } else {
-                // TODO Implement correct logic here in case of any failure
                 Toast.makeText(getActivity(), "Invalid Response " + responseCode, Toast.LENGTH_SHORT).show();
                 getActivity().onBackPressed();
             }

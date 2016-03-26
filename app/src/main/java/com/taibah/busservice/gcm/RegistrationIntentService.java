@@ -43,7 +43,6 @@ public class RegistrationIntentService extends IntentService {
                         GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
                 AppGlobals.putGcmToken(gcmToken);
                 // [END get_token]
-                Log.i(TAG, "GCM Registration Token: " + gcmToken);
             }
             sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, true).apply();
             // [END register_for_gcm]

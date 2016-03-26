@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -62,8 +61,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     TextView tvUserType;
     static TextView tvRouteStatus;
     TextView tvRouteClickToRestore;
-    TextView tvRouteArrivalTime;
-    TextView tvRouteDepartureTime;
+    static TextView tvRouteArrivalTime;
+    static TextView tvRouteDepartureTime;
     TextView tvStatusRetrievingCancelledRoutes;
 
     static int responseCode;
@@ -81,6 +80,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     HttpURLConnection connectionRoutes;
     public RetrieveAllCancelledRoutes mTask;
     TextView tvRouteName;
+    TextView tvStudentServiceStatus;
 
 
     @Nullable
@@ -94,6 +94,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         tvRouteDepartureTime = (TextView) convertView.findViewById(R.id.tv_departure_time);
         tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
         tvRouteName = (TextView) convertView.findViewById(R.id.tv_route_name_home_fragment);
+        tvStudentServiceStatus = (TextView) convertView.findViewById(R.id.tv_student_service_status_home_fragment);
         tvStatusRetrievingCancelledRoutes = (TextView) convertView.findViewById(R.id.tv_status_retrieving_cancelled_routes);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
@@ -107,6 +108,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 tvRouteName.setText("Assigned Route: " + jsonObject.getString("name"));
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+        }
+
+        if (AppGlobals.getUserType() == 1) {
+            if (AppGlobals.getStudentServiceAllowed() == 0) {
+                tvStudentServiceStatus.setVisibility(View.VISIBLE);
             }
         }
 
@@ -126,19 +133,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         setAppView();
         setRouteStatus(AppGlobals.getRouteStatus());
-
-        if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
-            try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-                String arrivalTime = jsonObject.getString("arrival_time");
-                String departureTime = jsonObject.getString("departure_time");
-                tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
-                tvRouteDepartureTime.setText(departureTime.substring(departureTime.length() - 8));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
         return convertView;
     }
 
@@ -188,6 +182,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 } else if (status == 4) {
                     tvRouteStatus.setText("Bus out of service");
                 }
+            }
+        }
+
+        if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
+            try {
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+                String arrivalTime = jsonObject.getString("arrival_time");
+                String departureTime = jsonObject.getString("departure_time");
+                tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
+                tvRouteDepartureTime.setText(departureTime.substring(departureTime.length() - 8));
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -358,7 +364,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     int id = radioGroupReportSituation.getCheckedRadioButtonId();
                                     View radioButton = radioGroupReportSituation.findViewById(id);
                                     radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
-                                    Log.i("BusService", "SituationReportingIndex: " + radioIndex);
 
                                     new SituationReportTask().execute("status=" + radioIndex);
 
@@ -404,7 +409,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         @Override
         protected Void doInBackground(String... params) {
-            Log.i("UpdateRouteStatus", "Called");
             try {
                 JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                 String ID = jsonObject.getString("id");
@@ -467,7 +471,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     responseCodeRoutes = connectionRoutes.getResponseCode();
                     String data = WebServiceHelpers.readResponse(connectionRoutes);
                     JSONArray jsonArray = new JSONArray(data);
-                    System.out.println("AllRoutes: " + jsonArray);
                     responseCodeRoutes = connectionRoutes.getResponseCode();
 
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -480,11 +483,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             arrayListString.add(jsonObject.getString("name"));
                             arrayListString.add(jsonObject.getString("bus_number"));
                             arrayListString.add(jsonObject.getString("status"));
-
                             String driverObject = jsonObject.getString("driver");
                             JSONObject jsonObjectDriver = new JSONObject(driverObject);
                             arrayListString.add(jsonObjectDriver.getString("phone"));
-
                             hashMapRouteData.put(jsonObject.getInt("id"), arrayListString);
                         }
                     }
@@ -509,7 +510,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 } else {
                     tvStatusRetrievingCancelledRoutes.setText("No cancelled route found.");
                     tvStatusRetrievingCancelledRoutes.setTextColor(Color.BLACK);
-                    
                 }
             } else {
                 tvStatusRetrievingCancelledRoutes.setText("Error retrieving cancelled routes status");
