@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.text.format.Time;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -159,8 +160,13 @@ public class DriverService extends Service implements LocationListener,
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
+                Time today = new Time(Time.getCurrentTimezone());
+                today.setToNow();
+
+                String timeStamp = today.monthDay + "/" + today.month + "/" + today.year + " - " + today.format("%k:%M:%S");
+
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                out.writeBytes("speed=" + driverCurrentSpeedInKilometers +
+                out.writeBytes("speed=" + driverCurrentSpeedInKilometers + "   " + timeStamp +
                         "&" + "latitude=" + driverCurrentLocation.latitude +
                         "&" + "longitude=" + driverCurrentLocation.longitude);
                 out.flush();
