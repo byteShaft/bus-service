@@ -20,7 +20,6 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.taibah.busservice.LoginActivity;
 import com.taibah.busservice.fragments.MapsFragment;
 
 import java.io.DataOutputStream;
@@ -52,6 +51,8 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         connectGoogleApiClient();
+        driverLocationReportingServiceIsRunning = true;
+        new UpdateRouteStatus(getApplicationContext()).execute("status=1");
         return START_STICKY;
     }
 
@@ -79,8 +80,6 @@ public class DriverService extends Service implements LocationListener,
         }
         Location tempLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         driverLastKnownLocation = new LatLng(tempLocation.getLatitude(), tempLocation.getLongitude());
-        new UpdateRouteStatus(getApplicationContext()).execute("status=1");
-        driverLocationReportingServiceIsRunning = true;
     }
 
     @Override
