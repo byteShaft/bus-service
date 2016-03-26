@@ -66,36 +66,76 @@ public class RegisterStudent extends Fragment {
     public static TextView tvMapRegisterStudentInfo;
     public static int onLongClickCounter = 0;
     public static int responseCode;
-
-    View convertView;
+    public static boolean spinnerValueChanged;
+    public static ViewPager mViewPager;
+    public static LatLng latLngA = new LatLng(24.513371, 39.576058);
+    public static LatLng latLngB = new LatLng(24.913371, 39.876058);
     static String firstNameStudent = "";
     static String lastNameStudent;
     static String contactNumberStudent;
     static String rollNumberStudent;
     static String emailStudent;
-    String studentRegistrationDetail;
-    String studentStop;
-
-    public static boolean spinnerValueChanged;
-
     static GoogleMap mMap;
-
-    HttpURLConnection connection;
-
-    public static ViewPager mViewPager;
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
     static ArrayList<Integer> routeIdsList;
     static HashMap<Integer, ArrayList<String>> hashMapRouteData;
-
     static Spinner spinnerRoutesList;
-
     static int routeId = 0;
     static String spinnerText;
+    View convertView;
+    String studentRegistrationDetail;
+    String studentStop;
+    HttpURLConnection connection;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
-    public static LatLng latLngA = new LatLng(24.513371, 39.576058);
-    public static LatLng latLngB = new LatLng(24.913371, 39.876058);
+    public static boolean validateInfo() {
+        boolean valid = true;
 
+        if (firstNameStudent.isEmpty() || firstNameStudent.length() < 3) {
+            etStudentFirstName.setError("at least 3 characters");
+            valid = false;
+        } else {
+            etStudentFirstName.setError(null);
+        }
+
+        if (lastNameStudent.isEmpty() || lastNameStudent.length() < 3) {
+            etStudentLastName.setError("at least 3 characters");
+            valid = false;
+        } else {
+            etStudentLastName.setError(null);
+        }
+
+        if (rollNumberStudent.isEmpty() || rollNumberStudent.length() < 3) {
+            etStudentRollNumber.setError("at least 3 characters");
+            valid = false;
+        } else {
+            etStudentContactNumber.setError(null);
+        }
+
+        if (!contactNumberStudent.isEmpty() && !PhoneNumberUtils.isGlobalPhoneNumber(contactNumberStudent)) {
+            etStudentContactNumber.setError("Number is invalid");
+            valid = false;
+        } else {
+            etStudentContactNumber.setError(null);
+        }
+
+        if (!emailStudent.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(emailStudent).matches()) {
+            etStudentEmail.setError("Email is invalid");
+            valid = false;
+        } else {
+            etStudentEmail.setError(null);
+        }
+
+        return valid;
+    }
+
+    public static void setInitialMap() {
+        mMap.addMarker(new MarkerOptions().position(latLngB)
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
+        mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLngB, 12.0f));
+
+        PlaceholderFragment.buildAndDisplayRoute(latLngB, latLngA);
+    }
 
     @Nullable
     @Override
@@ -103,9 +143,7 @@ public class RegisterStudent extends Fragment {
         convertView = inflater.inflate(R.layout.layout_register_student, null);
         setHasOptionsMenu(true);
 
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
-
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) convertView.findViewById(R.id.container_student);
@@ -118,6 +156,7 @@ public class RegisterStudent extends Fragment {
 
         TabLayout tabLayout = (TabLayout) convertView.findViewById(R.id.tabs_student);
         tabLayout.setupWithViewPager(mViewPager);
+
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -128,29 +167,24 @@ public class RegisterStudent extends Fragment {
             public void onPageSelected(int position) {
                 Helpers.closeKeyboard(getActivity());
                 if (position == 1) {
-                    if (spinnerText != null) {
-                        if (onLongClickCounter != 0) {
-                            menuItemUndo.setVisible(true);
-                        }
-                        if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
-                            mMap.clear();
-                            setInitialMap();
-                            onLongClickCounter = 0;
-                            menuItemUndo.setVisible(false);
-                            PlaceholderFragment.studentStopLatLng = null;
-                            tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
-                            spinnerValueChanged = false;
-                        } else if (spinnerValueChanged && mMap != null) {
-                            mMap.clear();
-                            setInitialMap();
-                            spinnerValueChanged = false;
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), "Error: Route not found", Toast.LENGTH_SHORT).show();
-                        mViewPager.setCurrentItem(0);
+                    if (onLongClickCounter != 0) {
+                        menuItemUndo.setVisible(true);
                     }
-                } else {
-                    menuItemUndo.setVisible(false);
+                    if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
+                        mMap.clear();
+                        setInitialMap();
+                        onLongClickCounter = 0;
+                        menuItemUndo.setVisible(false);
+                        PlaceholderFragment.studentStopLatLng = null;
+                        tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
+                        spinnerValueChanged = false;
+                    } else if (spinnerValueChanged && mMap != null) {
+                        mMap.clear();
+                        setInitialMap();
+                        spinnerValueChanged = false;
+                    } else {
+                        menuItemUndo.setVisible(false);
+                    }
                 }
             }
 
@@ -159,7 +193,7 @@ public class RegisterStudent extends Fragment {
 
             }
         });
-        mViewPager.setOffscreenPageLimit(0);
+        mViewPager.setOffscreenPageLimit(1);
         return convertView;
     }
 
@@ -264,47 +298,6 @@ public class RegisterStudent extends Fragment {
 
     }
 
-    public static boolean validateInfo() {
-        boolean valid = true;
-
-        if (firstNameStudent.isEmpty() || firstNameStudent.length() < 3) {
-            etStudentFirstName.setError("at least 3 characters");
-            valid = false;
-        } else {
-            etStudentFirstName.setError(null);
-        }
-
-        if (lastNameStudent.isEmpty() || lastNameStudent.length() < 3) {
-            etStudentLastName.setError("at least 3 characters");
-            valid = false;
-        } else {
-            etStudentLastName.setError(null);
-        }
-
-        if (rollNumberStudent.isEmpty() || rollNumberStudent.length() < 3) {
-            etStudentRollNumber.setError("at least 3 characters");
-            valid = false;
-        } else {
-            etStudentContactNumber.setError(null);
-        }
-
-        if (!contactNumberStudent.isEmpty() && !PhoneNumberUtils.isGlobalPhoneNumber(contactNumberStudent)) {
-            etStudentContactNumber.setError("Number is invalid");
-            valid = false;
-        } else {
-            etStudentContactNumber.setError(null);
-        }
-
-        if (!emailStudent.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(emailStudent).matches()) {
-            etStudentEmail.setError("Email is invalid");
-            valid = false;
-        } else {
-            etStudentEmail.setError(null);
-        }
-
-        return valid;
-    }
-
     public void onRegistrationSuccess() {
         Toast.makeText(getActivity(), "Registration successful", Toast.LENGTH_SHORT).show();
         menuItemUndo.setVisible(false);
@@ -332,7 +325,7 @@ public class RegisterStudent extends Fragment {
     public static class PlaceholderFragment extends Fragment implements AdapterView.OnItemSelectedListener {
         private static final String ARG_SECTION_NUMBER = "section_number";
         public static LatLng studentStopLatLng = null;
-
+        static RoutingListener mRoutingListener;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -340,7 +333,6 @@ public class RegisterStudent extends Fragment {
 
         private FragmentManager fm;
         private SupportMapFragment myMapFragment;
-        static RoutingListener mRoutingListener;
 
         public PlaceholderFragment() {
         }
@@ -356,6 +348,15 @@ public class RegisterStudent extends Fragment {
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
+        }
+
+        static void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
+            Routing routing = new Routing.Builder()
+                    .travelMode(Routing.TravelMode.DRIVING)
+                    .withListener(mRoutingListener)
+                    .waypoints(startPoint, endPoint)
+                    .build();
+            routing.execute();
         }
 
         @Override
@@ -406,25 +407,32 @@ public class RegisterStudent extends Fragment {
                         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                             @Override
                             public void onMapLongClick(LatLng latLng) {
-                                if (RegisterStudent.firstNameStudent.trim().length() < 3) {
-                                    Toast.makeText(getActivity(), "Put student name first", Toast.LENGTH_SHORT).show();
-                                    mViewPager.setCurrentItem(0);
-                                } else {
-                                    onLongClickCounter++;
-                                    if (onLongClickCounter == 1) {
-                                        mMap.clear();
-                                        menuItemUndo.setVisible(true);
-                                        tvMapRegisterStudentInfo.setText("Resolving route points...");
-                                        mMap.addMarker(new MarkerOptions().position(latLngB)
-                                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
-                                        mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
 
-                                        mMap.addMarker(new MarkerOptions().position(latLng)).setIcon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(RegisterStudent.firstNameStudent, getActivity())));
+                                if (spinnerText != null) {
 
-                                        LatLng[] latLngDummyList = new LatLng[]{latLngA, latLng, latLngB};
-                                        buildAndDisplayRouteWithWayPoints(latLngDummyList);
-                                        studentStopLatLng = latLng;
+                                    if (RegisterStudent.firstNameStudent.trim().length() < 3) {
+                                        Toast.makeText(getActivity(), "Put student name first", Toast.LENGTH_SHORT).show();
+                                        mViewPager.setCurrentItem(0);
+                                    } else {
+                                        onLongClickCounter++;
+                                        if (onLongClickCounter == 1) {
+                                            mMap.clear();
+                                            menuItemUndo.setVisible(true);
+                                            tvMapRegisterStudentInfo.setText("Resolving route points...");
+                                            mMap.addMarker(new MarkerOptions().position(latLngB)
+                                                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
+                                            mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
+
+                                            mMap.addMarker(new MarkerOptions().position(latLng)).setIcon(BitmapDescriptorFactory.fromBitmap(Helpers.getMarkerBitmapFromView(RegisterStudent.firstNameStudent, getActivity())));
+
+                                            LatLng[] latLngDummyList = new LatLng[]{latLngA, latLng, latLngB};
+                                            buildAndDisplayRouteWithWayPoints(latLngDummyList);
+                                            studentStopLatLng = latLng;
+                                        }
                                     }
+                                } else {
+                                    Toast.makeText(getActivity(), "Route not found. Register route first", Toast.LENGTH_LONG).show();
+                                    getActivity().onBackPressed();
                                 }
                             }
                         });
@@ -471,15 +479,6 @@ public class RegisterStudent extends Fragment {
             return rootView;
         }
 
-        static void buildAndDisplayRoute(LatLng startPoint, LatLng endPoint) {
-            Routing routing = new Routing.Builder()
-                    .travelMode(Routing.TravelMode.DRIVING)
-                    .withListener(mRoutingListener)
-                    .waypoints(startPoint, endPoint)
-                    .build();
-            routing.execute();
-        }
-
         private void buildAndDisplayRouteWithWayPoints(LatLng[] latLngArrayWithWayPoints) {
             Routing routing = new Routing.Builder()
                     .travelMode(Routing.TravelMode.DRIVING)
@@ -502,6 +501,10 @@ public class RegisterStudent extends Fragment {
         public void onNothingSelected(AdapterView<?> parent) {
 
         }
+    }
+
+    static class ViewHolder {
+        TextView tvSpinner;
     }
 
     private class checkInternetTask extends AsyncTask<Void, Void, Boolean> {
@@ -687,7 +690,6 @@ public class RegisterStudent extends Fragment {
         }
     }
 
-
     class CustomSpinnerListAdapter extends ArrayAdapter<String> {
 
         ArrayList<Integer> arrayListIntIds;
@@ -726,20 +728,6 @@ public class RegisterStudent extends Fragment {
         public int getCount() {
             return arrayListIntIds.size();
         }
-    }
-
-
-    static class ViewHolder {
-        TextView tvSpinner;
-    }
-
-    public static void setInitialMap() {
-        mMap.addMarker(new MarkerOptions().position(latLngB)
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_b)));
-        mMap.addMarker(new MarkerOptions().position(latLngA).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_location_marker_a)));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLngB, 12.0f));
-
-        PlaceholderFragment.buildAndDisplayRoute(latLngB, latLngA);
     }
 }
 
