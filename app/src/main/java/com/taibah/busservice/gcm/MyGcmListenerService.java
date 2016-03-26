@@ -82,6 +82,10 @@ public class MyGcmListenerService extends GcmListenerService {
                     studentStatusChanged = true;
                 }
             }
+        } else if (notificationStatus.equals("student_attending")) {
+            if (AppGlobals.getUserType() == 2) {
+                studentStatusChanged = true;
+            }
         }
 
     }
