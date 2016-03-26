@@ -477,7 +477,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
                         if (!routeIdsList.contains(jsonObject.getInt("id"))
                                 && !jsonObject.getString("status").equalsIgnoreCase("0")
-                                && !jsonObject.getString("status").equalsIgnoreCase("1")) {
+                                && !jsonObject.getString("status").equalsIgnoreCase("1")
+                                && !jsonObject.getString("driver").equals("null") && !jsonObject.getString("status").equals("null")) {
                             routeIdsList.add(jsonObject.getInt("id"));
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObject.getString("name"));
