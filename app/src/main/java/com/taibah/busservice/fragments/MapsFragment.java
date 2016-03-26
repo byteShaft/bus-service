@@ -129,7 +129,8 @@ public class MapsFragment extends Fragment {
         if (driverLocationMarker != null) {
             layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
             driverLocationMarker.setPosition(latLngDriverForStudent);
-            tvDriverCurrentSpeed.setText("Speed: " + locationSpeedAndTimeStampForStudent + " Km/h");
+            tvDriverCurrentSpeed.setText("Speed: " + locationSpeedAndTimeStampForStudent.substring(0, 2) + " Km/h");
+            tvDriverCurrentLocationTimeStamp.setText(locationSpeedAndTimeStampForStudent.substring(locationSpeedAndTimeStampForStudent.length() - 21));
         }
     }
 

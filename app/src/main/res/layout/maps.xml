@@ -36,7 +36,6 @@
             android:shadowDx="1.6"
             android:shadowDy="1.3"
             android:shadowRadius="1.6"
-            android:text="10:02 AM - 06/12/2015"
             android:textColor="#ffffff"
             android:textSize="14dp" />
 
