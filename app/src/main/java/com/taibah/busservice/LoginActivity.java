@@ -1,13 +1,17 @@
 package com.taibah.busservice;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +50,7 @@ public class LoginActivity extends Activity {
     public static BroadcastReceiver mRegistrationBroadcastReceiver;
     public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public static int pushNotificationsEnablerCounter = 0;
+    public static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0;
 
     boolean internetNotWorking = false;
 
@@ -53,6 +58,8 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+
 
         editTextUsername = (EditText) findViewById(R.id.et_username_login);
         editTextPassword = (EditText) findViewById(R.id.et_password_login);
@@ -63,22 +70,49 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 username = editTextUsername.getText().toString().trim();
                 password = editTextPassword.getText().toString().trim();
-                login();
+
+                if (ContextCompat.checkSelfPermission(LoginActivity.this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(LoginActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    return;
+                }
             }
         });
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-//        finish();
-    }
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        MainActivity.isAppForeground = true;
-    }
+                    login();
+
+                } else {
+                    Toast.makeText(LoginActivity.this, "Please allow Location access from your " +
+                            "Android Application Settings", Toast.LENGTH_LONG).show();
+                }
+        }
+
+        }
+
+        @Override
+        public void onBackPressed () {
+            super.onBackPressed();
+//        finish();
+        }
+
+        @Override
+        protected void onResume () {
+            super.onResume();
+            MainActivity.isAppForeground = true;
+        }
 
     public void login() {
 
@@ -135,11 +169,11 @@ public class LoginActivity extends Activity {
     }
 
     public void setUserType() {
-        if (TextUtils.equals(username.substring(0,3), "dvr")) {
+        if (TextUtils.equals(username.substring(0, 3), "dvr")) {
             AppGlobals.putUserType(2);
-        } else if (TextUtils.equals(username.substring(0,3), "sdt")){
+        } else if (TextUtils.equals(username.substring(0, 3), "sdt")) {
             AppGlobals.putUserType(1);
-        } else if (TextUtils.equals(username.substring(0,3), "adn")){
+        } else if (TextUtils.equals(username.substring(0, 3), "adn")) {
             AppGlobals.putUserType(0);
         }
     }
@@ -200,8 +234,8 @@ public class LoginActivity extends Activity {
 
                     int ch;
                     StringBuilder sb = new StringBuilder();
-                    while((ch = in.read()) != -1)
-                        sb.append((char)ch);
+                    while ((ch = in.read()) != -1)
+                        sb.append((char) ch);
 
                     Log.d("RESULT", sb.toString());
 
@@ -224,8 +258,8 @@ public class LoginActivity extends Activity {
                     in = (InputStream) connection.getContent();
 
                     sb = new StringBuilder();
-                    while((ch = in.read()) != -1)
-                        sb.append((char)ch);
+                    while ((ch = in.read()) != -1)
+                        sb.append((char) ch);
 
                     Log.d("RESULT", sb.toString());
 
@@ -289,8 +323,8 @@ public class LoginActivity extends Activity {
 
                     int ch;
                     StringBuilder sb = new StringBuilder();
-                    while((ch = in.read()) != -1)
-                        sb.append((char)ch);
+                    while ((ch = in.read()) != -1)
+                        sb.append((char) ch);
 
                     Log.d("LoginRESULT", sb.toString());
 
@@ -319,8 +353,8 @@ public class LoginActivity extends Activity {
                     in = (InputStream) connection.getContent();
 
                     sb = new StringBuilder();
-                    while((ch = in.read()) != -1)
-                        sb.append((char)ch);
+                    while ((ch = in.read()) != -1)
+                        sb.append((char) ch);
 
                     Log.d("UserdetailRESULT", sb.toString());
 
