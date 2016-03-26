@@ -10,10 +10,9 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.android.gms.gcm.GcmListenerService;
 import com.taibah.busservice.MainActivity;
 import com.taibah.busservice.R;
-import com.google.android.gms.gcm.GcmListenerService;
-import com.taibah.busservice.fragments.HomeFragment;
 import com.taibah.busservice.fragments.MapsFragment;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
@@ -21,14 +20,13 @@ import com.taibah.busservice.utils.Helpers;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Map;
-
 public class MyGcmListenerService extends GcmListenerService {
 
     private static final String TAG = "MyGcmListenerService";
     String notificationStatus;
     JSONObject jsonObject;
     int value;
+    public boolean routeStartedNotification;
     public static boolean studentStatusChanged;
 
     /**
@@ -53,6 +51,7 @@ public class MyGcmListenerService extends GcmListenerService {
         }
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + real);
+        routeStartedNotification = false;
 
         if (notificationStatus.equals("bus_status")) {
             if (AppGlobals.getUserType() == 1) {
@@ -64,6 +63,7 @@ public class MyGcmListenerService extends GcmListenerService {
                         showNotification("Route Stopped");
                     } else if (AppGlobals.getRouteStatus() == 1) {
                         showNotification("Route Started");
+                        routeStartedNotification = true;
                     } else if (AppGlobals.getRouteStatus() > 1) {
                         showNotification(Helpers.parseRouteCancelledReason(AppGlobals.getRouteStatus()));
                         if (MainActivity.isHomeFragmentOpen) {
@@ -83,7 +83,7 @@ public class MyGcmListenerService extends GcmListenerService {
                 }
             }
         } else if (notificationStatus.equals("student_attending")) {
-            if (AppGlobals.getUserType() == 2) {
+            if (AppGlobals.getUserType() == 2 && MapsFragment.mapsFragmentOpen) {
                 studentStatusChanged = true;
             }
         }
@@ -105,7 +105,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.cast_ic_notification_on)
+                .setSmallIcon(R.mipmap.ic_notification)
                 .setContentTitle("BusService")
                 .setContentText(message)
                 .setAutoCancel(true)

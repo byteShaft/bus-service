@@ -56,8 +56,10 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        driverLocationReportingServiceIsRunning = false;
-//        stopLocationService();
+        driverLocationReportingServiceIsRunning = false;
+        stopLocationService();
+        DriverService.onLocationChangedCounter = 0;
+        new UpdateRouteStatus(getApplicationContext()).execute("status=0");
     }
 
     @Override

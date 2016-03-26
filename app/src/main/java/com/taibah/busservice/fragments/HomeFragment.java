@@ -264,9 +264,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                         public void onClick(DialogInterface dialog, int id) {
 
                                             Helpers.showProgressDialog(getActivity(), "Ending Route");
-                                            DriverService.onLocationChangedCounter = 0;
-                                            new UpdateRouteStatus(getActivity()).execute("status=0");
-
                                             new android.os.Handler().postDelayed(
                                                     new Runnable() {
                                                         public void run() {
