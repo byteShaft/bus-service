@@ -59,8 +59,6 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
-
         editTextUsername = (EditText) findViewById(R.id.et_username_login);
         editTextPassword = (EditText) findViewById(R.id.et_password_login);
         buttonLogin = (Button) findViewById(R.id.btn_login);
@@ -70,7 +68,6 @@ public class LoginActivity extends Activity {
             public void onClick(View v) {
                 username = editTextUsername.getText().toString().trim();
                 password = editTextPassword.getText().toString().trim();
-
                 if (ContextCompat.checkSelfPermission(LoginActivity.this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -78,7 +75,8 @@ public class LoginActivity extends Activity {
                     ActivityCompat.requestPermissions(LoginActivity.this,
                             new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                             MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                    return;
+                } else {
+                    login();
                 }
             }
         });
@@ -105,7 +103,6 @@ public class LoginActivity extends Activity {
         @Override
         public void onBackPressed () {
             super.onBackPressed();
-//        finish();
         }
 
         @Override
