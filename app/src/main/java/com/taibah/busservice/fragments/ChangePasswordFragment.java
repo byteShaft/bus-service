@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.taibah.busservice.LoginActivity;
-import com.taibah.busservice.MainActivity;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
@@ -141,7 +140,7 @@ public class ChangePasswordFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isInternetWorking() && Helpers.isNetworkAvailable()) {
                 try {
-                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                     String ID = jsonObject.getString("id");
                     URL url = new URL("http://46.101.75.194:8080/users/" + ID);
 

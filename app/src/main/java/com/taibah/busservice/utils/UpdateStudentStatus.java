@@ -35,7 +35,7 @@ public class UpdateStudentStatus extends AsyncTask<String, Integer, Void> {
     protected Void doInBackground(String... params) {
         Log.i("UpdateRouteStatus", "Called");
         try {
-            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
             String ID = jsonObject.getString("id");
             URL url = new URL("http://46.101.75.194:8080/users/" + ID);
 

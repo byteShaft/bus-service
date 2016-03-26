@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -49,15 +50,14 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         connectGoogleApiClient();
-        driverLocationReportingServiceIsRunning = true;
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        driverLocationReportingServiceIsRunning = false;
-        stopLocationService();
+//        driverLocationReportingServiceIsRunning = false;
+//        stopLocationService();
     }
 
     @Override
@@ -75,7 +75,8 @@ public class DriverService extends Service implements LocationListener,
         }
         Location tempLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         driverLastKnownLocation = new LatLng(tempLocation.getLatitude(), tempLocation.getLongitude());
-
+        new UpdateRouteStatus(getApplicationContext()).execute("status=1");
+        driverLocationReportingServiceIsRunning = true;
     }
 
     @Override
@@ -88,7 +89,6 @@ public class DriverService extends Service implements LocationListener,
         onLocationChangedCounter++;
         if (onLocationChangedCounter == 1) {
             new DriverLocationPosterTask().execute();
-            new UpdateRouteStatus(getApplicationContext()).execute("status=1");
         }
         driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         driverCurrentSpeedInKilometers = String.valueOf((int) ((location.getSpeed() * 3600) / 1000));
@@ -100,6 +100,7 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+        Toast.makeText(getApplicationContext(), "Failed to start Location Service", Toast.LENGTH_LONG).show();
     }
 
     private void connectGoogleApiClient() {
