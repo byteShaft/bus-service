@@ -303,6 +303,7 @@ public class LoginActivity extends Activity {
                     String routeData = response.getString("route");
                     JSONObject jsonObject = new JSONObject(routeData);
                     int routeStatus = Integer.parseInt(jsonObject.getString("status"));
+                    Log.i("routeStatus", "ssada: " + routeStatus);
                     AppGlobals.putRouteStatus(routeStatus);
                     connection.disconnect();
 

@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.text.format.Time;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -89,6 +88,7 @@ public class DriverService extends Service implements LocationListener,
         onLocationChangedCounter++;
         if (onLocationChangedCounter == 1) {
             new DriverLocationPosterTask().execute();
+            new UpdateRouteStatus(getApplicationContext()).execute("status=1");
         }
         driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         driverCurrentSpeedInKilometers = String.valueOf((int) ((location.getSpeed() * 3600) / 1000));

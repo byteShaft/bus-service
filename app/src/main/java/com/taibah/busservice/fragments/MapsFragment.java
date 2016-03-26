@@ -37,7 +37,6 @@ import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
-import com.taibah.busservice.utils.UpdateRouteStatus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,8 +63,9 @@ public class MapsFragment extends Fragment {
     private static TextView tvDriverCurrentLocationTimeStamp;
     private static float previousZoomLevel = -1.0f;
     private static boolean isNetworkNotAvailable = true;
-    public GetDriverLocationTask mTask;
-    String routeStatus;
+    public GetDriverLocationTask driverLocationTask;
+    public RetrieveStudentsRegisteredAgainstRoute retrieveStudentsTask;
+    int routeStatus;
     HttpURLConnection connection;
     ArrayList<Integer> studentIdsList;
     HashMap<Integer, ArrayList<String>> hashMapStudentData;
@@ -121,7 +121,7 @@ public class MapsFragment extends Fragment {
         convertView = inflater.inflate(R.layout.maps, null);
         setHasOptionsMenu(true);
         fm = getChildFragmentManager();
-        new RetrieveStudentsRegisteredAgainstRoute().execute();
+        retrieveStudentsTask = (RetrieveStudentsRegisteredAgainstRoute) new RetrieveStudentsRegisteredAgainstRoute().execute();
 
         studentIdsList = new ArrayList<>();
         hashMapStudentData = new HashMap<>();
@@ -235,8 +235,13 @@ public class MapsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mapsFragmentOpen = false;
-        if (AppGlobals.getUserType() == 1 && routeStatus.equals("1")) {
-            mTask.cancel(true);
+        if (!retrieveStudentsTask.isCancelled()) {
+            retrieveStudentsTask.cancel(true);
+        }
+        if (AppGlobals.getUserType() == 1) {
+            if (!driverLocationTask.isCancelled()) {
+            driverLocationTask.cancel(true);
+            }
         }
     }
 
@@ -392,12 +397,12 @@ public class MapsFragment extends Fragment {
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
-                    System.out.print(responseCode);
+                    System.out.println(responseCode);
 
                     String data1 = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObject1 = new JSONObject(data1);
 
-                    routeStatus = jsonObject1.getString("status");
+                    routeStatus = Integer.parseInt(jsonObject1.getString("status"));
 
                     Log.i("Route Details", "" + jsonObject1);
 
@@ -439,16 +444,14 @@ public class MapsFragment extends Fragment {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12.0f));
 
                 buildAndDisplayRouteWithWayPoints(studentStops);
-                if (AppGlobals.getUserType() == 2 && DriverService.driverLocationReportingServiceIsRunning) {
-                    new UpdateRouteStatus(getActivity()).execute("status=1");
-                } else if (AppGlobals.getUserType() == 1) {
-                    if (routeStatus.equals("1")) {
-                        mTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                if (AppGlobals.getUserType() == 1) {
+                    if (routeStatus == 1) {
+                        driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
                     }
                 }
                 isNetworkNotAvailable = true;
             } else {
-                Toast.makeText(getActivity(), "Server Error", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Error: Server not responding. Check internet", Toast.LENGTH_LONG).show();
                 getActivity().onBackPressed();
             }
         }
@@ -463,9 +466,10 @@ public class MapsFragment extends Fragment {
                     Log.i("Get Driver Location", "Called");
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
                     String ID = jsonObject.getString("id");
-                    routeStatus = jsonObject.getString("status");
-                    System.out.print("Route Status: " + routeStatus);
+                    routeStatus = Integer.parseInt(jsonObject.getString("status"));
+                    System.out.println("Route Status: " + routeStatus);
                     System.out.println(ID);
+                    AppGlobals.putRouteStatus(routeStatus);
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/locations/get?route_id=" + ID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
@@ -492,7 +496,7 @@ public class MapsFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             if (isNetworkNotAvailable) {
-                Toast.makeText(getActivity(), "Error: Server not responding", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Error: Server not responding. Check internet", Toast.LENGTH_LONG).show();
                 layoutRouteMapInfoStrip.setVisibility(View.INVISIBLE);
                 getActivity().onBackPressed();
             } else if (responseCode == 200) {
@@ -507,7 +511,18 @@ public class MapsFragment extends Fragment {
                 new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                        if (routeStatus == 1) {
+                            driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
+                        } else if (routeStatus == 0) {
+                            driverLocationTask.cancel(true);
+                            Toast.makeText(getActivity(), "Route Stopped", Toast.LENGTH_SHORT).show();
+                            layoutRouteMapInfoStrip.setVisibility(View.GONE);
+                        } else {
+                            driverLocationTask.cancel(true);
+                            Toast.makeText(getActivity(), "Route Unavailable", Toast.LENGTH_SHORT).show();
+                            layoutRouteMapInfoStrip.setVisibility(View.GONE);
+                            getActivity().onBackPressed();
+                        }
                     }
                 }, 4000);
                 isNetworkNotAvailable = true;
