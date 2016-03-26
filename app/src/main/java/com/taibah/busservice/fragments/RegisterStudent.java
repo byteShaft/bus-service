@@ -15,7 +15,6 @@ import android.support.v4.view.ViewPager;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -128,24 +127,27 @@ public class RegisterStudent extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 Helpers.closeKeyboard(getActivity());
-                Log.i("OnPageSelected", "Main");
                 if (position == 1) {
-                    Log.i("OnPageSelected", "PositionOne");
-                    if (onLongClickCounter != 0) {
-                        menuItemUndo.setVisible(true);
-                    }
-                    if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
-                        mMap.clear();
-                        setInitialMap();
-                        onLongClickCounter = 0;
-                        menuItemUndo.setVisible(false);
-                        PlaceholderFragment.studentStopLatLng = null;
-                        tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
-                        spinnerValueChanged = false;
-                    } else if (spinnerValueChanged && mMap != null) {
-                        mMap.clear();
-                        setInitialMap();
-                        spinnerValueChanged = false;
+                    if (spinnerText != null) {
+                        if (onLongClickCounter != 0) {
+                            menuItemUndo.setVisible(true);
+                        }
+                        if (spinnerValueChanged && onLongClickCounter > 0 && mMap != null) {
+                            mMap.clear();
+                            setInitialMap();
+                            onLongClickCounter = 0;
+                            menuItemUndo.setVisible(false);
+                            PlaceholderFragment.studentStopLatLng = null;
+                            tvMapRegisterStudentInfo.setText("Tap and hold to set a stop");
+                            spinnerValueChanged = false;
+                        } else if (spinnerValueChanged && mMap != null) {
+                            mMap.clear();
+                            setInitialMap();
+                            spinnerValueChanged = false;
+                        }
+                    } else {
+                        Toast.makeText(getActivity(), "Error: Route not found", Toast.LENGTH_SHORT).show();
+                        mViewPager.setCurrentItem(0);
                     }
                 } else {
                     menuItemUndo.setVisible(false);
@@ -197,11 +199,6 @@ public class RegisterStudent extends Fragment {
                     e.printStackTrace();
                     return true;
                 }
-
-                if (spinnerText == null) {
-                    Toast.makeText(getActivity(), "Incomplete info. No route found", Toast.LENGTH_SHORT).show();
-                }
-
                 new checkInternetTask().execute();
 
                 return true;
