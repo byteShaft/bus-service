@@ -135,7 +135,7 @@ public class MapsFragment extends Fragment {
         myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
 
         try {
-            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
             startPoint = new LatLng(Double.parseDouble(jsonObject.getString("start_latitude")), Double.parseDouble(jsonObject.getString("start_longitude")));
             endPoint = new LatLng(Double.parseDouble(jsonObject.getString("end_latitude")), Double.parseDouble(jsonObject.getString("end_longitude")));
         } catch (JSONException e) {
@@ -342,10 +342,6 @@ public class MapsFragment extends Fragment {
         }
     }
 
-    public static void cancelDriveLocation() {
-
-    }
-
     private void buildAndDisplayRouteWithWayPoints(List<LatLng> latLngArrayWithWayPoints) {
         Routing routing = new Routing.Builder()
                 .travelMode(Routing.TravelMode.DRIVING)
@@ -368,7 +364,7 @@ public class MapsFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                     String ID = jsonObject.getString("id");
                     System.out.println(ID);
                     connection = WebServiceHelpers.openConnectionForUrl
@@ -476,7 +472,7 @@ public class MapsFragment extends Fragment {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
                     Log.i("Get Driver Location", "Called");
-                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                     String ID = jsonObject.getString("id");
                     routeStatus = Integer.parseInt(jsonObject.getString("status"));
                     System.out.println("Route Status: " + routeStatus);
@@ -525,12 +521,11 @@ public class MapsFragment extends Fragment {
                     public void run() {
                         if (routeStatus == 1) {
                             driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
-                        } else if (routeStatus == 0) {
-                            driverLocationTask.cancel(true);
+                        } else if (routeStatus == 0 && locationRetrievalCounterForStudent > 0) {
                             Toast.makeText(getActivity(), "Route Stopped", Toast.LENGTH_SHORT).show();
                             layoutRouteMapInfoStrip.setVisibility(View.GONE);
-                        } else {
-                            driverLocationTask.cancel(true);
+                            driverLocationMarker.remove();
+                        } else if (routeStatus > 1 && locationRetrievalCounterForStudent > 0) {
                             Toast.makeText(getActivity(), "Route Unavailable", Toast.LENGTH_SHORT).show();
                             layoutRouteMapInfoStrip.setVisibility(View.GONE);
                             getActivity().onBackPressed();

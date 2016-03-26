@@ -7,9 +7,9 @@
         android:id="@+id/layout_heading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:layout_marginTop="10dp">
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
@@ -19,6 +19,14 @@
             android:textSize="18dp"
             android:textStyle="bold"
             android:typeface="serif" />
+
+        <TextView
+            android:id="@+id/tv_route_name_home_fragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="#000000"
+            android:textSize="14dp" />
     </LinearLayout>
 
 
@@ -27,35 +35,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/layout_heading"
-        android:orientation="vertical"
-        android:layout_margin="20dp">
+        android:layout_margin="20dp"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/tv_status_retrieving_cancelled_routes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:visibility="gone"
-            android:textSize="14dp"/>
+            android:textSize="14dp"
+            android:visibility="gone" />
+
         <LinearLayout
             android:id="@+id/layout_list_cancelled_routes"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:visibility="gone">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:text="Cancelled Routes"
-            android:textSize="16dp"
-            android:layout_gravity="center_horizontal"
-            android:textStyle="bold"/>
-        <ListView
-            android:id="@+id/lv_cancelled_routes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="@null">
-        </ListView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:text="Cancelled Routes"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+
+            <ListView
+                android:id="@+id/lv_cancelled_routes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@null"></ListView>
         </LinearLayout>
     </LinearLayout>
 
@@ -63,41 +74,69 @@
         android:id="@+id/layout_route_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
         android:layout_below="@+id/layout_heading"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="70dp"
         android:visibility="gone">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Arrival Time: "
-                android:textStyle="bold"
-                android:textSize="18dp" />
-            <TextView
-                android:id="@+id/tv_arrival_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="60dp"
-                android:textSize="26dp" />
+                android:background="@drawable/rounded_corners"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp">
 
-            <TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Arrival Time: "
+                    android:textSize="14dp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="#000000"/>
+
+                <TextView
+                    android:id="@+id/tv_arrival_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="30dp" />
+            </LinearLayout>
+
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:text="Departure Time: "
-                android:textStyle="bold"
-                android:textSize="18dp" />
-            <TextView
-                android:id="@+id/tv_departure_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="60dp"
-                android:textSize="26dp" />
+                android:background="@drawable/rounded_corners"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:paddingRight="10dp"
+                android:paddingLeft="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Departure Time: "
+                    android:textSize="14dp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="#000000"/>
+
+                <TextView
+                    android:id="@+id/tv_departure_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="30dp" />
+            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 
@@ -112,8 +151,8 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -124,9 +163,9 @@
                 android:id="@+id/tv_route_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14dp"
+                android:textAllCaps="true"
                 android:textColor="#000000"
-                android:textAllCaps="true"/>
+                android:textSize="14dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -134,15 +173,15 @@
                 android:text="Route Cancelled"
                 android:textColor="#B71C1C"
                 android:textSize="20dp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_route_click_to_restore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Click to Restore"
-                android:visibility="gone"
-                android:textSize="14dp" />
+                android:textSize="14dp"
+                android:visibility="gone" />
 
         </LinearLayout>
     </RelativeLayout>

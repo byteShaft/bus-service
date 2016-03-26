@@ -80,6 +80,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public static int responseCodeRoutes;
     HttpURLConnection connectionRoutes;
     public RetrieveAllCancelledRoutes mTask;
+    TextView tvRouteName;
 
 
     @Nullable
@@ -92,12 +93,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         tvRouteArrivalTime = (TextView) convertView.findViewById(R.id.tv_arrival_time);
         tvRouteDepartureTime = (TextView) convertView.findViewById(R.id.tv_departure_time);
         tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
+        tvRouteName = (TextView) convertView.findViewById(R.id.tv_route_name_home_fragment);
         tvStatusRetrievingCancelledRoutes = (TextView) convertView.findViewById(R.id.tv_status_retrieving_cancelled_routes);
         layoutDriverButtons = (RelativeLayout) convertView.findViewById(R.id.layout_driver_buttons);
         layoutAdminInfo = (LinearLayout) convertView.findViewById(R.id.layout_admin_info);
         layoutListCancelledRoutes = (LinearLayout) convertView.findViewById(R.id.layout_list_cancelled_routes);
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
+
+        if (AppGlobals.getUserType() > 0) {
+            try {
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+                tvRouteName.setText("Assigned Route: " + jsonObject.getString("name"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
 
         routeIdsList = new ArrayList<>();
         hashMapRouteData = new HashMap<>();
@@ -118,7 +129,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
             try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                 String arrivalTime = jsonObject.getString("arrival_time");
                 String departureTime = jsonObject.getString("departure_time");
                 tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
@@ -155,7 +166,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public static void setRouteStatus(int status) {
-        if (status == 0) {
+        if (status == 0 || status == 1) {
             if (AppGlobals.getUserType() == 2) {
                 layoutDriverButtons.setVisibility(View.VISIBLE);
             }
@@ -170,11 +181,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             layoutRouteCancelled.setVisibility(View.VISIBLE);
             if (AppGlobals.getUserType() != 0) {
                 layoutRouteInfo.setVisibility(View.GONE);
-                if (status == 1) {
+                if (status == 2) {
                     tvRouteStatus.setText("Accident");
-                } else if (status == 2) {
-                    tvRouteStatus.setText("Driver unavailable");
                 } else if (status == 3) {
+                    tvRouteStatus.setText("Driver unavailable");
+                } else if (status == 4) {
                     tvRouteStatus.setText("Bus out of service");
                 }
             }
@@ -227,7 +238,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     .setCancelable(false)
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-
                                             getActivity().startService(new Intent(getActivity(), DriverService.class));
                                             buttonStartStopRoute.setText("End Route");
                                             Helpers.dismissProgressDialog();
@@ -254,9 +264,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                         public void onClick(DialogInterface dialog, int id) {
 
                                             Helpers.showProgressDialog(getActivity(), "Ending Route");
-
                                             DriverService.onLocationChangedCounter = 0;
-
                                             new UpdateRouteStatus(getActivity()).execute("status=0");
 
                                             new android.os.Handler().postDelayed(
@@ -401,7 +409,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         protected Void doInBackground(String... params) {
             Log.i("UpdateRouteStatus", "Called");
             try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                 String ID = jsonObject.getString("id");
                 URL url = new URL("http://46.101.75.194:8080/routes/" + ID);
 

@@ -299,7 +299,7 @@ public class LoginActivity extends Activity {
                     AppGlobals.putToken(token);
                     Log.d("TOKEN", token);
 
-                    AppGlobals.putStudentDriverRouteID(response.getString("route"));
+                    AppGlobals.putStudentDriverRouteDetails(response.getString("route"));
                     String routeData = response.getString("route");
                     JSONObject jsonObject = new JSONObject(routeData);
                     int routeStatus = Integer.parseInt(jsonObject.getString("status"));
@@ -397,7 +397,7 @@ public class LoginActivity extends Activity {
             try {
                 pushNotificationsEnablerCounter++;
                 Log.i("Counter ", "" + pushNotificationsEnablerCounter);
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteID());
+                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                 String ID = jsonObject.getString("id");
                 System.out.print("User ID " + ID);
                 URL url = new URL("http://46.101.75.194:8080/users/" + ID);
