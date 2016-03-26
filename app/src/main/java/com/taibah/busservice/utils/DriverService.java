@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.text.format.Time;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -19,6 +20,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.taibah.busservice.LoginActivity;
 import com.taibah.busservice.fragments.MapsFragment;
 
 import java.io.DataOutputStream;
@@ -88,6 +90,7 @@ public class DriverService extends Service implements LocationListener,
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.i("On Location Changed", "Called");
         onLocationChangedCounter++;
         if (onLocationChangedCounter == 1) {
             new DriverLocationPosterTask().execute();
@@ -166,6 +169,7 @@ public class DriverService extends Service implements LocationListener,
                 String timeStamp = today.monthDay + "/" + today.month + "/" + today.year + " - " + today.format("%k:%M:%S");
 
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+
                 String driverSpeedWithTimeStamp = driverCurrentSpeedInKilometers + "   " + timeStamp;
                 out.writeBytes("speed=" + driverSpeedWithTimeStamp +
                         "&" + "latitude=" + driverCurrentLocation.latitude +
