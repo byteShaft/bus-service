@@ -127,10 +127,13 @@ public class MapsFragment extends Fragment {
 
     public static void updateDriverLocationForStudent() {
         if (driverLocationMarker != null) {
-            layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
             driverLocationMarker.setPosition(latLngDriverForStudent);
-            tvDriverCurrentSpeed.setText("Speed: " + locationSpeedAndTimeStampForStudent.substring(0, 2) + " Km/h");
-            tvDriverCurrentLocationTimeStamp.setText(locationSpeedAndTimeStampForStudent.substring(locationSpeedAndTimeStampForStudent.length() - 21));
+            System.out.println("string: " + locationSpeedAndTimeStampForStudent);
+            if (locationSpeedAndTimeStampForStudent.length() > 5) {
+                layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
+                tvDriverCurrentSpeed.setText("Speed: " + locationSpeedAndTimeStampForStudent.substring(0, 2) + " Km/h");
+                tvDriverCurrentLocationTimeStamp.setText(locationSpeedAndTimeStampForStudent.substring(locationSpeedAndTimeStampForStudent.length() - 21));
+            }
         }
     }
 
@@ -401,13 +404,11 @@ public class MapsFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
                     String ID = jsonObject.getString("id");
-                    System.out.println(ID);
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/routes/" + ID + "/students", "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
-                    System.out.print(responseCode);
 
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
@@ -513,6 +514,9 @@ public class MapsFragment extends Fragment {
                             , Double.parseDouble(jsonObject1.getString("longitude")));
                     locationSpeedAndTimeStampForStudent = jsonObject1.getString("speed");
 
+                    System.out.println("latLngDriver: " + latLngDriverForStudent);
+                    System.out.println("speedNtimeStamp: " + locationSpeedAndTimeStampForStudent);
+
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/routes/" + ID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
@@ -553,16 +557,23 @@ public class MapsFragment extends Fragment {
                 new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        if (!mapsFragmentOpen) {
+                            cancel(true);
+                        }
                         if (routeStatus == 1) {
                             driverLocationTask = (GetDriverLocationTask) new GetDriverLocationTask().execute();
                         } else if (routeStatus == 0 && locationRetrievalCounterForStudent > 0) {
-                            Toast.makeText(getActivity(), "Route Stopped", Toast.LENGTH_LONG).show();
-                            layoutRouteMapInfoStrip.setVisibility(View.GONE);
-                            driverLocationMarker.remove();
+                            Toast.makeText(AppGlobals.getContext(), "Route Stopped", Toast.LENGTH_LONG).show();
+                            if (mapsFragmentOpen) {
+                                layoutRouteMapInfoStrip.setVisibility(View.GONE);
+                                driverLocationMarker.remove();
+                            }
                         } else if (routeStatus > 1 && locationRetrievalCounterForStudent > 0) {
-                            Toast.makeText(getActivity(), "Route Unavailable", Toast.LENGTH_LONG).show();
-                            layoutRouteMapInfoStrip.setVisibility(View.GONE);
-                            getActivity().onBackPressed();
+                            Toast.makeText(AppGlobals.getContext(), "Route Unavailable", Toast.LENGTH_LONG).show();
+                            if (mapsFragmentOpen) {
+                                layoutRouteMapInfoStrip.setVisibility(View.GONE);
+                                getActivity().onBackPressed();
+                            }
                         }
                         isNetworkNotAvailable = true;
                     }

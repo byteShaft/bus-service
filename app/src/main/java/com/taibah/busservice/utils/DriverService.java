@@ -166,7 +166,8 @@ public class DriverService extends Service implements LocationListener,
                 String timeStamp = today.monthDay + "/" + today.month + "/" + today.year + " - " + today.format("%k:%M:%S");
 
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                out.writeBytes("speed=" + driverCurrentSpeedInKilometers + "   " + timeStamp +
+                String driverSpeedWithTimeStamp = driverCurrentSpeedInKilometers + "   " + timeStamp;
+                out.writeBytes("speed=" + driverSpeedWithTimeStamp +
                         "&" + "latitude=" + driverCurrentLocation.latitude +
                         "&" + "longitude=" + driverCurrentLocation.longitude);
                 out.flush();
