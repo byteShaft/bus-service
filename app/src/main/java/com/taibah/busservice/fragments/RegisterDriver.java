@@ -301,7 +301,7 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             } else {
                 // TODO Implement correct logic here
                 onRegistrationFailed();
-                Toast.makeText(getActivity(), "Invalid Response: " + responseCode, Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
             }
         }
     }
