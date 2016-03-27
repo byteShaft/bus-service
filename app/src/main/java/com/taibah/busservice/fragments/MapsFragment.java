@@ -130,7 +130,7 @@ public class MapsFragment extends Fragment {
             System.out.println("string: " + locationSpeedAndTimeStampForStudent);
             layoutRouteMapInfoStrip.setVisibility(View.VISIBLE);
             tvDriverCurrentSpeed.setText("Speed: " + locationSpeedAndTimeStampForStudent.substring(0, 2) + " Km/h");
-            tvDriverCurrentLocationTimeStamp.setText(locationSpeedAndTimeStampForStudent.substring(locationSpeedAndTimeStampForStudent.length() - 21));
+            tvDriverCurrentLocationTimeStamp.setText(locationSpeedAndTimeStampForStudent.substring(locationSpeedAndTimeStampForStudent.length() - 22));
         }
     }
 

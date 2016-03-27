@@ -244,6 +244,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     .setCancelable(false)
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
+                                            DriverService.driverLocationReportingServiceIsRunning = true;
+                                            new UpdateRouteStatus(getActivity()).execute("status=1");
                                             getActivity().startService(new Intent(getActivity(), DriverService.class));
                                             buttonStartStopRoute.setText("End Route");
                                             Helpers.dismissProgressDialog();
