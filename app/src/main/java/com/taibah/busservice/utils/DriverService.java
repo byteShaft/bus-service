@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.text.format.Time;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -27,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class DriverService extends Service implements LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -51,8 +51,6 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         connectGoogleApiClient();
-        driverLocationReportingServiceIsRunning = true;
-        new UpdateRouteStatus(getApplicationContext()).execute("status=1");
         return START_STICKY;
     }
 
@@ -78,6 +76,7 @@ public class DriverService extends Service implements LocationListener,
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        Toast.makeText(getApplicationContext(), "Acquiring Location . . .", Toast.LENGTH_LONG).show();
         Location tempLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         driverLastKnownLocation = new LatLng(tempLocation.getLatitude(), tempLocation.getLongitude());
     }
@@ -89,10 +88,10 @@ public class DriverService extends Service implements LocationListener,
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i("On Location Changed", "Called");
         onLocationChangedCounter++;
         if (onLocationChangedCounter == 1) {
             new DriverLocationPosterTask().execute();
+            Toast.makeText(getApplicationContext(), "Location Acquired. Reporting Started.", Toast.LENGTH_LONG).show();
         }
         driverCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         driverCurrentSpeedInKilometers = String.valueOf((int) ((location.getSpeed() * 3600) / 1000));
@@ -162,10 +161,13 @@ public class DriverService extends Service implements LocationListener,
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-                Time today = new Time(Time.getCurrentTimezone());
-                today.setToNow();
-
-                String timeStamp = today.monthDay + "/" + today.month + "/" + today.year + " - " + today.format("%k:%M:%S");
+                Calendar rightNow = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                String time = sdf.format(rightNow.getTime());
+                int day = rightNow.get(Calendar.DATE);
+                int month = rightNow.get(Calendar.MONTH) + 1;
+                int year = rightNow.get(Calendar.YEAR);
+                String timeStamp = day + "/" + month + "/" + year + " - " + time;
 
                 DataOutputStream out = new DataOutputStream(connection.getOutputStream());
 

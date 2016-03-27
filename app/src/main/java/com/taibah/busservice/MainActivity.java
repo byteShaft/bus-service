@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.taibah.busservice.fragments.ChangePasswordFragment;
 import com.taibah.busservice.fragments.ContactFragment;
@@ -34,16 +35,17 @@ import com.taibah.busservice.fragments.ScheduleFragment;
 import com.taibah.busservice.fragments.TwitterFragment;
 import com.taibah.busservice.gcm.QuickstartPreferences;
 import com.taibah.busservice.utils.AppGlobals;
+import com.taibah.busservice.utils.DriverService;
 import com.taibah.busservice.utils.Helpers;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    Fragment fragment;
     public static boolean isHomeFragmentOpen;
     public static NavigationView navigationView;
     public static int responseCode;
     public static boolean isAppForeground;
+    Fragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,28 +205,31 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showLogoutDialog() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                MainActivity.this);
-        alertDialogBuilder.setTitle("Logout");
-        alertDialogBuilder
-                .setMessage("Are you sure?")
-                .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        logout();
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+        if (!DriverService.driverLocationReportingServiceIsRunning) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    MainActivity.this);
+            alertDialogBuilder.setTitle("Logout");
+            alertDialogBuilder
+                    .setMessage("Are you sure?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            logout();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        } else {
+            Toast.makeText(MainActivity.this, "Driver Service is running. Stop route first", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void logout() {
-
         Helpers.showProgressDialog(MainActivity.this, "Logging out");
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -244,6 +249,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 }, 1000);
+
     }
 
     @Override
