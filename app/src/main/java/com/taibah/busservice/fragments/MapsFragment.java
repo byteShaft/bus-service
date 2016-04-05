@@ -437,6 +437,8 @@ public class MapsFragment extends Fragment {
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
+                } catch (NumberFormatException nE) {
+                    routeStatus = 0;
                 }
             }
             return null;
