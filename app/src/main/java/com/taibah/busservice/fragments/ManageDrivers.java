@@ -126,6 +126,23 @@ public class ManageDrivers extends Fragment {
                 intent.setData(Uri.parse("tel:" + hashMapDriverData.get(driversIdsList.get(info.position)).get(4)));
                 startActivity(intent);
                 return true;
+            case R.id.item_context_menu_drivers_list_delete:
+                AlertDialog.Builder alertDialogStudentDelete = new AlertDialog.Builder(
+                        getActivity()).setTitle(driversName)
+                        .setMessage("Really want to delete?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Delete Driver here...
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialogDelete = alertDialogStudentDelete.create();
+                alertDialogDelete.show();
+                return true;
         }
         return true;
     }
