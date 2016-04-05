@@ -1,12 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-    <!--<item-->
-        <!--android:id="@+id/item_context_menu_routes_list_delete"-->
-        <!--android:title="Delete Driver" />-->
     <item
         android:id="@+id/item_context_menu_drivers_list_show_credentials"
         android:title="Show Credentials" />
     <item
         android:id="@+id/item_context_menu_drivers_list_call"
         android:title="Call" />
+    <item
+    android:id="@+id/item_context_menu_driver_list_delete"
+    android:title="Delete Driver" />
 </menu>
