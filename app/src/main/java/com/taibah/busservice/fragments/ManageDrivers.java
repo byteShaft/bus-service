@@ -40,14 +40,10 @@ public class ManageDrivers extends Fragment {
 
     ArrayList<Integer> driversIdsList;
     HashMap<Integer, ArrayList<String>> hashMapDriverData;
-
     ListView driversListView;
-
     public static int responseCode;
-
     View convertView;
     HttpURLConnection connection;
-
     String driversName;
 
     @Nullable

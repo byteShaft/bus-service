@@ -365,7 +365,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                                     int id = radioGroupReportSituation.getCheckedRadioButtonId();
                                     View radioButton = radioGroupReportSituation.findViewById(id);
-                                    radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
+                                    radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 2;
 
                                     new SituationReportTask().execute("status=" + radioIndex);
 
