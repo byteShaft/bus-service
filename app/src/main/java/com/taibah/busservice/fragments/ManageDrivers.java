@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -45,6 +46,8 @@ public class ManageDrivers extends Fragment {
     View convertView;
     HttpURLConnection connection;
     String driversName;
+    int index;
+    boolean internetNotWorking = false;
 
     @Nullable
     @Override
@@ -102,7 +105,7 @@ public class ManageDrivers extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int index = info.position;
+        index = info.position;
         System.out.println(driversIdsList.get(index));
 
         switch (item.getItemId()) {
@@ -126,14 +129,14 @@ public class ManageDrivers extends Fragment {
                 intent.setData(Uri.parse("tel:" + hashMapDriverData.get(driversIdsList.get(info.position)).get(4)));
                 startActivity(intent);
                 return true;
-            case R.id.item_context_menu_drivers_list_delete:
+            case R.id.item_context_menu_driver_list_delete:
                 AlertDialog.Builder alertDialogStudentDelete = new AlertDialog.Builder(
                         getActivity()).setTitle(driversName)
                         .setMessage("Really want to delete?")
                         .setCancelable(false)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                // Delete Driver here...
+                                new DeleteDriverTask().execute();
                             }
                         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -238,5 +241,56 @@ public class ManageDrivers extends Fragment {
     static class ViewHolder {
         TextView tvDriverListName;
         TextView tvDriverUsername;
+    }
+
+    public class DeleteDriverTask extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Deleting");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isInternetWorking() && Helpers.isNetworkAvailable()) {
+                try {
+                    URL url = new URL("http://46.101.75.194:8080/users/" + driversIdsList.get(index));
+
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("DELETE");
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    connection.setRequestProperty("charset", "utf-8");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+
+                    responseCode = connection.getResponseCode();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                internetNotWorking = true;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 204) {
+                Toast.makeText(getActivity(), "Driver deleted", Toast.LENGTH_SHORT).show();
+                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
+                internetNotWorking = false;
+            } else if (internetNotWorking) {
+                Toast.makeText(getActivity(), "Your device is not connected to the internet", Toast.LENGTH_LONG).show();
+                getActivity().onBackPressed();
+                internetNotWorking = false;
+            }
+        }
     }
 }
