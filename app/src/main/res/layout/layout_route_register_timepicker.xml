@@ -1,124 +1,59 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@drawable/rounded_corners"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="5dp"
-            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="15dp"
+            android:background="@drawable/rounded_corners"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_register_route_time_picker_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="Set Arrival Time"
+                android:layout_margin="5dp"
+                android:text="Arrival Time"
                 android:textColor="#000000"
                 android:textSize="16dp"
                 android:textStyle="bold" />
 
             <TimePicker
-                android:id="@+id/tp_register_route_time_picker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="false"
-                android:timePickerMode="spinner"
-                android:descendantFocusability="blocksDescendants">
+                android:id="@+id/tp_register_route_arrival_time"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></TimePicker>
+        </LinearLayout>
 
-            </TimePicker>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="15dp"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/rounded_corners"
+            android:orientation="vertical">
 
-
-            <RadioGroup
-                android:id="@+id/rg_register_route_set_time_type"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:orientation="horizontal">
+                android:layout_margin="5dp"
+                android:text="Departure Time"
+                android:textColor="#000000"
+                android:textSize="16dp"
+                android:textStyle="bold" />
 
-                <RadioButton
-                    android:id="@+id/rb_register_route_set_time_arrival_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Arrival Time" />
-
-                <RadioButton
-                    android:id="@+id/rb_register_route_set_time_departure_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Departure Time" />
-
-            </RadioGroup>
+            <TimePicker
+                android:id="@+id/tp_register_route_departure_time"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></TimePicker>
         </LinearLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:layout_margin="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="Route Timings"
-            android:textColor="#000000"
-            android:textSize="20dp" />
-
-        <ImageButton
-            android:id="@+id/ll_register_route_add_route_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:padding="4dp"
-            android:background="@drawable/image_button_click_feedback"
-            android:src="@mipmap/ic_add_time" />
-
-        <ImageButton
-            android:id="@+id/ll_register_route_delete_route_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:padding="4dp"
-            android:background="@drawable/image_button_click_feedback"
-            android:src="@mipmap/ic_delete_time"
-            android:visibility="invisible"/>
-    </LinearLayout>
-
-    <RadioGroup
-        android:id="@+id/rg_register_route_times"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <RadioButton
-            android:id="@+id/rb_register_route_timings_one"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <RadioButton
-            android:id="@+id/rb_register_route_timings_two"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"/>
-        <RadioButton
-            android:id="@+id/rb_register_route_timings_three"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible" />
-
-    </RadioGroup>
-
-</LinearLayout>
+</ScrollView>

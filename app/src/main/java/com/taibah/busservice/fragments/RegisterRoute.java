@@ -19,9 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -57,27 +54,10 @@ public class RegisterRoute extends Fragment {
     public static EditText etBusNumber;
     public static TextView tvMapRegisterRouteInfo;
     public static int onLongClickCounter = 0;
-    public static TimePicker tpArrivalDepartureTime;
-    public static RadioGroup rgSetArrivalDepartureTime;
-    public static RadioGroup rgCreateRouteTimes;
-    public static TextView tvTimePickerHeader;
+    public static TimePicker timePickerArrivalTime;
+    public static TimePicker timePickerDepartureTime;
     public static LatLng[] latLngList;
     public static int responseCode;
-    public static ImageButton ibAddRouteTime;
-    public static ImageButton ibDeleteRouteTime;
-    public static int routeTimeCounter = 1;
-    public static String temporaryArrivalTime;
-    public static String temporaryDepartureTime;
-    public static String[] arrayRouteTimings;
-    public static final int RB1_ID = 1001;
-    public static final int RB2_ID = 1002;
-    public static final int RB3_ID = 1003;
-    public static RadioButton timeOne;
-    public static RadioButton timeTwo;
-    public static RadioButton timeThree;
-    public static String timeOneText;
-    public static String timeTwoText;
-    public static String timeThreeText;
     HttpURLConnection connection;
     String routeName;
     String busNumber;
@@ -96,6 +76,7 @@ public class RegisterRoute extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         convertView = inflater.inflate(R.layout.layout_register_route, null);
         setHasOptionsMenu(true);
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
@@ -159,6 +140,9 @@ public class RegisterRoute extends Fragment {
                         Toast.makeText(getActivity(), "Incomplete info", Toast.LENGTH_SHORT).show();
                         return true;
                     }
+
+                    arrivalTime = timePickerArrivalTime.getCurrentHour() + ":" + timePickerArrivalTime.getCurrentMinute();
+                    departureTime = timePickerDepartureTime.getCurrentHour() + ":" + timePickerDepartureTime.getCurrentMinute();
 
                     locationPointA = PlaceholderFragment.pointA.toString();
                     locationPointB = PlaceholderFragment.pointB.toString();
@@ -257,7 +241,6 @@ public class RegisterRoute extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        routeTimeCounter = 1;
         onLongClickCounter = 0;
         PlaceholderFragment.pointA = null;
         PlaceholderFragment.pointB = null;
@@ -306,99 +289,8 @@ public class RegisterRoute extends Fragment {
 
             } else if (tabCount == 2) {
                 rootView = inflater.inflate(R.layout.layout_route_register_timepicker, container, false);
-                tvTimePickerHeader = (TextView) rootView.findViewById(R.id.tv_register_route_time_picker_heading);
-                tpArrivalDepartureTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_time_picker);
-                rgSetArrivalDepartureTime = (RadioGroup) rootView.findViewById(R.id.rg_register_route_set_time_type);
-                rgCreateRouteTimes = (RadioGroup) rootView.findViewById(R.id.rg_register_route_times);
-
-                timeOne = (RadioButton) rootView.findViewById(R.id.rb_register_route_timings_one);
-                timeTwo = (RadioButton) rootView.findViewById(R.id.rb_register_route_timings_two);
-                timeThree = (RadioButton) rootView.findViewById(R.id.rb_register_route_timings_three);
-
-                ibAddRouteTime = (ImageButton) rootView.findViewById(R.id.ll_register_route_add_route_time);
-                ibDeleteRouteTime = (ImageButton) rootView.findViewById(R.id.ll_register_route_delete_route_time);
-
-                temporaryArrivalTime = convertTimeFormat(tpArrivalDepartureTime.getCurrentHour(), tpArrivalDepartureTime.getCurrentMinute());
-                temporaryDepartureTime = convertTimeFormat(tpArrivalDepartureTime.getCurrentHour(), tpArrivalDepartureTime.getCurrentMinute());
-
-                rgCreateRouteTimes.check(R.id.rb_register_route_timings_one);
-
-                timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
-
-                tpArrivalDepartureTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-                    @Override
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        if (R.id.rb_register_route_set_time_arrival_time == rgSetArrivalDepartureTime.getCheckedRadioButtonId()) {
-                            temporaryArrivalTime = convertTimeFormat(hourOfDay, minute);
-                        } else if (R.id.rb_register_route_set_time_departure_time == rgSetArrivalDepartureTime.getCheckedRadioButtonId()) {
-                            temporaryDepartureTime = convertTimeFormat(hourOfDay, minute);
-                        }
-
-                        if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_one) {
-                            timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
-                        } else if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_two) {
-                            timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
-                        } else if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_three) {
-                            timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
-                        }
-                    }
-                });
-
-                ibAddRouteTime.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i("click", "add");
-                        if (routeTimeCounter < 3) {
-                            routeTimeCounter++;
-                            if (routeTimeCounter > 1) {
-                                ibDeleteRouteTime.setVisibility(View.VISIBLE);
-                            }
-                            if (routeTimeCounter == 2) {
-                                timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
-                                timeTwo.setVisibility(View.VISIBLE);
-                            } else if (routeTimeCounter == 3) {
-                                timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
-                                timeThree.setVisibility(View.VISIBLE);
-                            }
-                        } else {
-                            Toast.makeText(getActivity(), "You cannot add more than 3 timings", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-                ibDeleteRouteTime.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i("click", "delete");
-                            if (routeTimeCounter == 2) {
-                                routeTimeCounter--;
-                                if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_two) {
-                                    rgCreateRouteTimes.check(R.id.rb_register_route_timings_one);
-                                }
-                                timeTwo.setVisibility(View.INVISIBLE);
-                                ibDeleteRouteTime.setVisibility(View.INVISIBLE);
-                            } else if (routeTimeCounter == 3) {
-                                routeTimeCounter--;
-                                if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_three) {
-                                    rgCreateRouteTimes.check(R.id.rb_register_route_timings_two);
-                                }
-                                timeThree.setVisibility(View.INVISIBLE);
-                            }
-                    }
-                });
-
-                rgSetArrivalDepartureTime.check(R.id.rb_register_route_set_time_arrival_time);
-
-                rgSetArrivalDepartureTime.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        if (checkedId == R.id.rb_register_route_set_time_arrival_time) {
-                            tvTimePickerHeader.setText("Set Arrival Time");
-                        } else if (checkedId == R.id.rb_register_route_set_time_departure_time) {
-                            tvTimePickerHeader.setText("Set Departure Time");
-                        }
-                    }
-                });
+                timePickerArrivalTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_arrival_time);
+                timePickerDepartureTime = (TimePicker) rootView.findViewById(R.id.tp_register_route_departure_time);
 
             } else if (tabCount == 3) {
                 rootView = inflater.inflate(R.layout.layout_route_register_map, container, false);
@@ -477,8 +369,7 @@ public class RegisterRoute extends Fragment {
 
             routeInfoDialogMessage = "Route Name: "
                     + routeName + "\n" + "Bus Number: " + busNumber
-                    + "\n\n" + "Total Route Timings: " + routeTimeCounter + "\n"
-                    + showRouteTimings()
+                    + "\n\n" + "Arrival Time: " + arrivalTime + "\n" + "Departure Time: " + departureTime
                     + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
                     PlaceholderFragment.pointA) + "\n" + "Point B: "
                     + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
@@ -594,41 +485,5 @@ public class RegisterRoute extends Fragment {
                 Helpers.dismissProgressDialog();
             }
         }
-    }
-
-    public static String convertTimeFormat(int hours, int mins) {
-
-        String timeSet;
-        if (hours > 12) {
-            hours -= 12;
-            timeSet = "PM";
-        } else if (hours == 0) {
-            hours += 12;
-            timeSet = "AM";
-        } else if (hours == 12)
-            timeSet = "PM";
-        else
-            timeSet = "AM";
-
-        String minutes;
-        if (mins < 10)
-            minutes = "0" + mins;
-        else
-            minutes = String.valueOf(mins);
-        String aTime = new StringBuilder().append(hours).append(':')
-                .append(minutes).append(" ").append(timeSet).toString();
-        return aTime;
-    }
-
-    public static String showRouteTimings() {
-        String routeTimings = "";
-        if (routeTimeCounter == 1) {
-            routeTimings = timeOne.getText().toString();
-        } else if (routeTimeCounter == 2) {
-            routeTimings = timeOne.getText().toString() + "\n" + timeTwo.getText();
-        } else if (routeTimeCounter == 3) {
-            routeTimings = timeOne.getText().toString() + "\n" + timeTwo.getText().toString() + "\n" + timeThree.getText().toString();
-        }
-        return routeTimings;
     }
 }

@@ -51,7 +51,7 @@ public class ManageRoutes extends Fragment {
 
         routesListView = (ListView) convertView.findViewById(R.id.lv_list_routes);
 
-//        new RetrieveAllRegisteredRoutes().execute();
+        new RetrieveAllRegisteredRoutes().execute();
 
         routeIdsList = new ArrayList<>();
         hashMapRouteData = new HashMap<>();
