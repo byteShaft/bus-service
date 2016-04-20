@@ -25,7 +25,6 @@ import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.R;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
-import com.taibah.busservice.utils.UpdateStudentStatus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,10 +41,8 @@ public class ManageStudent extends Fragment {
 
     public static int responseCode;
 
-
     ArrayList<Integer> studentIdsList;
     HashMap<Integer, ArrayList<String>> hashMapStudentData;
-
 
     ListView studentListView;
     CustomStudentsListAdapter customRoutesListAdapter;
