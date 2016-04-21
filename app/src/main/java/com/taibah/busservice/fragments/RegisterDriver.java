@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.telephony.PhoneNumberUtils;
@@ -61,6 +62,7 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     String spinnerText;
     Menu mMenu;
     MenuInflater mMenuInflater;
+    boolean internetNotWorking = false;
 
     @Nullable
     @Override
@@ -176,6 +178,8 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         routeId = unAssignedRouteIdsList.get(position);
         spinnerText = hashMapUnAssignedRouteData.get(unAssignedRouteIdsList.get(position));
+        System.out.println("Route ID: " + routeId);
+        new FetchRouteDetails().execute();
     }
 
     @Override
@@ -356,6 +360,58 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                 Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
                 Helpers.dismissProgressDialog();
                 getActivity().onBackPressed();
+            }
+        }
+    }
+
+    private class FetchRouteDetails extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Helpers.showProgressDialog(getActivity(), "Retrieving route details");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                try {
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/routes/" + routeId, "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                    System.out.print(responseCode);
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONObject jsonObject = new JSONObject(data);
+                    System.out.println("Route Details: " + jsonObject);
+                    String routeTimings = jsonObject.getString("timings");
+                    System.out.println(routeTimings);
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                internetNotWorking = true;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (responseCode == 200) {
+                Helpers.dismissProgressDialog();
+                internetNotWorking = false;
+            } else if (internetNotWorking) {
+                Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
+                getActivity().onBackPressed();
+                internetNotWorking = false;
+            } else {
+                Toast.makeText(getActivity(), "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
+                Helpers.dismissProgressDialog();
+                getActivity().onBackPressed();
+                internetNotWorking = true;
             }
         }
     }
