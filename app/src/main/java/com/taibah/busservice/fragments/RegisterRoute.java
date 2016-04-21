@@ -75,9 +75,6 @@ public class RegisterRoute extends Fragment {
     public static RadioButton timeOne;
     public static RadioButton timeTwo;
     public static RadioButton timeThree;
-    public static String timeOneText;
-    public static String timeTwoText;
-    public static String timeThreeText;
     HttpURLConnection connection;
     String routeName;
     String busNumber;
@@ -202,15 +199,13 @@ public class RegisterRoute extends Fragment {
         alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                routeInfo = "name=" + routeName + "&" + "bus_number=" + busNumber + "&"
-                        + "arrival_time=2016-02-19 "
-                        + arrivalTime + ":00" + "&" + "departure_time=2016-02-19 "
-                        + departureTime + ":00"
+                routeInfo = "name=" + routeName + "&" + "bus_number=" + busNumber
                         + "&" + "start_latitude=" + PlaceholderFragment.pointA.latitude
                         + "&" + "end_latitude=" + PlaceholderFragment.pointB.latitude
                         + "&" + "start_longitude=" + PlaceholderFragment.pointA.longitude
                         + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
-                        + "&" + "total_stops=10";
+                        + "&" + "total_stops=10"
+                        + writeTimings();
                 new RegisterRouteTask().execute();
             }
         });
@@ -323,7 +318,7 @@ public class RegisterRoute extends Fragment {
 
                 rgCreateRouteTimes.check(R.id.rb_register_route_timings_one);
 
-                timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
+                timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")   ");
 
                 tpArrivalDepartureTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                     @Override
@@ -335,11 +330,11 @@ public class RegisterRoute extends Fragment {
                         }
 
                         if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_one) {
-                            timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
+                            timeOne.setText("Time" + 1 + "  (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
                         } else if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_two) {
-                            timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
+                            timeTwo.setText("Time" + 2 + "  (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
                         } else if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_three) {
-                            timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
+                            timeThree.setText("Time" + 3 + "  (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
                         }
                     }
                 });
@@ -354,10 +349,10 @@ public class RegisterRoute extends Fragment {
                                 ibDeleteRouteTime.setVisibility(View.VISIBLE);
                             }
                             if (routeTimeCounter == 2) {
-                                timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
+                                timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
                                 timeTwo.setVisibility(View.VISIBLE);
                             } else if (routeTimeCounter == 3) {
-                                timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")");
+                                timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
                                 timeThree.setVisibility(View.VISIBLE);
                             }
                         } else {
@@ -482,6 +477,9 @@ public class RegisterRoute extends Fragment {
                     + "\n\n" + "Point A: " + Helpers.getAddress(getActivity(),
                     PlaceholderFragment.pointA) + "\n" + "Point B: "
                     + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
+
+            Log.i("Route Timings", showRouteTimings());
+            Log.i("Test Timings", writeTimings());
 
             return Helpers.isInternetWorking();
         }
@@ -627,8 +625,35 @@ public class RegisterRoute extends Fragment {
         } else if (routeTimeCounter == 2) {
             routeTimings = timeOne.getText().toString() + "\n" + timeTwo.getText();
         } else if (routeTimeCounter == 3) {
-            routeTimings = timeOne.getText().toString() + "\n" + timeTwo.getText().toString() + "\n" + timeThree.getText().toString();
+            routeTimings = timeOne.getText().toString() + "\n" + timeTwo.getText().toString() + "\n"
+                    + timeThree.getText().toString();
         }
         return routeTimings;
+    }
+
+    public static String writeTimings() {
+        StringBuilder sbWriteTime = new StringBuilder();
+        String tempArrivalTime = "", tempDepartureTime = "";
+        String tempTime;
+        for (int i = 0; i < routeTimeCounter; i++) {
+            if (i == 0) {
+                tempTime = timeOne.getText().toString();
+                tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                Log.i("Temp Arrival Time", tempArrivalTime);
+                Log.i("Temp Departure Time", tempDepartureTime);
+            } else if (i == 1) {
+                tempTime = timeTwo.getText().toString();
+                tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+            } else if (i == 2) {
+                tempTime = timeThree.getText().toString();
+                tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+            }
+            sbWriteTime.append("&timings[" + i + "][arrival_time]=" + tempArrivalTime +
+                    "&timings[" + i + "][departure_time]=" + tempDepartureTime + "&timings[" + i + "][status]=0");
+        }
+        return sbWriteTime.toString();
     }
 }

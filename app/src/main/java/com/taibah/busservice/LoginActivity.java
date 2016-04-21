@@ -237,6 +237,7 @@ public class LoginActivity extends Activity {
                     response = new JSONObject(sb.toString());
                     token = response.getString("token");
                     AppGlobals.putToken(token);
+                    Log.i("Token", AppGlobals.getToken());
 
                     connection.disconnect();
 
