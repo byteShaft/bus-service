@@ -386,7 +386,13 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                     JSONObject jsonObject = new JSONObject(data);
                     System.out.println("Route Details: " + jsonObject);
                     String routeTimings = jsonObject.getString("timings");
-                    System.out.println(routeTimings);
+                    JSONArray jsonArray = new JSONArray(routeTimings);
+                    System.out.println("Timing Details: " + jsonArray);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject object = jsonArray.getJSONObject(i);
+                        String arrivalTime = object.getString("arrival_time");
+                        String departureTime = object.getString("departure_time");
+                    }
 
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
