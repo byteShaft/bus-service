@@ -68,18 +68,12 @@ public class RegisterRoute extends Fragment {
     public static int routeTimeCounter = 1;
     public static String temporaryArrivalTime;
     public static String temporaryDepartureTime;
-    public static String[] arrayRouteTimings;
-    public static final int RB1_ID = 1001;
-    public static final int RB2_ID = 1002;
-    public static final int RB3_ID = 1003;
     public static RadioButton timeOne;
     public static RadioButton timeTwo;
     public static RadioButton timeThree;
     HttpURLConnection connection;
     String routeName;
     String busNumber;
-    String arrivalTime;
-    String departureTime;
     String locationPointA;
     String locationPointB;
     String routeInfoDialogMessage;
@@ -313,8 +307,8 @@ public class RegisterRoute extends Fragment {
                 ibAddRouteTime = (ImageButton) rootView.findViewById(R.id.ll_register_route_add_route_time);
                 ibDeleteRouteTime = (ImageButton) rootView.findViewById(R.id.ll_register_route_delete_route_time);
 
-                temporaryArrivalTime = convertTimeFormat(tpArrivalDepartureTime.getCurrentHour(), tpArrivalDepartureTime.getCurrentMinute());
-                temporaryDepartureTime = convertTimeFormat(tpArrivalDepartureTime.getCurrentHour(), tpArrivalDepartureTime.getCurrentMinute());
+                temporaryArrivalTime = Helpers.convertTimeFormat24to12(tpArrivalDepartureTime.getCurrentHour(), tpArrivalDepartureTime.getCurrentMinute());
+                temporaryDepartureTime = Helpers.convertTimeFormat24to12(tpArrivalDepartureTime.getCurrentHour(), tpArrivalDepartureTime.getCurrentMinute());
 
                 rgCreateRouteTimes.check(R.id.rb_register_route_timings_one);
 
@@ -324,9 +318,9 @@ public class RegisterRoute extends Fragment {
                     @Override
                     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
                         if (R.id.rb_register_route_set_time_arrival_time == rgSetArrivalDepartureTime.getCheckedRadioButtonId()) {
-                            temporaryArrivalTime = convertTimeFormat(hourOfDay, minute);
+                            temporaryArrivalTime = Helpers.convertTimeFormat24to12(hourOfDay, minute);
                         } else if (R.id.rb_register_route_set_time_departure_time == rgSetArrivalDepartureTime.getCheckedRadioButtonId()) {
-                            temporaryDepartureTime = convertTimeFormat(hourOfDay, minute);
+                            temporaryDepartureTime = Helpers.convertTimeFormat24to12(hourOfDay, minute);
                         }
 
                         if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_one) {
@@ -594,30 +588,6 @@ public class RegisterRoute extends Fragment {
         }
     }
 
-    public static String convertTimeFormat(int hours, int mins) {
-
-        String timeSet;
-        if (hours > 12) {
-            hours -= 12;
-            timeSet = "PM";
-        } else if (hours == 0) {
-            hours += 12;
-            timeSet = "AM";
-        } else if (hours == 12)
-            timeSet = "PM";
-        else
-            timeSet = "AM";
-
-        String minutes;
-        if (mins < 10)
-            minutes = "0" + mins;
-        else
-            minutes = String.valueOf(mins);
-        String aTime = new StringBuilder().append(hours).append(':')
-                .append(minutes).append(" ").append(timeSet).toString();
-        return aTime;
-    }
-
     public static String showRouteTimings() {
         String routeTimings = "";
         if (routeTimeCounter == 1) {
@@ -634,25 +604,34 @@ public class RegisterRoute extends Fragment {
     public static String writeTimings() {
         StringBuilder sbWriteTime = new StringBuilder();
         String tempArrivalTime = "", tempDepartureTime = "";
+        String readyArrivalTime = "", readyDepartureTime = "";
         String tempTime;
         for (int i = 0; i < routeTimeCounter; i++) {
             if (i == 0) {
                 tempTime = timeOne.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
                 tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
+                readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
                 Log.i("Temp Arrival Time", tempArrivalTime);
                 Log.i("Temp Departure Time", tempDepartureTime);
             } else if (i == 1) {
                 tempTime = timeTwo.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
                 tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
+                readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             } else if (i == 2) {
                 tempTime = timeThree.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
                 tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
+                readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             }
-            sbWriteTime.append("&timings[" + i + "][arrival_time]=" + tempArrivalTime +
-                    "&timings[" + i + "][departure_time]=" + tempDepartureTime + "&timings[" + i + "][status]=0");
+            sbWriteTime.append(
+                    "&timings[" + i + "][arrival_time]=2016-04-16 " + readyArrivalTime +
+                    "&timings[" + i + "][departure_time]=2016-04-16 " + readyDepartureTime +
+                    "&timings[" + i + "][status]=0");
         }
         return sbWriteTime.toString();
     }

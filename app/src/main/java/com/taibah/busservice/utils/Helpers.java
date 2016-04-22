@@ -28,6 +28,9 @@ import com.taibah.busservice.R;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -178,5 +181,57 @@ public class Helpers {
             reason = "Bus out of service";
         }
         return reason;
+    }
+
+    public static String convertTimeFormat24to12(int hours, int mins) {
+
+        String timeSet;
+        if (hours > 12) {
+            hours -= 12;
+            timeSet = "PM";
+        } else if (hours == 0) {
+            hours += 12;
+            timeSet = "AM";
+        } else if (hours == 12)
+            timeSet = "PM";
+        else
+            timeSet = "AM";
+
+        String minutes;
+        if (mins < 10)
+            minutes = "0" + mins;
+        else
+            minutes = String.valueOf(mins);
+        String aTime = new StringBuilder().append(hours).append(':')
+                .append(minutes).append(" ").append(timeSet).toString();
+        return aTime;
+    }
+
+    public static String convertTimeForUser(String time) {
+        Date dateObj = null;
+        try {
+            final SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
+            dateObj = sdf.parse(time);
+            System.out.println(dateObj);
+            System.out.println(new SimpleDateFormat("hh:mm aa").format(dateObj));
+        } catch (final ParseException e) {
+            e.printStackTrace();
+        }
+
+        return new SimpleDateFormat("hh:mm aa").format(dateObj);
+    }
+
+    public static String convertTimeFormat12to24(String time) {
+
+        SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat parseFormat = new SimpleDateFormat("hh:mm a");
+        Date date = null;
+        try {
+            date = parseFormat.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return displayFormat.format(date);
     }
 }
