@@ -319,6 +319,7 @@ public class LoginActivity extends Activity {
                         sb.append((char) ch);
 
                     response = new JSONObject(sb.toString());
+                    System.out.println("Response: " + response);
                     token = response.getString("token");
                     AppGlobals.putToken(token);
 

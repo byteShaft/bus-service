@@ -125,11 +125,24 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                     Toast.makeText(getActivity(), "Incomplete info. Route not found", Toast.LENGTH_SHORT).show();
                     return true;
                 }
+
+                if (!isAnyCheckBoxChecked()) {
+                    Toast.makeText(getActivity(), "You must select at least one route time", Toast.LENGTH_LONG).show();
+                    return true;
+                }
                 new checkInternetTask().execute();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public boolean isAnyCheckBoxChecked() {
+        if (registerDriverCheckBoxOne.isChecked() || registerDriverCheckBoxTwo.isChecked()
+                || registerDriverCheckBoxThree.isChecked()) {
+            isAnyCheckBoxChecked = true;
+        }
+        return isAnyCheckBoxChecked;
     }
 
     public void register() {
