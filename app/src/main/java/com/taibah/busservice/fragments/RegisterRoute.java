@@ -18,8 +18,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -81,6 +83,8 @@ public class RegisterRoute extends Fragment {
     private ViewPager mViewPager;
     private View convertView;
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    static CheckBox registerStudentCheckBoxOne, registerStudentCheckBoxTwo, registerStudentCheckBoxThree;
+    LinearLayout cbLinearLayout;
 
     @Nullable
     @Override

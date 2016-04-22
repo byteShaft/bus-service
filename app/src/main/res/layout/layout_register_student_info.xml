@@ -130,5 +130,37 @@
 
             </RelativeLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            android:padding="24dp"
+            android:visibility="invisible"
+            android:id="@+id/cb_register_student_layout"
+            android:background="@drawable/rounded_corners">
+
+            <CheckBox
+                android:id="@+id/cb_register_student_timings_one"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+
+            <CheckBox
+                android:id="@+id/cb_register_student_timings_two"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <CheckBox
+                android:id="@+id/cb_register_student_timings_three"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

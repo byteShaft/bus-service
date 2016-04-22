@@ -23,7 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,6 +78,7 @@ public class RegisterStudent extends Fragment {
     static String rollNumberStudent;
     static String emailStudent;
     static GoogleMap mMap;
+    static String temporaryArrivalTime, temporaryDepartureTime;
     static ArrayList<Integer> routeIdsList;
     static HashMap<Integer, ArrayList<String>> hashMapRouteData;
     static Spinner spinnerRoutesList;
@@ -84,8 +87,13 @@ public class RegisterStudent extends Fragment {
     View convertView;
     String studentRegistrationDetail;
     String studentStop;
-    HttpURLConnection connection;
+    private static HttpURLConnection connection;
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    static JSONArray jsonTimingArray;
+    static CheckBox registerStudentCheckBoxOne, registerStudentCheckBoxTwo, registerStudentCheckBoxThree;
+    static LinearLayout cbStudentLinearLayout;
+    static boolean internetNotWorking = false;
+    static Context mContext;
 
     public static boolean validateInfo() {
         boolean valid = true;
@@ -234,7 +242,7 @@ public class RegisterStudent extends Fragment {
                     return true;
                 }
                 new checkInternetTask().execute();
-
+                System.out.println("Timings: " + assignTimings());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -292,7 +300,10 @@ public class RegisterStudent extends Fragment {
                 + "&" + "username=" + username
                 + "&" + "latitude=" + PlaceholderFragment.studentStopLatLng.latitude
                 + "&" + "longitude=" + PlaceholderFragment.studentStopLatLng.longitude
-                + "&" + "roll_number=" + rollNumberStudent;
+                + "&" + "roll_number=" + rollNumberStudent
+                + assignTimings();
+
+        System.out.println("Student Registration Details: " + studentRegistrationDetail);
 
         new RegisterStudentTask().execute();
 
@@ -389,6 +400,12 @@ public class RegisterStudent extends Fragment {
                 etStudentContactNumber = (EditText) rootView.findViewById(R.id.et_student_contact);
                 etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
                 etStudentEmail = (EditText) rootView.findViewById(R.id.et_student_email);
+
+                cbStudentLinearLayout = (LinearLayout) rootView.findViewById(R.id.cb_register_student_layout);
+
+                registerStudentCheckBoxOne = (CheckBox) rootView.findViewById(R.id.cb_register_student_timings_one);
+                registerStudentCheckBoxTwo = (CheckBox) rootView.findViewById(R.id.cb_register_student_timings_two);
+                registerStudentCheckBoxThree = (CheckBox) rootView.findViewById(R.id.cb_register_student_timings_three);
 
 
                 spinnerRoutesList = (Spinner) rootView.findViewById(R.id.spinner_select_route_for_student);
@@ -488,6 +505,97 @@ public class RegisterStudent extends Fragment {
             routing.execute();
         }
 
+        private class FetchRouteDetails extends AsyncTask<Void, Integer, Void> {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                cbStudentLinearLayout.setVisibility(View.INVISIBLE);
+                registerStudentCheckBoxOne.setVisibility(View.INVISIBLE);
+                registerStudentCheckBoxTwo.setVisibility(View.INVISIBLE);
+                registerStudentCheckBoxThree.setVisibility(View.INVISIBLE);
+                Helpers.showProgressDialog(getActivity(), "Retrieving route details");
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
+                    try {
+                        connection = WebServiceHelpers.openConnectionForUrl
+                                ("http://46.101.75.194:8080/routes/" + routeId, "GET");
+                        connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                        connection.connect();
+                        responseCode = connection.getResponseCode();
+                        System.out.print(responseCode);
+                        String data = WebServiceHelpers.readResponse(connection);
+                        JSONObject jsonObject = new JSONObject(data);
+                        System.out.println("Route Details: " + jsonObject);
+                        String routeTimings = jsonObject.getString("timings");
+                        jsonTimingArray = new JSONArray(routeTimings);
+                        System.out.println("Timing Details: " + jsonTimingArray);
+
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    internetNotWorking = true;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if (responseCode == 200) {
+                    Helpers.dismissProgressDialog();
+                    internetNotWorking = false;
+
+                    for (int i = 0; i < jsonTimingArray.length(); i++) {
+                        int timingID = 0;
+                        JSONObject object = null;
+                        try {
+                            object = jsonTimingArray.getJSONObject(i);
+                            timingID = Integer.parseInt(object.getString("id"));
+                            temporaryArrivalTime = object.getString("arrival_time");
+                            temporaryDepartureTime = object.getString("departure_time");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        String arrivalTime = temporaryArrivalTime.substring(11, 16);
+                        String departureTime = temporaryDepartureTime.substring(11, 16);
+
+                        String checkboxTime = "(" + Helpers.convertTimeForUser(arrivalTime) + " - "
+                                + Helpers.convertTimeForUser(departureTime) + ")";
+                        System.out.println(arrivalTime);
+
+                        if (i == 0) {
+                            registerStudentCheckBoxOne.setText(checkboxTime);
+                            registerStudentCheckBoxOne.setVisibility(View.VISIBLE);
+                            cbStudentLinearLayout.setVisibility(View.VISIBLE);
+                            registerStudentCheckBoxOne.setId(timingID);
+                        }else if (i == 1) {
+                            registerStudentCheckBoxTwo.setText(checkboxTime);
+                            registerStudentCheckBoxTwo.setVisibility(View.VISIBLE);
+                            registerStudentCheckBoxTwo.setId(timingID);
+                        }else if (i == 2) {
+                            registerStudentCheckBoxThree.setText(checkboxTime);
+                            registerStudentCheckBoxThree.setVisibility(View.VISIBLE);
+                            registerStudentCheckBoxThree.setId(timingID);
+                        }
+                    }
+                } else if (internetNotWorking) {
+                    Toast.makeText(mContext, "You're not connected to the internet", Toast.LENGTH_LONG).show();
+                    internetNotWorking = false;
+                    getActivity().onBackPressed();
+                } else {
+                    Toast.makeText(mContext, "Something went wrong. Please try again", Toast.LENGTH_LONG).show();
+                    Helpers.dismissProgressDialog();
+                    internetNotWorking = true;
+                    getActivity().onBackPressed();
+                }
+            }
+        }
+
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             routeId = RegisterStudent.routeIdsList.get(position);
@@ -495,6 +603,7 @@ public class RegisterStudent extends Fragment {
             latLngA = new LatLng(Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(1)), Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(3)));
             latLngB = new LatLng(Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(2)), Double.parseDouble(hashMapRouteData.get(routeIdsList.get(position)).get(4)));
             spinnerValueChanged = true;
+            new FetchRouteDetails().execute();
         }
 
         @Override
@@ -688,6 +797,20 @@ public class RegisterStudent extends Fragment {
                 getActivity().onBackPressed();
             }
         }
+    }
+
+    public static String assignTimings() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < jsonTimingArray.length(); i++) {
+            if(i == 0 && registerStudentCheckBoxOne.isChecked()) {
+                sb.append("&timing_ids[]=" + registerStudentCheckBoxOne.getId());
+            } else if (i == 1 && registerStudentCheckBoxTwo.isChecked()) {
+                sb.append("&timing_ids[]=" + registerStudentCheckBoxTwo.getId());
+            } else if (i == 2 && registerStudentCheckBoxThree.isChecked()) {
+                sb.append("&timing_ids[]=" + registerStudentCheckBoxThree.getId());
+            }
+        }
+        return sb.toString();
     }
 
     class CustomSpinnerListAdapter extends ArrayAdapter<String> {
