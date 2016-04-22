@@ -136,31 +136,45 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginTop="24dp"
-            android:padding="24dp"
-            android:visibility="invisible"
-            android:id="@+id/cb_register_student_layout"
+            android:padding="12dp"
+            android:id="@+id/layout_register_student_timings"
             android:background="@drawable/rounded_corners">
 
-            <CheckBox
-                android:id="@+id/cb_register_student_timings_one"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="10dp"
+                android:text="Assign Timing"
+                android:textSize="18dp"
+                android:textStyle="bold" />
 
-
-            <CheckBox
-                android:id="@+id/cb_register_student_timings_two"
-                android:visibility="invisible"
-                android:layout_width="wrap_content"
+            <RadioGroup
+                android:id="@+id/rg_register_student_timings"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                android:layout_marginLeft="10dp">
 
-            <CheckBox
-                android:id="@+id/cb_register_student_timings_three"
-                android:visibility="invisible"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
+                <RadioButton
+                    android:id="@+id/rb_register_student_timings_one"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+
+                <RadioButton
+                    android:id="@+id/rb_register_student_timings_two"
+                    android:visibility="invisible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+
+                <RadioButton
+                    android:id="@+id/rb_register_student_timings_three"
+                    android:visibility="invisible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+            </RadioGroup>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
