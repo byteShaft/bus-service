@@ -207,6 +207,20 @@ public class Helpers {
         return aTime;
     }
 
+    public static String convertTimeForUser(String time) {
+        Date dateObj = null;
+        try {
+            final SimpleDateFormat sdf = new SimpleDateFormat("H:mm");
+            dateObj = sdf.parse(time);
+            System.out.println(dateObj);
+            System.out.println(new SimpleDateFormat("hh:mm aa").format(dateObj));
+        } catch (final ParseException e) {
+            e.printStackTrace();
+        }
+
+        return new SimpleDateFormat("hh:mm aa").format(dateObj);
+    }
+
     public static String convertTimeFormat12to24(String time) {
 
         SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");

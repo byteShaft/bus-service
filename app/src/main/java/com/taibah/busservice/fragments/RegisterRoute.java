@@ -68,18 +68,12 @@ public class RegisterRoute extends Fragment {
     public static int routeTimeCounter = 1;
     public static String temporaryArrivalTime;
     public static String temporaryDepartureTime;
-    public static String[] arrayRouteTimings;
-    public static final int RB1_ID = 1001;
-    public static final int RB2_ID = 1002;
-    public static final int RB3_ID = 1003;
     public static RadioButton timeOne;
     public static RadioButton timeTwo;
     public static RadioButton timeThree;
     HttpURLConnection connection;
     String routeName;
     String busNumber;
-    String arrivalTime;
-    String departureTime;
     String locationPointA;
     String locationPointB;
     String routeInfoDialogMessage;
@@ -634,8 +628,10 @@ public class RegisterRoute extends Fragment {
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             }
-            sbWriteTime.append("&timings[" + i + "][arrival_time]=" + readyArrivalTime +
-                    "&timings[" + i + "][departure_time]=" + readyDepartureTime + "&timings[" + i + "][status]=0");
+            sbWriteTime.append(
+                    "&timings[" + i + "][arrival_time]=2016-04-16 " + readyArrivalTime +
+                    "&timings[" + i + "][departure_time]=2016-04-16 " + readyDepartureTime +
+                    "&timings[" + i + "][status]=0");
         }
         return sbWriteTime.toString();
     }

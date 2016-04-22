@@ -18,7 +18,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +57,12 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
     String contactNumberDriver;
     HttpURLConnection connection;
     String registrationDetail;
+    String temporaryArrivalTime, temporaryDepartureTime;
     Spinner spinnerUnAssignedRoutesList;
+    static CheckBox registerDriverCheckBoxOne, registerDriverCheckBoxTwo, registerDriverCheckBoxThree;
+    LinearLayout linearLayout;
+    static JSONArray jsonTimingArray;
+    boolean isAnyCheckBoxChecked = false;
 
     ArrayList<Integer> unAssignedRouteIdsList;
     HashMap<Integer, String> hashMapUnAssignedRouteData;
@@ -73,6 +81,12 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
         etDriverFirstName = (EditText) convertView.findViewById(R.id.et_driver_first_name);
         etDriverLastName = (EditText) convertView.findViewById(R.id.et_driver_last_name);
         etDriverContactNumber = (EditText) convertView.findViewById(R.id.et_driver_contact);
+
+        linearLayout = (LinearLayout) convertView.findViewById(R.id.cb_layout);
+
+        registerDriverCheckBoxOne = (CheckBox) convertView.findViewById(R.id.cb_register_driver_timings_one);
+        registerDriverCheckBoxTwo = (CheckBox) convertView.findViewById(R.id.cb_register_driver_timings_two);
+        registerDriverCheckBoxThree = (CheckBox) convertView.findViewById(R.id.cb_register_driver_timings_three);
 
         spinnerUnAssignedRoutesList = (Spinner) convertView.findViewById(R.id.spinner_register_driver_select_route);
 
@@ -127,7 +141,8 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                 + "first_name=" + firstNameDriver + "&" + "last_name=" + lastNameDriver
                 + "&" + "password=" + password + "&" + "passconf=" + password + "&" + "type=driver"
                 + "&" + "username=" + username
-                + "&" + "phone=" + contactNumberDriver;
+                + "&" + "phone=" + contactNumberDriver
+                + assignTimings();
 
         new RegisterDriverTask().execute();
     }
@@ -210,6 +225,7 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                         + "\n" + "Driver Contact: " + contactNumberDriver + "\n\n" + "Assigned Route: "
                         + spinnerText;
                 showRegInfoDialog(message);
+                System.out.println(assignTimings());
             } else {
                 showInternetNotWorkingDialog();
             }
@@ -369,6 +385,10 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            linearLayout.setVisibility(View.INVISIBLE);
+            registerDriverCheckBoxOne.setVisibility(View.INVISIBLE);
+            registerDriverCheckBoxTwo.setVisibility(View.INVISIBLE);
+            registerDriverCheckBoxThree.setVisibility(View.INVISIBLE);
             Helpers.showProgressDialog(getActivity(), "Retrieving route details");
         }
 
@@ -386,7 +406,8 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
                     JSONObject jsonObject = new JSONObject(data);
                     System.out.println("Route Details: " + jsonObject);
                     String routeTimings = jsonObject.getString("timings");
-                    System.out.println(routeTimings);
+                    jsonTimingArray = new JSONArray(routeTimings);
+                    System.out.println("Timing Details: " + jsonTimingArray);
 
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -403,6 +424,39 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             if (responseCode == 200) {
                 Helpers.dismissProgressDialog();
                 internetNotWorking = false;
+
+                for (int i = 0; i < jsonTimingArray.length(); i++) {
+                    int timingID = 0;
+                    JSONObject object = null;
+                    try {
+                        object = jsonTimingArray.getJSONObject(i);
+                        timingID = Integer.parseInt(object.getString("id"));
+                        temporaryArrivalTime = object.getString("arrival_time");
+                        temporaryDepartureTime = object.getString("departure_time");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    String arrivalTime = temporaryArrivalTime.substring(11, 16);
+                    String departureTime = temporaryDepartureTime.substring(11, 16);
+
+                    String checkboxTime = "(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")";
+                    System.out.println(arrivalTime);
+
+                    if (i == 0) {
+                        registerDriverCheckBoxOne.setText(checkboxTime);
+                        registerDriverCheckBoxOne.setVisibility(View.VISIBLE);
+                        linearLayout.setVisibility(View.VISIBLE);
+                        registerDriverCheckBoxOne.setId(timingID);
+                    }else if (i == 1) {
+                        registerDriverCheckBoxTwo.setText(checkboxTime);
+                        registerDriverCheckBoxTwo.setVisibility(View.VISIBLE);
+                        registerDriverCheckBoxTwo.setId(timingID);
+                    }else if (i == 2) {
+                        registerDriverCheckBoxThree.setText(checkboxTime);
+                        registerDriverCheckBoxThree.setVisibility(View.VISIBLE);
+                        registerDriverCheckBoxThree.setId(timingID);
+                    }
+                }
             } else if (internetNotWorking) {
                 Toast.makeText(getActivity(), "You're not connected to the internet", Toast.LENGTH_LONG).show();
                 getActivity().onBackPressed();
@@ -415,6 +469,7 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
             }
         }
     }
+
 
     class CustomSpinnerListAdapter extends ArrayAdapter<String> {
 
@@ -459,5 +514,19 @@ public class RegisterDriver extends Fragment implements AdapterView.OnItemSelect
 
     static class ViewHolder {
         TextView tvSpinner;
+    }
+
+    public static String assignTimings() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < jsonTimingArray.length(); i++) {
+            if(i == 0 && registerDriverCheckBoxOne.isChecked()) {
+                sb.append("&timing_ids[]=" + registerDriverCheckBoxOne.getId());
+            } else if (i == 1 && registerDriverCheckBoxTwo.isChecked()) {
+                sb.append("&timing_ids[]=" + registerDriverCheckBoxTwo.getId());
+            } else if (i == 2 && registerDriverCheckBoxThree.isChecked()) {
+                sb.append("&timing_ids[]=" + registerDriverCheckBoxThree.getId());
+            }
+        }
+        return sb.toString();
     }
 }

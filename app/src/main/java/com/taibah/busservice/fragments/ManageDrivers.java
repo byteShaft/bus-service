@@ -168,6 +168,7 @@ public class ManageDrivers extends Fragment {
                     connection.connect();
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObj = new JSONObject(data);
+                    System.out.println("Driver Details: " + jsonObj);
                     responseCode = connection.getResponseCode();
                     JSONArray jsonArray = jsonObj.getJSONArray("users");
 
