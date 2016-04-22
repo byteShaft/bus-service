@@ -23,9 +23,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,8 +91,9 @@ public class RegisterStudent extends Fragment {
     private static HttpURLConnection connection;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     static JSONArray jsonTimingArray;
-    static CheckBox registerStudentCheckBoxOne, registerStudentCheckBoxTwo, registerStudentCheckBoxThree;
-    static LinearLayout cbStudentLinearLayout;
+    static RadioGroup rgRegisterStudentTiming;
+    static RadioButton rbRegisterStudentTimingOne, rbRegisterStudentTimingTwo, rbRegisterStudentTimingThree;
+    static LinearLayout layoutStudentRegisterTimingsRadioButton;
     static boolean internetNotWorking = false;
     static Context mContext;
 
@@ -401,11 +403,13 @@ public class RegisterStudent extends Fragment {
                 etStudentRollNumber = (EditText) rootView.findViewById(R.id.et_student_roll_number);
                 etStudentEmail = (EditText) rootView.findViewById(R.id.et_student_email);
 
-                cbStudentLinearLayout = (LinearLayout) rootView.findViewById(R.id.cb_register_student_layout);
+                layoutStudentRegisterTimingsRadioButton = (LinearLayout) rootView.findViewById(R.id.layout_register_student_timings);
 
-                registerStudentCheckBoxOne = (CheckBox) rootView.findViewById(R.id.cb_register_student_timings_one);
-                registerStudentCheckBoxTwo = (CheckBox) rootView.findViewById(R.id.cb_register_student_timings_two);
-                registerStudentCheckBoxThree = (CheckBox) rootView.findViewById(R.id.cb_register_student_timings_three);
+                rgRegisterStudentTiming = (RadioGroup) rootView.findViewById(R.id.rg_register_student_timings);
+
+                rbRegisterStudentTimingOne = (RadioButton) rootView.findViewById(R.id.rb_register_student_timings_one);
+                rbRegisterStudentTimingTwo = (RadioButton) rootView.findViewById(R.id.rb_register_student_timings_two);
+                rbRegisterStudentTimingThree = (RadioButton) rootView.findViewById(R.id.rb_register_student_timings_three);
 
 
                 spinnerRoutesList = (Spinner) rootView.findViewById(R.id.spinner_select_route_for_student);
@@ -510,10 +514,9 @@ public class RegisterStudent extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                cbStudentLinearLayout.setVisibility(View.INVISIBLE);
-                registerStudentCheckBoxOne.setVisibility(View.INVISIBLE);
-                registerStudentCheckBoxTwo.setVisibility(View.INVISIBLE);
-                registerStudentCheckBoxThree.setVisibility(View.INVISIBLE);
+                rbRegisterStudentTimingOne.setVisibility(View.GONE);
+                rbRegisterStudentTimingTwo.setVisibility(View.GONE);
+                rbRegisterStudentTimingThree.setVisibility(View.GONE);
                 Helpers.showProgressDialog(getActivity(), "Retrieving route details");
             }
 
@@ -564,23 +567,25 @@ public class RegisterStudent extends Fragment {
                         String arrivalTime = temporaryArrivalTime.substring(11, 16);
                         String departureTime = temporaryDepartureTime.substring(11, 16);
 
-                        String checkboxTime = "(" + Helpers.convertTimeForUser(arrivalTime) + " - "
+                        String radioTime = "(" + Helpers.convertTimeForUser(arrivalTime) + " - "
                                 + Helpers.convertTimeForUser(departureTime) + ")";
                         System.out.println(arrivalTime);
 
                         if (i == 0) {
-                            registerStudentCheckBoxOne.setText(checkboxTime);
-                            registerStudentCheckBoxOne.setVisibility(View.VISIBLE);
-                            cbStudentLinearLayout.setVisibility(View.VISIBLE);
-                            registerStudentCheckBoxOne.setId(timingID);
+                            rbRegisterStudentTimingOne.setText(radioTime);
+                            rbRegisterStudentTimingOne.setVisibility(View.VISIBLE);
+                            layoutStudentRegisterTimingsRadioButton.setVisibility(View.VISIBLE);
+                            rbRegisterStudentTimingOne.setId(timingID);
+                            rgRegisterStudentTiming.check(timingID);
+
                         }else if (i == 1) {
-                            registerStudentCheckBoxTwo.setText(checkboxTime);
-                            registerStudentCheckBoxTwo.setVisibility(View.VISIBLE);
-                            registerStudentCheckBoxTwo.setId(timingID);
+                            rbRegisterStudentTimingTwo.setText(radioTime);
+                            rbRegisterStudentTimingTwo.setVisibility(View.VISIBLE);
+                            rbRegisterStudentTimingTwo.setId(timingID);
                         }else if (i == 2) {
-                            registerStudentCheckBoxThree.setText(checkboxTime);
-                            registerStudentCheckBoxThree.setVisibility(View.VISIBLE);
-                            registerStudentCheckBoxThree.setId(timingID);
+                            rbRegisterStudentTimingThree.setText(radioTime);
+                            rbRegisterStudentTimingThree.setVisibility(View.VISIBLE);
+                            rbRegisterStudentTimingThree.setId(timingID);
                         }
                     }
                 } else if (internetNotWorking) {
@@ -637,6 +642,7 @@ public class RegisterStudent extends Fragment {
                     + "Contact Number: " + contactNumberStudent
                     + "\n" + "RollNumber: " + rollNumberStudent + "\n" + "Email ID: " + emailStudent
                     + "\n\n" + "Assigned Route: " + spinnerText
+                    + "\n" + "Route Timing: " + showTimings()
                     + "\n" + "Stop Address: " + Helpers.getAddress(getActivity(), PlaceholderFragment.studentStopLatLng);
 
             Helpers.dismissProgressDialog();
@@ -802,12 +808,26 @@ public class RegisterStudent extends Fragment {
     public static String assignTimings() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < jsonTimingArray.length(); i++) {
-            if(i == 0 && registerStudentCheckBoxOne.isChecked()) {
-                sb.append("&timing_ids[]=" + registerStudentCheckBoxOne.getId());
-            } else if (i == 1 && registerStudentCheckBoxTwo.isChecked()) {
-                sb.append("&timing_ids[]=" + registerStudentCheckBoxTwo.getId());
-            } else if (i == 2 && registerStudentCheckBoxThree.isChecked()) {
-                sb.append("&timing_ids[]=" + registerStudentCheckBoxThree.getId());
+            if(i == 0 && rbRegisterStudentTimingOne.isChecked()) {
+                sb.append("&timing_ids[]=" + rbRegisterStudentTimingOne.getId());
+            } else if (i == 1 && rbRegisterStudentTimingTwo.isChecked()) {
+                sb.append("&timing_ids[]=" + rbRegisterStudentTimingTwo.getId());
+            } else if (i == 2 && rbRegisterStudentTimingThree.isChecked()) {
+                sb.append("&timing_ids[]=" + rbRegisterStudentTimingThree.getId());
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String showTimings() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < jsonTimingArray.length(); i++) {
+            if(i == 0 && rbRegisterStudentTimingOne.isChecked()) {
+                sb.append(rbRegisterStudentTimingOne.getText());
+            } else if (i == 1 && rbRegisterStudentTimingTwo.isChecked()) {
+                sb.append(rbRegisterStudentTimingTwo.getText());
+            } else if (i == 2 && rbRegisterStudentTimingThree.isChecked()) {
+                sb.append(rbRegisterStudentTimingThree.getText());
             }
         }
         return sb.toString();
