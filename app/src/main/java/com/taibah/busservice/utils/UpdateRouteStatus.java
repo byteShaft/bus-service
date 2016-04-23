@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +30,8 @@ public class UpdateRouteStatus extends AsyncTask<String, Integer, Void> {
     protected Void doInBackground(String... params) {
         Log.i("UpdateRouteStatus", "Called");
         try {
-            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+            JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+            JSONObject jsonObject = jsonArray.getJSONObject(0);
             String ID = jsonObject.getString("id");
             URL url = new URL("http://46.101.75.194:8080/routes/" + ID);
 
