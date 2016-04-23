@@ -82,68 +82,38 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/layout_route_info"
-        android:layout_width="wrap_content"
+        android:id="@+id/layout_route_info_timing"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layout_heading"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="30dp"
         android:visibility="gone">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_margin="40dp"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_corners"
+            android:padding="10dp">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/rounded_corners"
-                android:orientation="vertical"
-                android:padding="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Arrival Time: "
-                    android:textSize="14dp"
-                    android:textStyle="bold"
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="#000000"/>
-
-                <TextView
-                    android:id="@+id/tv_arrival_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:textSize="30dp" />
-            </LinearLayout>
-
-
-            <LinearLayout
+                android:gravity="center_horizontal"
+                android:text="Assigned Route Timing"
+                android:layout_gravity="center_horizontal"
+                android:textSize="16dp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tv_home_assined_route_timing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:background="@drawable/rounded_corners"
-                android:orientation="vertical"
-                android:padding="10dp">
+                android:textSize="14dp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Departure Time: "
-                    android:textSize="14dp"
-                    android:textStyle="bold"
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="#000000"/>
-
-                <TextView
-                    android:id="@+id/tv_departure_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:textSize="30dp" />
-            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 

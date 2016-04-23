@@ -33,5 +33,48 @@
         android:text="Set whether you will be attending the bus or not. Turn the switch 'Off' and you'll be removed from the route shown to the driver until you turn it 'On' again"
         android:gravity="center_horizontal"/>
 
+
+    <LinearLayout
+        android:id="@+id/layout_student_schedule_timings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:padding="24dp"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_corners"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            android:text="Select Route Timings"
+            android:layout_gravity="center_horizontal"/>
+
+        <RadioGroup
+            android:id="@+id/rg_student_schedule_timings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp">
+
+            <RadioButton
+                android:id="@+id/rb_student_schedule_timings_one"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/rb_student_schedule_timings_two"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <RadioButton
+                android:id="@+id/rb_student_schedule_timings_three"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+        </RadioGroup>
+    </LinearLayout>
+
 </LinearLayout>
 

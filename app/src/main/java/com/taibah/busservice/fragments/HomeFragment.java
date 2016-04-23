@@ -62,8 +62,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     TextView tvUserType;
     static TextView tvRouteStatus;
     TextView tvRouteClickToRestore;
-    static TextView tvRouteArrivalTime;
-    static TextView tvRouteDepartureTime;
+    static TextView tvRouteTimings;
     TextView tvStatusRetrievingCancelledRoutes;
 
     static int responseCode;
@@ -82,7 +81,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public RetrieveAllCancelledRoutes mTask;
     TextView tvRouteName;
     TextView tvStudentServiceStatus;
-    String timings[];
 
 
     @Nullable
@@ -92,8 +90,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         tvUserType = (TextView) convertView.findViewById(R.id.tv_user_type);
         tvRouteStatus = (TextView) convertView.findViewById(R.id.tv_route_status);
-        tvRouteArrivalTime = (TextView) convertView.findViewById(R.id.tv_arrival_time);
-        tvRouteDepartureTime = (TextView) convertView.findViewById(R.id.tv_departure_time);
+        tvRouteTimings = (TextView) convertView.findViewById(R.id.tv_home_assined_route_timing);
         tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
         tvRouteName = (TextView) convertView.findViewById(R.id.tv_route_name_home_fragment);
         tvStudentServiceStatus = (TextView) convertView.findViewById(R.id.tv_student_service_status_home_fragment);
@@ -107,13 +104,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         if (AppGlobals.getUserType() > 0) {
             try {
                 JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
-                JSONObject jsonObject = jsonArray.getJSONObject(1);
+                JSONObject jsonObject = jsonArray.getJSONObject(0);
                 System.out.println(jsonObject.getString("name"));
                 Log.i("User Details ", "" + jsonObject);
                 JSONArray timingsArray = new JSONArray(jsonObject.getString("timings"));
-                JSONObject timingsJsonObject = timingsArray.getJSONObject(1);
-                Log.i("Timings", "" + timingsJsonObject);
                 tvRouteName.setText("Assigned Route: " + jsonObject.getString("name"));
+
+                StringBuilder sbTimings = new StringBuilder();
+                for (int i = 0; i < timingsArray.length(); i++) {
+                    JSONObject timingsJsonObject = timingsArray.getJSONObject(i);
+                    String arrivalTime = timingsJsonObject.get("arrival_time").toString().substring(11, 16);
+                    String departureTime = timingsJsonObject.get("departure_time").toString().substring(11, 16);
+                    sbTimings.append("(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")\n");
+                }
+
+                if (AppGlobals.getRouteStatus() < 2) {
+                    tvRouteTimings.setText(sbTimings);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -129,7 +136,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         hashMapRouteData = new HashMap<>();
         listViewCancelledRoutes = (ListView) convertView.findViewById(R.id.lv_cancelled_routes);
 
-        layoutRouteInfo = (RelativeLayout) convertView.findViewById(R.id.layout_route_info);
+        layoutRouteInfo = (RelativeLayout) convertView.findViewById(R.id.layout_route_info_timing);
         registerForContextMenu(listViewCancelledRoutes);
 
 
@@ -193,17 +200,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         }
 
-//        if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
-//            try {
-//                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-//                String arrivalTime = jsonObject.getString("arrival_time");
-//                String departureTime = jsonObject.getString("departure_time");
-//                tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
-//                tvRouteDepartureTime.setText(departureTime.substring(departureTime.length() - 8));
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 
     public void setAppView() {
