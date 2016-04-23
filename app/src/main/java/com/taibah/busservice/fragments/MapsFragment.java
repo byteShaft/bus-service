@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -399,8 +400,10 @@ public class MapsFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+                    JSONArray jsonArray1 = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                    JSONObject jsonObject = jsonArray1.getJSONObject(0);
                     String ID = jsonObject.getString("id");
+                    Log.i("ID", ID);
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/routes/" + ID + "/students", "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
@@ -409,6 +412,7 @@ public class MapsFragment extends Fragment {
 
                     String data = WebServiceHelpers.readResponse(connection);
                     JSONArray jsonArray = new JSONArray(data);
+                    Log.i("jsonArray", ": " + jsonArray);
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObjectArray = jsonArray.getJSONObject(i);
@@ -431,6 +435,9 @@ public class MapsFragment extends Fragment {
 
                     String data1 = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObject1 = new JSONObject(data1);
+                    Log.i("json", ": " + jsonObject1);
+
+
 
                     routeStatus = Integer.parseInt(jsonObject1.getString("status"));
 
@@ -448,6 +455,7 @@ public class MapsFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             Helpers.dismissProgressDialog();
+            Log.i("responseCode", ": " + responseCode);
             if (responseCode == 200) {
                 mMap.clear();
 

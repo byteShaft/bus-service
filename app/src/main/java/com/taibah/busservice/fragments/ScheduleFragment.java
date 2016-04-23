@@ -246,13 +246,10 @@ public class ScheduleFragment extends Fragment {
                 }
             }
             rgScheduleTimings.check(timingID);
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
-
-
 
     public class UpdateStudentTimingStatus extends AsyncTask<String, Integer, Void> {
 
