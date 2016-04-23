@@ -477,7 +477,7 @@ public class RegisterRoute extends Fragment {
                     + Helpers.getAddress(getActivity(), PlaceholderFragment.pointB);
 
             Log.i("Route Timings", showRouteTimings());
-            Log.i("Test Timings", writeTimings());
+//            Log.i("Test Timings", writeTimings());
 
             return Helpers.isInternetWorking();
         }
@@ -607,8 +607,10 @@ public class RegisterRoute extends Fragment {
 
     public static String writeTimings() {
         StringBuilder sbWriteTime = new StringBuilder();
-        String tempArrivalTime = "", tempDepartureTime = "";
-        String readyArrivalTime = "", readyDepartureTime = "";
+        String tempArrivalTime = "";
+        String tempDepartureTime = "";
+        String readyArrivalTime = "";
+        String readyDepartureTime = "";
         String tempTime;
         for (int i = 0; i < routeTimeCounter; i++) {
             if (i == 0) {
@@ -617,8 +619,6 @@ public class RegisterRoute extends Fragment {
                 tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
-                Log.i("Temp Arrival Time", tempArrivalTime);
-                Log.i("Temp Departure Time", tempDepartureTime);
             } else if (i == 1) {
                 tempTime = timeTwo.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");

@@ -120,7 +120,6 @@ public class Helpers {
     }
 
 
-
     public static Bitmap getMarkerBitmapFromView(String studentName, Context mContext) {
         View customMarkerView = ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.layout_custom_marker_student, null);
         TextView markerTextView = (TextView) customMarkerView.findViewById(R.id.tv_student_marker);
@@ -222,16 +221,16 @@ public class Helpers {
     }
 
     public static String convertTimeFormat12to24(String time) {
-
-        SimpleDateFormat displayFormat = new SimpleDateFormat("HH:mm");
-        SimpleDateFormat parseFormat = new SimpleDateFormat("hh:mm a");
-        Date date = null;
+        String displayFormat = "";
         try {
-            date = parseFormat.parse(time);
+            SimpleDateFormat inFormat = new SimpleDateFormat("hh:mm aa");
+            SimpleDateFormat outFormat = new SimpleDateFormat("HH:mm");
+            displayFormat = outFormat.format(inFormat.parse(time));
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        return displayFormat.format(date);
+        return displayFormat;
     }
 }
+
