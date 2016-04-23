@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -103,15 +104,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
 
-//        if (AppGlobals.getUserType() > 0) {
-//            try {
-//                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-//                System.out.println(jsonObject.getString("users"));
-////                tvRouteName.setText("Assigned Route: " + jsonObject.getString("users"));
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        if (AppGlobals.getUserType() > 0) {
+            try {
+                JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                JSONObject jsonObject = jsonArray.getJSONObject(1);
+                System.out.println(jsonObject.getString("name"));
+                Log.i("User Details ", "" + jsonObject);
+                JSONArray timingsArray = new JSONArray(jsonObject.getString("timings"));
+                JSONObject timingsJsonObject = timingsArray.getJSONObject(1);
+                Log.i("Timings", "" + timingsJsonObject);
+                tvRouteName.setText("Assigned Route: " + jsonObject.getString("name"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (AppGlobals.getUserType() == 1) {
             if (AppGlobals.getStudentServiceAllowed() == 0) {

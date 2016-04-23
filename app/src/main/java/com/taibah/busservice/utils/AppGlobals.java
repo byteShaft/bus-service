@@ -23,6 +23,7 @@ public class AppGlobals extends Application {
     private static final String ROUTE_ID = "route_id";
     private static final String USER_PASSWORD = "user_password";
     private static final String STUDENT_ALLOWED_VALUE = "student_allowed";
+    private static final String USER_DATA = "user_data";
 
     @Override
     public void onCreate() {
@@ -61,6 +62,14 @@ public class AppGlobals extends Application {
 
     public static String getStudentDriverRouteDetails() {
         return sPreferences.getString(ROUTE_ID, null);
+    }
+
+    public static void saveUserDataForPushNotifications(String userData) {
+        sPreferences.edit().putString(USER_DATA, userData).apply();
+    }
+
+    public static String getUserDataForPushNotifications() {
+        return sPreferences.getString(USER_DATA, null);
     }
 
     public static String getToken() {
