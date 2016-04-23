@@ -26,6 +26,7 @@ import com.taibah.busservice.gcm.RegistrationIntentService;
 import com.taibah.busservice.utils.AppGlobals;
 import com.taibah.busservice.utils.Helpers;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -323,15 +324,21 @@ public class LoginActivity extends Activity {
                     token = response.getString("token");
                     AppGlobals.putToken(token);
 
-                    AppGlobals.putStudentDriverRouteDetails(response.getString("route"));
-                    String routeData = response.getString("route");
-                    JSONObject jsonObject = new JSONObject(routeData);
-                    try {
-                        int routeStatus = Integer.parseInt(jsonObject.getString("status"));
-                        AppGlobals.putRouteStatus(routeStatus);
-                    } catch (NumberFormatException nfe) {
-                        AppGlobals.putRouteStatus(0);
-                    }
+                    String userData = response.getString("user");
+                    System.out.println("User Data:" + userData);
+                    JSONObject userDataObject = new JSONObject(userData);
+                    String routeData = userDataObject.getString("routes");
+                    Log.i("Route Data", routeData);
+
+                    AppGlobals.putStudentDriverRouteDetails(routeData);
+//                    String routeData = response.getString("route");
+//                    JSONObject jsonObject = new JSONObject(routeData);
+//                    try {
+//                        int routeStatus = Integer.parseInt(jsonObject.getString("status"));
+//                        AppGlobals.putRouteStatus(routeStatus);
+//                    } catch (NumberFormatException nfe) {
+//                        AppGlobals.putRouteStatus(0);
+//                    }
                     connection.disconnect();
 
                     url = new URL("http://46.101.75.194:8080/user");

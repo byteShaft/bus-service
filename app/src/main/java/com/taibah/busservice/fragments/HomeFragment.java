@@ -81,6 +81,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public RetrieveAllCancelledRoutes mTask;
     TextView tvRouteName;
     TextView tvStudentServiceStatus;
+    String timings[];
 
 
     @Nullable
@@ -102,14 +103,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         layoutRouteCancelled = (RelativeLayout) convertView.findViewById(R.id.layout_driver_route_cancelled);
         layoutRouteCancelled.setOnClickListener(this);
 
-        if (AppGlobals.getUserType() > 0) {
-            try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-                tvRouteName.setText("Assigned Route: " + jsonObject.getString("name"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+//        if (AppGlobals.getUserType() > 0) {
+//            try {
+//                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+//                System.out.println(jsonObject.getString("users"));
+////                tvRouteName.setText("Assigned Route: " + jsonObject.getString("users"));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         if (AppGlobals.getUserType() == 1) {
             if (AppGlobals.getStudentServiceAllowed() == 0) {
@@ -185,17 +187,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         }
 
-        if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
-            try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-                String arrivalTime = jsonObject.getString("arrival_time");
-                String departureTime = jsonObject.getString("departure_time");
-                tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
-                tvRouteDepartureTime.setText(departureTime.substring(departureTime.length() - 8));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+//        if (AppGlobals.getUserType() != 0 && AppGlobals.getRouteStatus() < 2) {
+//            try {
+//                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+//                String arrivalTime = jsonObject.getString("arrival_time");
+//                String departureTime = jsonObject.getString("departure_time");
+//                tvRouteArrivalTime.setText(arrivalTime.substring(arrivalTime.length() - 8));
+//                tvRouteDepartureTime.setText(departureTime.substring(departureTime.length() - 8));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void setAppView() {
@@ -384,6 +386,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
         }
+    }
+
+    public void buildAlertDialogWithMultipleTimings() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Pick a time");
+
     }
 
     @Override
