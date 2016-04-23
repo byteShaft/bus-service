@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -89,6 +90,7 @@ public class DriverService extends Service implements LocationListener,
     @Override
     public void onLocationChanged(Location location) {
         onLocationChangedCounter++;
+        Log.i("onLocationChange", "Called");
         if (onLocationChangedCounter == 1) {
             new DriverLocationPosterTask().execute();
             Toast.makeText(getApplicationContext(), "Location Acquired. Reporting Started.", Toast.LENGTH_LONG).show();
@@ -178,6 +180,8 @@ public class DriverService extends Service implements LocationListener,
                 out.flush();
                 out.close();
                 responseCode = connection.getResponseCode();
+
+                System.out.println("Location Poster Response Code: " + responseCode);
 
                 InputStream in = (InputStream) connection.getContent();
                 int ch;
