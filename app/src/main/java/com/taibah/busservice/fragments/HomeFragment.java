@@ -84,7 +84,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     HashMap<Integer, ArrayList<String>> hashMapRouteData;
 
     ListView listViewCancelledRoutes;
-    int checkedTimeIDForSituation;
+    public static int checkedTimeIDForSituation;
 
     int timeIDforStartStopRoute;
     public static int responseCodeRoutes;
