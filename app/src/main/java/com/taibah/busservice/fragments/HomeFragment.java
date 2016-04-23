@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -54,6 +55,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     Button buttonReportSituation;
     Button buttonStartStopRoute;
     RadioGroup radioGroupReportSituation;
+    RadioGroup rgSituationReportingSelectTime;
+    RadioButton rbSelectTimeOne;
+    RadioButton rbSelectTimeTwo;
+    RadioButton rbSelectTimeThree;
     static RelativeLayout layoutDriverButtons;
     static RelativeLayout layoutRouteCancelled;
     static RelativeLayout layoutRouteInfo;
@@ -76,11 +81,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     ListView listViewCancelledRoutes;
 
+
+    int checkedTimeIDForSituation;
     public static int responseCodeRoutes;
     HttpURLConnection connectionRoutes;
     public RetrieveAllCancelledRoutes mTask;
     TextView tvRouteName;
     TextView tvStudentServiceStatus;
+    TextView tvReportDialogSetTimeTitle;
 
 
     @Nullable
@@ -301,85 +309,118 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error: Not connected to the network", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            case R.id.layout_driver_route_cancelled:
-                if (Helpers.isNetworkAvailable()) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                            getActivity());
-                    alertDialogBuilder.setTitle("Restore Route");
-                    alertDialogBuilder
-                            .setMessage("Are you sure?")
-                            .setCancelable(false)
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    if (Helpers.isNetworkAvailable()) {
-
-                                        Helpers.showProgressDialog(getActivity(), "Restoring Route");
-
-                                        new UpdateRouteStatus(getActivity()).execute("status=0");
-
-                                        new android.os.Handler().postDelayed(
-                                                new Runnable() {
-                                                    public void run() {
-                                                        AppGlobals.putRouteStatus(0);
-                                                        setRouteStatus(0);
-                                                        Helpers.dismissProgressDialog();
-                                                    }
-                                                }, 2000);
-                                    } else {
-                                        Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    AlertDialog restoreRouteDialog = alertDialogBuilder.create();
-                    restoreRouteDialog.show();
-                } else {
-                    Toast.makeText(getActivity(), "Error: Not connected to the network", Toast.LENGTH_SHORT).show();
-                }
-                break;
             case R.id.btn_report_situation:
                 if (Helpers.isNetworkAvailable()) {
                     if (!DriverService.driverLocationReportingServiceIsRunning) {
-                        final Dialog reportSituationDialog = new Dialog(getActivity());
-                        reportSituationDialog.setContentView(R.layout.layout_report_dialog);
+                                final Dialog reportSituationDialog = new Dialog(getActivity());
+                                reportSituationDialog.setContentView(R.layout.layout_report_dialog);
                         reportSituationDialog.setTitle("Choose a situation");
-                        reportSituationDialog.setCancelable(false);
+                                reportSituationDialog.setCancelable(false);
+                        final LinearLayout layoutSelectTime = (LinearLayout)  reportSituationDialog.findViewById(R.id.layout_select_route_time);
+                        final LinearLayout layoutSituationToReport = (LinearLayout)  reportSituationDialog.findViewById(R.id.layout_select_situation);
+                        rbSelectTimeOne = (RadioButton) reportSituationDialog.findViewById(R.id.rb_situation_reporting_select_time_one);
+                        rbSelectTimeTwo = (RadioButton) reportSituationDialog.findViewById(R.id.rb_situation_reporting_select_time_two);
+                        rbSelectTimeThree = (RadioButton) reportSituationDialog.findViewById(R.id.rb_situation_reporting_select_time_three);
+                        final TextView tvShowSelectedTimeForSituationReporting = (TextView) reportSituationDialog.findViewById(R.id.tv_report_dialog_timing);
 
-                        radioGroupReportSituation = (RadioGroup) reportSituationDialog.findViewById(R.id.rg_report_situation);
+                        rgSituationReportingSelectTime = (RadioGroup) reportSituationDialog.findViewById(R.id.rg_situation_reporting_select_time);
+                        rgSituationReportingSelectTime.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                                checkedTimeIDForSituation = rgSituationReportingSelectTime.getCheckedRadioButtonId();
+                                String timeText = "";
+                                if (rbSelectTimeOne.getId() == checkedTimeIDForSituation) {
+                                    timeText = rbSelectTimeOne.getText().toString();
+                                } else if (rbSelectTimeTwo.getId() == checkedTimeIDForSituation) {
+                                    timeText = rbSelectTimeTwo.getText().toString();
+                                } else if (rbSelectTimeThree.getId() == checkedTimeIDForSituation) {
+                                    timeText = rbSelectTimeThree.getText().toString();
+                                }
 
-                        Button dialogButtonCancel = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_cancel);
-                        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+                                tvShowSelectedTimeForSituationReporting.setText(timeText);
+                                layoutSelectTime.setVisibility(View.GONE);
+                                layoutSituationToReport.setVisibility(View.VISIBLE);
+                                reportSituationDialog.setTitle("Choose a situation");
+
+                            }
+                        });
+
+                        JSONArray jsonArray = null;
+                        try {
+                            jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                            JSONObject jsonObject = jsonArray.getJSONObject(0);
+                            JSONArray timingsArrayForID = new JSONArray(jsonObject.getString("timings"));
+                            for (int i = 0; i < timingsArrayForID.length(); i++) {
+                                JSONObject timingsJsonObject = timingsArrayForID.getJSONObject(i);
+                                String arrivalTime = timingsJsonObject.get("arrival_time").toString().substring(11, 16);
+                                String departureTime = timingsJsonObject.get("departure_time").toString().substring(11, 16);
+                                int id = timingsJsonObject.getInt("id");
+                                String routeTime = "(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")";
+                                if (i == 0) {
+                                    rbSelectTimeOne.setText(routeTime);
+                                    rbSelectTimeOne.setId(id);
+                                } else if (i == 1) {
+                                    rbSelectTimeTwo.setText(routeTime);
+                                    rbSelectTimeTwo.setId(id);
+                                    rbSelectTimeTwo.setVisibility(View.VISIBLE);
+                                    layoutSelectTime.setVisibility(View.VISIBLE);
+                                    layoutSituationToReport.setVisibility(View.GONE);
+                                    reportSituationDialog.setTitle("Select a time");
+                                } else if (i == 2) {
+                                    rbSelectTimeThree.setText(routeTime);
+                                    rbSelectTimeThree.setId(id);
+                                    rbSelectTimeThree.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        Button dialogCancelOne = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_cancel_one);
+                        dialogCancelOne.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 reportSituationDialog.dismiss();
                             }
                         });
 
-                        Button dialogButtonOk = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_ok);
-                        dialogButtonOk.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (Helpers.isNetworkAvailable()) {
+                                radioGroupReportSituation = (RadioGroup) reportSituationDialog.findViewById(R.id.rg_report_situation);
 
-                                    reportSituationDialog.dismiss();
+                                Button dialogButtonCancel = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_cancel);
+                                dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        reportSituationDialog.dismiss();
+                                    }
+                                });
 
-                                    int id = radioGroupReportSituation.getCheckedRadioButtonId();
-                                    View radioButton = radioGroupReportSituation.findViewById(id);
-                                    radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 2;
+                                Button dialogButtonOk = (Button) reportSituationDialog.findViewById(R.id.btn_report_dialog_ok);
+                                dialogButtonOk.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (Helpers.isNetworkAvailable()) {
+                                            reportSituationDialog.dismiss();
+                                            int id = radioGroupReportSituation.getCheckedRadioButtonId();
+                                            View radioButton = radioGroupReportSituation.findViewById(id);
+                                            radioIndex = radioGroupReportSituation.indexOfChild(radioButton) + 1;
+                                            int routeStatusToPut;
 
-                                    new SituationReportTask().execute("status=" + radioIndex);
+                                            if (radioIndex < 2) {
+                                                routeStatusToPut = 0;
+                                            } else {
+                                                routeStatusToPut = radioIndex;
+                                            }
 
-                                } else {
-                                    Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-                        reportSituationDialog.show();
+//                                            checkedTimeIDForSituation
 
+                                            new SituationReportTask().execute("status=" + routeStatusToPut);
+
+                                        } else {
+                                            Toast.makeText(getActivity(), "Not connected to the network", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                                reportSituationDialog.show();
                     } else {
                         Toast.makeText(getActivity(), "Error: Driver Service is running", Toast.LENGTH_SHORT).show();
                     }
@@ -393,7 +434,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void buildAlertDialogWithMultipleTimings() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pick a time");
-
     }
 
     @Override

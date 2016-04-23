@@ -70,10 +70,10 @@ public class TwitterFragment extends Fragment {
                 Paging paging = new Paging(1, 10);
 
                 try {
-                    final User user = twitter.showUser("adnanalmazrooa");
+                    final User user = twitter.showUser("presidentTU");
                     URL url = new URL(user.getBiggerProfileImageURL());
                     twitterProfileIcon = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                    statuses = twitter.getUserTimeline("adnanalmazrooa", paging);
+                    statuses = twitter.getUserTimeline("presidentTU", paging);
                     final tweetsArrayAdapter tweetsAdapter = new tweetsArrayAdapter(
                             getActivity().getApplicationContext(), R.layout.tweets_row, statuses);
 
