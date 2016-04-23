@@ -406,9 +406,15 @@ public class MapsFragment extends Fragment {
                     JSONObject userDataJsonObject = userDataJsonArray.getJSONObject(0);
                     JSONArray timingsArray = new JSONArray(userDataJsonObject.getString("timings"));
                     JSONObject timingsObject = timingsArray.getJSONObject(0);
-                    String timingID = timingsObject.getString("id");
+                    String timingID;
+                    if (AppGlobals.getUserType() == 1) {
+                        timingID = timingsObject.getString("id");
+                    } else {
+                        timingID = AppGlobals.timingsIDforDriverMapView;
+                    }
                     connection = WebServiceHelpers.openConnectionForUrl
                             ("http://46.101.75.194:8080/timings/" + timingID, "GET");
+                    Log.i("Link", "http://46.101.75.194:8080/timings/" + timingID);
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
@@ -507,10 +513,15 @@ public class MapsFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-                    String ID = jsonObject.getString("id");
+                    JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                    System.out.println(jsonObject.getString("name"));
+                    Log.i("User Details ", "" + jsonObject);
+                    JSONArray timingsArray = new JSONArray(jsonObject.getString("timings"));
+                    JSONObject jsonObject2 = timingsArray.getJSONObject(0);
+                    String ID = jsonObject2.getString("id");
                     connection = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/locations/get?route_id=" + ID, "GET");
+                            ("http://46.101.75.194:8080/locations/get?timing_id=" + ID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
@@ -520,17 +531,17 @@ public class MapsFragment extends Fragment {
                     latLngDriverForStudent = new LatLng(Double.parseDouble(jsonObject1.getString("latitude"))
                             , Double.parseDouble(jsonObject1.getString("longitude")));
                     locationSpeedAndTimeStampForStudent = jsonObject1.getString("speed");
-                    connection = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/routes/" + ID, "GET");
-                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-                    connection.connect();
-                    responseCode = connection.getResponseCode();
-
-                    String data1 = WebServiceHelpers.readResponse(connection);
-                    JSONObject jsonObjectRouteStatus = new JSONObject(data1);
-                    routeStatus = Integer.parseInt(jsonObjectRouteStatus.getString("status"));
-
-                    AppGlobals.putRouteStatus(routeStatus);
+//                    connection = WebServiceHelpers.openConnectionForUrl
+//                            ("http://46.101.75.194:8080/routes/" + ID, "GET");
+//                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+//                    connection.connect();
+//                    responseCode = connection.getResponseCode();
+//
+//                    String data1 = WebServiceHelpers.readResponse(connection);
+//                    JSONObject jsonObjectRouteStatus = new JSONObject(data1);
+//                    routeStatus = Integer.parseInt(jsonObjectRouteStatus.getString("status"));
+//
+//                    AppGlobals.putRouteStatus(routeStatus);
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();

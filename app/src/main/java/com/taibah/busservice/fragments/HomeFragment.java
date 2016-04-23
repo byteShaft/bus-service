@@ -289,6 +289,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     public void onClick(View v) {
                                         Helpers.dismissProgressDialog();
                                         DriverService.driverLocationReportingServiceIsRunning = true;
+                                        AppGlobals.timingsIDforDriverMapView = String.valueOf(rgStartRouteSelectTime.getCheckedRadioButtonId());
                                         new UpdateRouteStatus(getActivity()).execute("status=1");
                                         getActivity().startService(new Intent(getActivity(), DriverService.class));
                                         buttonStartStopRoute.setText("End Route");
