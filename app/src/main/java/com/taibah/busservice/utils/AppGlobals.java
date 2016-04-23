@@ -24,6 +24,7 @@ public class AppGlobals extends Application {
     private static final String USER_PASSWORD = "user_password";
     private static final String STUDENT_ALLOWED_VALUE = "student_allowed";
     private static final String USER_DATA = "user_data";
+    public static String timingsIDforDriverMapView;
 
     @Override
     public void onCreate() {
