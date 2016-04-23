@@ -59,6 +59,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     RadioButton rbSelectTimeOne;
     RadioButton rbSelectTimeTwo;
     RadioButton rbSelectTimeThree;
+    RadioGroup rgStartRouteSelectTime;
+    RadioButton rbStartRouteSelectTimeOne;
+    RadioButton rbStartRouteSelectTimeTwo;
+    RadioButton rbStartRouteSelectTimeThree;
     static RelativeLayout layoutDriverButtons;
     static RelativeLayout layoutRouteCancelled;
     static RelativeLayout layoutRouteInfo;
@@ -80,15 +84,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     HashMap<Integer, ArrayList<String>> hashMapRouteData;
 
     ListView listViewCancelledRoutes;
-
-
     int checkedTimeIDForSituation;
+
+    int timeIDforStartStopRoute;
     public static int responseCodeRoutes;
     HttpURLConnection connectionRoutes;
     public RetrieveAllCancelledRoutes mTask;
     TextView tvRouteName;
     TextView tvStudentServiceStatus;
-    TextView tvReportDialogSetTimeTitle;
 
 
     @Nullable
@@ -192,11 +195,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 layoutRouteInfo.setVisibility(View.VISIBLE);
             }
         } else {
-            if (AppGlobals.getUserType() == 2) {
-                layoutDriverButtons.setVisibility(View.GONE);
-            }
-            layoutRouteCancelled.setVisibility(View.VISIBLE);
-            if (AppGlobals.getUserType() != 0) {
+            if (AppGlobals.getUserType() != 0 || AppGlobals.getUserType() != 2) {
+                layoutRouteCancelled.setVisibility(View.VISIBLE);
                 layoutRouteInfo.setVisibility(View.GONE);
                 if (status == 2) {
                     tvRouteStatus.setText("Accident");
@@ -207,7 +207,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
             }
         }
-
     }
 
     public void setAppView() {
@@ -248,31 +247,68 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 if (Helpers.isNetworkAvailable()) {
                     if (Helpers.isHighAccuracyLocationServiceAvailable()) {
                         if (!DriverService.driverLocationReportingServiceIsRunning) {
-                            AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
-                                    getActivity());
-                            alertDialogRouteSwitch.setTitle("Start Route");
-                            alertDialogRouteSwitch
-                                    .setMessage("Are you sure?")
-                                    .setCancelable(false)
-                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            DriverService.driverLocationReportingServiceIsRunning = true;
-                                            new UpdateRouteStatus(getActivity()).execute("status=1");
-                                            getActivity().startService(new Intent(getActivity(), DriverService.class));
-                                            buttonStartStopRoute.setText("End Route");
-                                            Helpers.dismissProgressDialog();
-                                            AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
 
-                                            MainActivity.navigationView.getMenu().getItem(1).setChecked(true);
-                                        }
-                                    })
-                                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    });
-                            AlertDialog routeSwitchDialog = alertDialogRouteSwitch.create();
-                            routeSwitchDialog.show();
+                            final Dialog startRouteSelectTimeDialog = new Dialog(getActivity());
+                            startRouteSelectTimeDialog.setContentView(R.layout.layout_start_route_dialog);
+                            startRouteSelectTimeDialog.setTitle("Select a Time");
+                            startRouteSelectTimeDialog.setCancelable(false);
+
+                            final Button okButtonStartRoute = (Button) startRouteSelectTimeDialog.findViewById(R.id.btn_start_route_dialog_ok);
+                            rgStartRouteSelectTime = (RadioGroup) startRouteSelectTimeDialog.findViewById(R.id.rg_start_route_select_time);
+                            rbStartRouteSelectTimeOne = (RadioButton) startRouteSelectTimeDialog.findViewById(R.id.rb_start_route_select_time_one);
+                            rbStartRouteSelectTimeTwo = (RadioButton) startRouteSelectTimeDialog.findViewById(R.id.rb_start_route_select_time_two);
+                            rbStartRouteSelectTimeThree = (RadioButton) startRouteSelectTimeDialog.findViewById(R.id.rb_start_route_select_time_three);
+
+                            JSONArray jsonArray = null;
+                            try {
+                                jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                                JSONObject jsonObject = jsonArray.getJSONObject(0);
+                                JSONArray timingsArrayForID = new JSONArray(jsonObject.getString("timings"));
+                                for (int i = 0; i < timingsArrayForID.length(); i++) {
+                                    JSONObject timingsJsonObject = timingsArrayForID.getJSONObject(i);
+                                    String arrivalTime = timingsJsonObject.get("arrival_time").toString().substring(11, 16);
+                                    String departureTime = timingsJsonObject.get("departure_time").toString().substring(11, 16);
+                                    int id = timingsJsonObject.getInt("id");
+                                    String routeTime = "(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")";
+                                    if (i == 0) {
+                                        rbStartRouteSelectTimeOne.setText(routeTime);
+                                        rbStartRouteSelectTimeOne.setId(id);
+                                    } else if (i == 1) {
+                                        rbStartRouteSelectTimeTwo.setText(routeTime);
+                                        rbStartRouteSelectTimeTwo.setId(id);
+                                        rbStartRouteSelectTimeTwo.setVisibility(View.VISIBLE);
+                                    } else if (i == 2) {
+                                        rbStartRouteSelectTimeThree.setText(routeTime);
+                                        rbStartRouteSelectTimeThree.setId(id);
+                                        rbStartRouteSelectTimeThree.setVisibility(View.VISIBLE);
+                                    }
+                                }
+
+                                okButtonStartRoute.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Helpers.dismissProgressDialog();
+                                        DriverService.driverLocationReportingServiceIsRunning = true;
+                                        new UpdateRouteStatus(getActivity()).execute("status=1");
+                                        getActivity().startService(new Intent(getActivity(), DriverService.class));
+                                        buttonStartStopRoute.setText("End Route");
+                                        AppGlobals.replaceFragment(getFragmentManager(), new MapsFragment());
+                                        MainActivity.navigationView.getMenu().getItem(1).setChecked(true);
+                                        startRouteSelectTimeDialog.dismiss();
+                                    }
+                                });
+
+                                rgStartRouteSelectTime.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                                        okButtonStartRoute.setEnabled(true);
+                                        timeIDforStartStopRoute = rgStartRouteSelectTime.getCheckedRadioButtonId();
+                                    }
+                                });
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            startRouteSelectTimeDialog.show();
                         } else {
                             AlertDialog.Builder alertDialogRouteSwitch = new AlertDialog.Builder(
                                     getActivity());
@@ -282,7 +318,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     .setCancelable(false)
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-
                                             Helpers.showProgressDialog(getActivity(), "Ending Route");
                                             new android.os.Handler().postDelayed(
                                                     new Runnable() {
