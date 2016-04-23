@@ -220,12 +220,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             } else {
                 buttonStartStopRoute.setText("Start Route");
             }
-
-            if (AppGlobals.getRouteStatus() == 1 && !DriverService.driverLocationReportingServiceIsRunning) {
-                getActivity().startService(new Intent(getActivity(), DriverService.class));
-                buttonStartStopRoute.setText("End Route");
-                Toast.makeText(getActivity(), "Route was active. Location reporting started", Toast.LENGTH_LONG).show();
-            }
+//
+//            if (AppGlobals.getRouteStatus() == 1 && !DriverService.driverLocationReportingServiceIsRunning) {
+//                getActivity().startService(new Intent(getActivity(), DriverService.class));
+//                buttonStartStopRoute.setText("End Route");
+//                Toast.makeText(getActivity(), "Route was active. Location reporting started", Toast.LENGTH_LONG).show();
+//            }
         } else if (AppGlobals.getUserType() == 1) {
             layoutDriverButtons.setVisibility(View.GONE);
             tvUserType.setText("UserType: Student");
