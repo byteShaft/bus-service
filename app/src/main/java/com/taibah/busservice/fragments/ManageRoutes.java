@@ -51,7 +51,7 @@ public class ManageRoutes extends Fragment {
 
         routesListView = (ListView) convertView.findViewById(R.id.lv_list_routes);
 
-//        new RetrieveAllRegisteredRoutes().execute();
+        new RetrieveAllRegisteredRoutes().execute();
 
         routeIdsList = new ArrayList<>();
         hashMapRouteData = new HashMap<>();
@@ -112,8 +112,6 @@ public class ManageRoutes extends Fragment {
                             ArrayList<String> arrayListString = new ArrayList<>();
                             arrayListString.add(jsonObject.getString("name"));
                             arrayListString.add(jsonObject.getString("bus_number"));
-                            arrayListString.add(jsonObject.getString("arrival_time"));
-                            arrayListString.add(jsonObject.getString("departure_time"));
                             hashMapRouteData.put(jsonObject.getInt("id"), arrayListString);
                         }
                     }
@@ -157,18 +155,12 @@ public class ManageRoutes extends Fragment {
                 convertView = layoutInflater.inflate(R.layout.route_list_row, parent, false);
                 viewHolder.tvRouteListName = (TextView) convertView.findViewById(R.id.tv_route_list_name);
                 viewHolder.tvRouteListBusNumber = (TextView) convertView.findViewById(R.id.tv_route_list_bus_number);
-                viewHolder.tvRouteListArrivalTime = (TextView) convertView.findViewById(R.id.tv_route_list_arrival_time);
-                viewHolder.tvRouteListDepartureTime = (TextView) convertView.findViewById(R.id.tv_route_list_departure_time);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
             viewHolder.tvRouteListName.setText("Route Name: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(0));
             viewHolder.tvRouteListBusNumber.setText("Bus Number: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(1));
-            viewHolder.tvRouteListArrivalTime.setText("Arrival Time: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(2)
-                    .substring(hashMapRouteData.get(arrayListIntIds.get(position)).get(2).length() - 8));
-            viewHolder.tvRouteListDepartureTime.setText("Departure Time: " + hashMapRouteData.get(arrayListIntIds.get(position)).get(3)
-                    .substring(hashMapRouteData.get(arrayListIntIds.get(position)).get(3).length() - 8));
             return convertView;
         }
 
