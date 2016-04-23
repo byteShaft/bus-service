@@ -195,7 +195,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 layoutRouteInfo.setVisibility(View.VISIBLE);
             }
         } else {
-            if (AppGlobals.getUserType() != 0 || AppGlobals.getUserType() != 2) {
+            if (AppGlobals.getUserType() != 0 && AppGlobals.getUserType() != 2) {
                 layoutRouteCancelled.setVisibility(View.VISIBLE);
                 layoutRouteInfo.setVisibility(View.GONE);
                 if (status == 2) {
