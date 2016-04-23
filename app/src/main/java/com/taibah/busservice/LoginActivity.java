@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.taibah.busservice.Helpers.WebServiceHelpers;
 import com.taibah.busservice.gcm.QuickstartPreferences;
 import com.taibah.busservice.gcm.RegistrationIntentService;
 import com.taibah.busservice.utils.AppGlobals;
@@ -341,26 +342,31 @@ public class LoginActivity extends Activity {
 //                    }
                     connection.disconnect();
 
-                    url = new URL("http://46.101.75.194:8080/user");
+                    JSONArray userDataJsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                    Log.i("userDataJsonArray", "" + userDataJsonArray);
+                    JSONObject userDataJsonObject = userDataJsonArray.getJSONObject(0);
+                    JSONArray timingsArray = new JSONArray(userDataJsonObject.getString("timings"));
+                    JSONObject timingsObject = timingsArray.getJSONObject(0);
+                    String timingID = timingsObject.getString("id");
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/timings/" + timingID, "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
 
-                    connection = (HttpURLConnection) url.openConnection();
-                    connection.setDoOutput(false);
-                    connection.setDoInput(true);
-                    connection.setInstanceFollowRedirects(false);
-                    connection.setRequestMethod("GET");
-                    connection.setRequestProperty("X-Api-Key", token);
+                    String data = WebServiceHelpers.readResponse(connection);
+                    JSONObject jsonObject = new JSONObject(data);
+                    Log.i("jsonObject", "" + jsonObject);
 
-                    in = (InputStream) connection.getContent();
+                    JSONArray studentIdsArray = new JSONArray(jsonObject.getString("students"));
 
-                    sb = new StringBuilder();
-                    while ((ch = in.read()) != -1)
-                        sb.append((char) ch);
-
-                    JSONObject jsonObjectUser = new JSONObject(sb.toString());
-
-                    AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
-                    AppGlobals.putUserPassword(jsonObjectUser.getString("password"));
-                    AppGlobals.putStudentServiceAllowed(Integer.parseInt(jsonObjectUser.getString("allowed")));
+                    for (int i = 0; i < studentIdsArray.length(); i++) {
+                        JSONObject jsonObjectUser = studentIdsArray.getJSONObject(i);
+                        AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
+                        Log.i("jsonObjectUser", "" + jsonObjectUser);
+                        AppGlobals.putUserPassword(jsonObjectUser.getString("password"));
+                        AppGlobals.putStudentServiceAllowed(Integer.parseInt(jsonObjectUser.getString("allowed")));
+                    }
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -428,7 +434,8 @@ public class LoginActivity extends Activity {
         protected Void doInBackground(Void... params) {
             try {
                 pushNotificationsEnablerCounter++;
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+                JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                JSONObject jsonObject = jsonArray.getJSONObject(0);
                 String ID = jsonObject.getString("id");
                 URL url = new URL("http://46.101.75.194:8080/users/" + ID);
 

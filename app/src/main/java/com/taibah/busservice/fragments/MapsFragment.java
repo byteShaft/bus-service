@@ -153,7 +153,8 @@ public class MapsFragment extends Fragment {
         myMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
 
         try {
-            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+            JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+            JSONObject jsonObject = jsonArray.getJSONObject(0);
             startPoint = new LatLng(Double.parseDouble(jsonObject.getString("start_latitude")), Double.parseDouble(jsonObject.getString("start_longitude")));
             endPoint = new LatLng(Double.parseDouble(jsonObject.getString("end_latitude")), Double.parseDouble(jsonObject.getString("end_longitude")));
         } catch (JSONException e) {
@@ -400,22 +401,26 @@ public class MapsFragment extends Fragment {
         protected Void doInBackground(Void... params) {
             if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
                 try {
-                    JSONArray jsonArray1 = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
-                    JSONObject jsonObject = jsonArray1.getJSONObject(0);
-                    String ID = jsonObject.getString("id");
-                    Log.i("ID", ID);
+                    JSONArray userDataJsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                    Log.i("userDataJsonArray", "" + userDataJsonArray);
+                    JSONObject userDataJsonObject = userDataJsonArray.getJSONObject(0);
+                    JSONArray timingsArray = new JSONArray(userDataJsonObject.getString("timings"));
+                    JSONObject timingsObject = timingsArray.getJSONObject(0);
+                    String timingID = timingsObject.getString("id");
                     connection = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/routes/" + ID + "/students", "GET");
+                            ("http://46.101.75.194:8080/timings/" + timingID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
 
                     String data = WebServiceHelpers.readResponse(connection);
-                    JSONArray jsonArray = new JSONArray(data);
-                    Log.i("jsonArray", ": " + jsonArray);
+                    JSONObject jsonObject = new JSONObject(data);
+                    Log.i("jsonObject", "" + jsonObject);
 
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObjectArray = jsonArray.getJSONObject(i);
+                    JSONArray studentIdsArray = new JSONArray(jsonObject.getString("students"));
+
+                    for (int i = 0; i < studentIdsArray.length(); i++) {
+                        JSONObject jsonObjectArray = studentIdsArray.getJSONObject(i);
                         if (!studentIdsList.contains(jsonObjectArray.getInt("id")) && !jsonObjectArray.getString("attending").equals("0")
                                 && !jsonObjectArray.getString("allowed").equals("0")) {
                             studentIdsList.add(jsonObjectArray.getInt("id"));
@@ -428,16 +433,13 @@ public class MapsFragment extends Fragment {
                     }
 
                     connection = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/routes/" + ID, "GET");
+                            ("http://46.101.75.194:8080/timings/" + timingID, "GET");
                     connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                     connection.connect();
                     responseCode = connection.getResponseCode();
 
                     String data1 = WebServiceHelpers.readResponse(connection);
                     JSONObject jsonObject1 = new JSONObject(data1);
-                    Log.i("json", ": " + jsonObject1);
-
-
 
                     routeStatus = Integer.parseInt(jsonObject1.getString("status"));
 
@@ -455,7 +457,6 @@ public class MapsFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             Helpers.dismissProgressDialog();
-            Log.i("responseCode", ": " + responseCode);
             if (responseCode == 200) {
                 mMap.clear();
 

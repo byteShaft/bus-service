@@ -5,6 +5,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.taibah.busservice.fragments.HomeFragment;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,9 +33,8 @@ public class UpdateRouteStatus extends AsyncTask<String, Integer, Void> {
     protected Void doInBackground(String... params) {
         Log.i("UpdateRouteStatus", "Called");
         try {
-            JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-            String ID = jsonObject.getString("id");
-            URL url = new URL("http://46.101.75.194:8080/routes/" + ID);
+
+            URL url = new URL("http://46.101.75.194:8080/timings/" + HomeFragment.checkedTimeIDForSituation);
 
             connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
@@ -52,7 +54,7 @@ public class UpdateRouteStatus extends AsyncTask<String, Integer, Void> {
 
             responseCode = connection.getResponseCode();
 
-        } catch (IOException | JSONException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;

@@ -84,7 +84,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     HashMap<Integer, ArrayList<String>> hashMapRouteData;
 
     ListView listViewCancelledRoutes;
-    int checkedTimeIDForSituation;
+    public static int checkedTimeIDForSituation;
 
     int timeIDforStartStopRoute;
     public static int responseCodeRoutes;
@@ -466,11 +466,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void buildAlertDialogWithMultipleTimings() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Pick a time");
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -497,9 +492,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         @Override
         protected Void doInBackground(String... params) {
             try {
-                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
-                String ID = jsonObject.getString("id");
-                URL url = new URL("http://46.101.75.194:8080/routes/" + ID);
+//                JSONObject jsonObject = new JSONObject(AppGlobals.getStudentDriverRouteDetails());
+//                String ID = jsonObject.getString("id");
+                URL url = new URL("http://46.101.75.194:8080/timings/" + checkedTimeIDForSituation);
 
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setDoOutput(true);
@@ -517,7 +512,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 responseCode = connection.getResponseCode();
 
-            } catch (IOException | JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return null;
