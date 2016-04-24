@@ -25,6 +25,7 @@ public class AppGlobals extends Application {
     private static final String STUDENT_ALLOWED_VALUE = "student_allowed";
     private static final String USER_DATA = "user_data";
     public static String timingsIDforDriverMapView;
+    public static int timingIDForStatusUpdate;
 
     @Override
     public void onCreate() {
