@@ -47,14 +47,14 @@ public class UpdateRouteStatus extends AsyncTask<String, Integer, Void> {
             connection.setRequestProperty("charset", "utf-8");
             connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-            System.out.println("Update Status Response Code: " + responseCode);
-
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.writeBytes(params[0]);
             out.flush();
             out.close();
 
             responseCode = connection.getResponseCode();
+
+            System.out.println("Update Status Response Code: " + responseCode);
 
         } catch (IOException e) {
             e.printStackTrace();

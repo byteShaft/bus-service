@@ -304,6 +304,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     public void onCheckedChanged(RadioGroup group, int checkedId) {
                                         okButtonStartRoute.setEnabled(true);
                                         timeIDforStartStopRoute = rgStartRouteSelectTime.getCheckedRadioButtonId();
+                                        AppGlobals.timingIDForStatusUpdate = rgStartRouteSelectTime.getCheckedRadioButtonId();
                                     }
                                 });
                             } catch (JSONException e) {
@@ -364,8 +365,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             @Override
                             public void onCheckedChanged(RadioGroup group, int checkedId) {
                                 checkedTimeIDForSituation = rgSituationReportingSelectTime.getCheckedRadioButtonId();
-                                AppGlobals.timingIDForStatusUpdate = rgSituationReportingSelectTime.getCheckedRadioButtonId();
-                                System.out.println("Radio Group On Check Changed Called");
                                 String timeText = "";
                                 if (rbSelectTimeOne.getId() == checkedTimeIDForSituation) {
                                     timeText = rbSelectTimeOne.getText().toString();
