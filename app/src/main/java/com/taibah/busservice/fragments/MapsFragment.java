@@ -531,17 +531,17 @@ public class MapsFragment extends Fragment {
                     latLngDriverForStudent = new LatLng(Double.parseDouble(jsonObject1.getString("latitude"))
                             , Double.parseDouble(jsonObject1.getString("longitude")));
                     locationSpeedAndTimeStampForStudent = jsonObject1.getString("speed");
-//                    connection = WebServiceHelpers.openConnectionForUrl
-//                            ("http://46.101.75.194:8080/routes/" + ID, "GET");
-//                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-//                    connection.connect();
-//                    responseCode = connection.getResponseCode();
-//
-//                    String data1 = WebServiceHelpers.readResponse(connection);
-//                    JSONObject jsonObjectRouteStatus = new JSONObject(data1);
-//                    routeStatus = Integer.parseInt(jsonObjectRouteStatus.getString("status"));
-//
-//                    AppGlobals.putRouteStatus(routeStatus);
+                    connection = WebServiceHelpers.openConnectionForUrl
+                            ("http://46.101.75.194:8080/timings/" + ID, "GET");
+                    connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+
+                    String data1 = WebServiceHelpers.readResponse(connection);
+                    JSONObject jsonObjectRouteStatus = new JSONObject(data1);
+                    routeStatus = Integer.parseInt(jsonObjectRouteStatus.getString("status"));
+
+                    AppGlobals.putRouteStatus(routeStatus);
                     isNetworkNotAvailable = false;
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();

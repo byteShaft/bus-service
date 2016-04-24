@@ -295,13 +295,55 @@ public class ScheduleFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Helpers.dismissProgressDialog();
             if (responseCode != 200) {
+                Helpers.dismissProgressDialog();
                 Toast.makeText(getActivity(), "Failed to update", Toast.LENGTH_LONG).show();
                 getActivity().onBackPressed();
             } else {
                 Toast.makeText(getActivity(), "Timing updated successfully", Toast.LENGTH_LONG).show();
+                new FetchStudentTimingDetails().execute();
             }
+        }
+    }
+
+    public class FetchStudentTimingDetails extends AsyncTask<String, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
+                JSONObject jsonObject = jsonArray.getJSONObject(0);
+
+                // timing ID for student
+                JSONArray timingsArray = new JSONArray(jsonObject.getString("timings"));
+                JSONObject timingsJsonObject = timingsArray.getJSONObject(0);
+                String timingID = timingsJsonObject.getString("id");
+
+                connection = WebServiceHelpers.openConnectionForUrl
+                        ("http://46.101.75.194:8080/timings/" + timingID, "GET");
+                connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
+                connection.connect();
+                responseCode = connection.getResponseCode();
+
+                String timingsData = WebServiceHelpers.readResponse(connection);
+                JSONObject jsonObjectRouteStatus = new JSONObject(timingsData);
+                Log.i("Timings Data", ""  + jsonObjectRouteStatus);
+
+                AppGlobals.putArrivalTime(jsonObjectRouteStatus.getString("arrival_time"));
+                AppGlobals.putDepartureTime(jsonObjectRouteStatus.getString("departure_time"));
+                System.out.println("Arrival Time" + jsonObjectRouteStatus.getString("arrival_time"));
+                System.out.println("Departure Time" + jsonObjectRouteStatus.getString("departure_time"));
+
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Helpers.dismissProgressDialog();
         }
     }
 

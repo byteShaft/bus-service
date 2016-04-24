@@ -34,7 +34,9 @@ public class UpdateRouteStatus extends AsyncTask<String, Integer, Void> {
         Log.i("UpdateRouteStatus", "Called");
         try {
 
-            URL url = new URL("http://46.101.75.194:8080/timings/" + HomeFragment.checkedTimeIDForSituation);
+            URL url = new URL("http://46.101.75.194:8080/timings/" + AppGlobals.timingIDForStatusUpdate);
+
+            System.out.println("Timing ID for Status Update: " + AppGlobals.timingIDForStatusUpdate);
 
             connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
@@ -45,14 +47,14 @@ public class UpdateRouteStatus extends AsyncTask<String, Integer, Void> {
             connection.setRequestProperty("charset", "utf-8");
             connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
 
-            System.out.println("Update Status Response Code: " + responseCode);
-
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.writeBytes(params[0]);
             out.flush();
             out.close();
 
             responseCode = connection.getResponseCode();
+
+            System.out.println("Update Status Response Code: " + responseCode);
 
         } catch (IOException e) {
             e.printStackTrace();

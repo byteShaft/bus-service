@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -131,6 +132,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 if (AppGlobals.getRouteStatus() < 2) {
                     tvRouteTimings.setText(sbTimings);
+                }
+                if (AppGlobals.getUserType() == 1 && AppGlobals.getArrivalTime() != null
+                        && AppGlobals.getDepartureTime() != null) {
+                    StringBuilder studentTimingBuilder = new StringBuilder();
+                    String arrivalTime = AppGlobals.getArrivalTime().substring(11, 16);
+                    String departureTime = AppGlobals.getDepartureTime().substring(11, 16);
+                    studentTimingBuilder.append("(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")\n");
+                    tvRouteTimings.setText(studentTimingBuilder);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -304,6 +313,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                     public void onCheckedChanged(RadioGroup group, int checkedId) {
                                         okButtonStartRoute.setEnabled(true);
                                         timeIDforStartStopRoute = rgStartRouteSelectTime.getCheckedRadioButtonId();
+                                        AppGlobals.timingIDForStatusUpdate = rgStartRouteSelectTime.getCheckedRadioButtonId();
                                     }
                                 });
                             } catch (JSONException e) {
@@ -446,8 +456,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                             } else {
                                                 routeStatusToPut = radioIndex;
                                             }
-
-//                                            checkedTimeIDForSituation
 
                                             new SituationReportTask().execute("status=" + routeStatusToPut);
 
