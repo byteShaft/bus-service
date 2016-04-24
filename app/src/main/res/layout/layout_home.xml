@@ -107,7 +107,7 @@
                 android:textSize="16dp"
                 android:textStyle="bold"/>
             <TextView
-                android:id="@+id/tv_home_assined_route_timing"
+                android:id="@+id/tv_home_assigned_route_timing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14dp"
