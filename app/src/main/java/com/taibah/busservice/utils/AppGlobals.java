@@ -26,6 +26,8 @@ public class AppGlobals extends Application {
     private static final String USER_DATA = "user_data";
     public static String timingsIDforDriverMapView;
     public static int timingIDForStatusUpdate;
+    public static final String ARRIVAL_TIME = "arrival_time";
+    public static final String DEPARTTURE_TIME = "departure_time";
 
     @Override
     public void onCreate() {
@@ -48,6 +50,22 @@ public class AppGlobals extends Application {
 
     public static String getUsername() {
         return sPreferences.getString(USER_NAME, null);
+    }
+
+    public static void putArrivalTime(String arrivalTime) {
+        sPreferences.edit().putString(ARRIVAL_TIME, arrivalTime).apply();
+    }
+
+    public static void putDepartureTime(String departureTime) {
+        sPreferences.edit().putString(DEPARTTURE_TIME, departureTime).apply();
+    }
+
+    public static String getArrivalTime() {
+        return sPreferences.getString(ARRIVAL_TIME, null);
+    }
+
+    public static String getDepartureTime() {
+        return sPreferences.getString(DEPARTTURE_TIME, null);
     }
 
     public static void putUsername(String username) {
