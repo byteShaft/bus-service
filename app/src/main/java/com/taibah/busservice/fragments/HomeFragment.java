@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.StringBuilderPrinter;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -102,7 +101,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         tvUserType = (TextView) convertView.findViewById(R.id.tv_user_type);
         tvRouteStatus = (TextView) convertView.findViewById(R.id.tv_route_status);
-        tvRouteTimings = (TextView) convertView.findViewById(R.id.tv_home_assined_route_timing);
+        tvRouteTimings = (TextView) convertView.findViewById(R.id.tv_home_assigned_route_timing);
         tvRouteClickToRestore = (TextView) convertView.findViewById(R.id.tv_route_click_to_restore);
         tvRouteName = (TextView) convertView.findViewById(R.id.tv_route_name_home_fragment);
         tvStudentServiceStatus = (TextView) convertView.findViewById(R.id.tv_student_service_status_home_fragment);
@@ -129,17 +128,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     String departureTime = timingsJsonObject.get("departure_time").toString().substring(11, 16);
                     sbTimings.append("(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")\n");
                 }
-
-                if (AppGlobals.getRouteStatus() < 2) {
-                    tvRouteTimings.setText(sbTimings);
-                }
-                if (AppGlobals.getUserType() == 1 && AppGlobals.getArrivalTime() != null
-                        && AppGlobals.getDepartureTime() != null) {
+                if (AppGlobals.getRouteStatus() < 2 && AppGlobals.getArrivalTime() != null) {
                     StringBuilder studentTimingBuilder = new StringBuilder();
-                    String arrivalTime = AppGlobals.getArrivalTime().substring(11, 16);
-                    String departureTime = AppGlobals.getDepartureTime().substring(11, 16);
-                    studentTimingBuilder.append("(" + Helpers.convertTimeForUser(arrivalTime) + " - " + Helpers.convertTimeForUser(departureTime) + ")\n");
-                    tvRouteTimings.setText(studentTimingBuilder);
+                    String arrivalTime2 = AppGlobals.getArrivalTime().substring(11, 16);
+                    String departureTime2 = AppGlobals.getDepartureTime().substring(11, 16);
+                    studentTimingBuilder.append("(" + Helpers.convertTimeForUser(arrivalTime2) + " - " + Helpers.convertTimeForUser(departureTime2) + ")\n");
+                    tvRouteTimings.setText(studentTimingBuilder.toString());
+                } else if (AppGlobals.getRouteStatus() < 2 && AppGlobals.getArrivalTime() == null) {
+                    tvRouteTimings.setText(sbTimings);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -72,6 +72,7 @@ public class ScheduleFragment extends Fragment {
                 if (radioCheckCounter > 1) {
                     new UpdateStudentTimingStatus().execute("timing_ids[]="
                             + rgScheduleTimings.getCheckedRadioButtonId());
+                    AppGlobals.timingIDForStatusUpdate = rgScheduleTimings.getCheckedRadioButtonId();
                 }
                 radioCheckCounter++;
             }
@@ -311,16 +312,8 @@ public class ScheduleFragment extends Fragment {
         @Override
         protected Void doInBackground(String... params) {
             try {
-                JSONArray jsonArray = new JSONArray(AppGlobals.getStudentDriverRouteDetails());
-                JSONObject jsonObject = jsonArray.getJSONObject(0);
-
-                // timing ID for student
-                JSONArray timingsArray = new JSONArray(jsonObject.getString("timings"));
-                JSONObject timingsJsonObject = timingsArray.getJSONObject(0);
-                String timingID = timingsJsonObject.getString("id");
-
                 connection = WebServiceHelpers.openConnectionForUrl
-                        ("http://46.101.75.194:8080/timings/" + timingID, "GET");
+                        ("http://46.101.75.194:8080/timings/" + AppGlobals.timingIDForStatusUpdate, "GET");
                 connection.setRequestProperty("X-Api-Key", AppGlobals.getToken());
                 connection.connect();
                 responseCode = connection.getResponseCode();

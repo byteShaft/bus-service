@@ -27,7 +27,7 @@ public class AppGlobals extends Application {
     public static String timingsIDforDriverMapView;
     public static int timingIDForStatusUpdate;
     public static final String ARRIVAL_TIME = "arrival_time";
-    public static final String DEPARTTURE_TIME = "departure_time";
+    public static final String DEPARTURE_TIME = "departure_time";
 
     @Override
     public void onCreate() {
@@ -57,7 +57,7 @@ public class AppGlobals extends Application {
     }
 
     public static void putDepartureTime(String departureTime) {
-        sPreferences.edit().putString(DEPARTTURE_TIME, departureTime).apply();
+        sPreferences.edit().putString(DEPARTURE_TIME, departureTime).apply();
     }
 
     public static String getArrivalTime() {
@@ -65,7 +65,7 @@ public class AppGlobals extends Application {
     }
 
     public static String getDepartureTime() {
-        return sPreferences.getString(DEPARTTURE_TIME, null);
+        return sPreferences.getString(DEPARTURE_TIME, null);
     }
 
     public static void putUsername(String username) {
