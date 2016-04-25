@@ -194,6 +194,14 @@ public class RegisterRoute extends Fragment {
         alertDialogBuilder.setTitle("Are you sure?");
         alertDialogBuilder.setMessage(message);
         alertDialogBuilder.setCancelable(false);
+        routeInfo = "name=" + routeName + "&" + "bus_number=" + busNumber
+                + "&" + "start_latitude=" + PlaceholderFragment.pointA.latitude
+                + "&" + "end_latitude=" + PlaceholderFragment.pointB.latitude
+                + "&" + "start_longitude=" + PlaceholderFragment.pointA.longitude
+                + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
+                + "&" + "total_stops=10"
+                + writeTimings();
+        System.out.println("Route Info: " + routeInfo);
         alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -204,6 +212,7 @@ public class RegisterRoute extends Fragment {
                         + "&" + "end_longitude=" + PlaceholderFragment.pointB.longitude
                         + "&" + "total_stops=10"
                         + writeTimings();
+                System.out.println("Route Info: " + routeInfo);
                 new RegisterRouteTask().execute();
             }
         });
@@ -615,20 +624,20 @@ public class RegisterRoute extends Fragment {
         for (int i = 0; i < routeTimeCounter; i++) {
             if (i == 0) {
                 tempTime = timeOne.getText().toString();
-                tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
-                tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                tempArrivalTime = tempTime.substring(+7, +16).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+18, +27).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             } else if (i == 1) {
                 tempTime = timeTwo.getText().toString();
-                tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
-                tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                tempArrivalTime = tempTime.substring(+7, +16).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+18, +27).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             } else if (i == 2) {
                 tempTime = timeThree.getText().toString();
-                tempArrivalTime = tempTime.substring(+7, +15).replaceAll("\\(", "").replaceAll("\\)","");
-                tempDepartureTime = tempTime.substring(+17, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                tempArrivalTime = tempTime.substring(+7, +16).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+18, +27).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             }

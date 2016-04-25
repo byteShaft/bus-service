@@ -362,7 +362,7 @@ public class LoginActivity extends Activity {
 
                     for (int i = 0; i < studentIdsArray.length(); i++) {
                         JSONObject jsonObjectUser = studentIdsArray.getJSONObject(i);
-                        AppGlobals.putName(jsonObjectUser.getString("first_name") + " " + jsonObjectUser.getString("last_name"));
+                        AppGlobals.putName(userDataObject.getString("first_name") + " " + userDataObject.getString("last_name"));
                         Log.i("jsonObjectUser", "" + jsonObjectUser);
                         AppGlobals.putUserPassword(jsonObjectUser.getString("password"));
                         AppGlobals.putStudentServiceAllowed(Integer.parseInt(jsonObjectUser.getString("allowed")));

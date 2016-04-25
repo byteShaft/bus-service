@@ -237,7 +237,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             layoutAdminInfo.setVisibility(View.GONE);
             layoutRouteCancelled.setClickable(false);
         } else if (AppGlobals.getUserType() == 0) {
-            mTask = (RetrieveAllCancelledRoutes) new RetrieveAllCancelledRoutes().execute();
+//            mTask = (RetrieveAllCancelledRoutes) new RetrieveAllCancelledRoutes().execute();
             layoutDriverButtons.setVisibility(View.GONE);
             layoutAdminInfo.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Admin");
@@ -481,9 +481,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         MainActivity.isHomeFragmentOpen = false;
-        if (AppGlobals.getUserType() == 0) {
-            mTask.cancel(true);
-        }
+//        if (AppGlobals.getUserType() == 0) {
+//            mTask.cancel(true);
+//        }
     }
 
     public class SituationReportTask extends AsyncTask<String, Integer, Void> {
