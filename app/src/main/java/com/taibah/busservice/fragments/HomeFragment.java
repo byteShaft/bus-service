@@ -89,7 +89,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     int timeIDforStartStopRoute;
     public static int responseCodeRoutes;
     HttpURLConnection connectionRoutes;
-    public RetrieveAllCancelledRoutes mTask;
     TextView tvRouteName;
     TextView tvStudentServiceStatus;
 
@@ -237,7 +236,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             layoutAdminInfo.setVisibility(View.GONE);
             layoutRouteCancelled.setClickable(false);
         } else if (AppGlobals.getUserType() == 0) {
-//            mTask = (RetrieveAllCancelledRoutes) new RetrieveAllCancelledRoutes().execute();
             layoutDriverButtons.setVisibility(View.GONE);
             layoutAdminInfo.setVisibility(View.VISIBLE);
             tvUserType.setText("UserType: Admin");
@@ -481,9 +479,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         MainActivity.isHomeFragmentOpen = false;
-//        if (AppGlobals.getUserType() == 0) {
-//            mTask.cancel(true);
-//        }
     }
 
     public class SituationReportTask extends AsyncTask<String, Integer, Void> {
@@ -533,75 +528,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 Toast.makeText(getActivity(), "Situation Reported Successfully", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getActivity(), "Situation reporting failed. Please try again", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    public class RetrieveAllCancelledRoutes extends AsyncTask<Void, Integer, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            tvStatusRetrievingCancelledRoutes.setText("Retrieving cancelled routes list . . .");
-            tvStatusRetrievingCancelledRoutes.setTextColor(Color.GRAY);
-            tvStatusRetrievingCancelledRoutes.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (Helpers.isNetworkAvailable() && Helpers.isInternetWorking()) {
-                try {
-                    connectionRoutes = WebServiceHelpers.openConnectionForUrl
-                            ("http://46.101.75.194:8080/routes", "GET");
-                    connectionRoutes.setRequestProperty("X-Api-Key", AppGlobals.getToken());
-                    connectionRoutes.connect();
-                    responseCodeRoutes = connectionRoutes.getResponseCode();
-                    String data = WebServiceHelpers.readResponse(connectionRoutes);
-                    JSONArray jsonArray = new JSONArray(data);
-                    responseCodeRoutes = connectionRoutes.getResponseCode();
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        if (!routeIdsList.contains(jsonObject.getInt("id"))
-                                && !jsonObject.getString("status").equalsIgnoreCase("0")
-                                && !jsonObject.getString("status").equalsIgnoreCase("1")
-                                && !jsonObject.getString("driver").equals("null") && !jsonObject.getString("status").equals("null")) {
-                            routeIdsList.add(jsonObject.getInt("id"));
-                            ArrayList<String> arrayListString = new ArrayList<>();
-                            arrayListString.add(jsonObject.getString("name"));
-                            arrayListString.add(jsonObject.getString("bus_number"));
-                            arrayListString.add(jsonObject.getString("status"));
-                            String driverObject = jsonObject.getString("driver");
-                            JSONObject jsonObjectDriver = new JSONObject(driverObject);
-                            arrayListString.add(jsonObjectDriver.getString("phone"));
-                            hashMapRouteData.put(jsonObject.getInt("id"), arrayListString);
-                        }
-                    }
-
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Helpers.dismissProgressDialog();
-            if (responseCodeRoutes == 200) {
-                if (!routeIdsList.isEmpty()) {
-                    tvStatusRetrievingCancelledRoutes.setVisibility(View.GONE);
-                    layoutListCancelledRoutes.setVisibility(View.VISIBLE);
-                    CustomRoutesListAdapter customRoutesListAdapter = new CustomRoutesListAdapter(getContext(), R.layout.routes_cancelled_list_row, routeIdsList);
-                    listViewCancelledRoutes.setAdapter(customRoutesListAdapter);
-                } else {
-                    tvStatusRetrievingCancelledRoutes.setText("No cancelled route found.");
-                    tvStatusRetrievingCancelledRoutes.setTextColor(Color.BLACK);
-                }
-            } else {
-                tvStatusRetrievingCancelledRoutes.setText("Error retrieving cancelled routes status");
-                tvStatusRetrievingCancelledRoutes.setTextColor(Color.RED);
             }
         }
     }
