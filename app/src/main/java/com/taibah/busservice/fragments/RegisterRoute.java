@@ -325,7 +325,7 @@ public class RegisterRoute extends Fragment {
 
                 rgCreateRouteTimes.check(R.id.rb_register_route_timings_one);
 
-                timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")   ");
+                timeOne.setText("Time" + 1 + " (" + temporaryArrivalTime + "  -  " + temporaryDepartureTime + ")   ");
 
                 tpArrivalDepartureTime.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
                     @Override
@@ -337,11 +337,11 @@ public class RegisterRoute extends Fragment {
                         }
 
                         if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_one) {
-                            timeOne.setText("Time" + 1 + "  (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
+                            timeOne.setText("Time" + 1 + "  (" + temporaryArrivalTime + "  -  " + temporaryDepartureTime + ")  ");
                         } else if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_two) {
-                            timeTwo.setText("Time" + 2 + "  (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
+                            timeTwo.setText("Time" + 2 + "  (" + temporaryArrivalTime + "  -  " + temporaryDepartureTime + ")  ");
                         } else if (rgCreateRouteTimes.getCheckedRadioButtonId() == R.id.rb_register_route_timings_three) {
-                            timeThree.setText("Time" + 3 + "  (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
+                            timeThree.setText("Time" + 3 + "  (" + temporaryArrivalTime + "  -  " + temporaryDepartureTime + ")  ");
                         }
                     }
                 });
@@ -356,10 +356,10 @@ public class RegisterRoute extends Fragment {
                                 ibDeleteRouteTime.setVisibility(View.VISIBLE);
                             }
                             if (routeTimeCounter == 2) {
-                                timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
+                                timeTwo.setText("Time" + 2 + " (" + temporaryArrivalTime + "  -  " + temporaryDepartureTime + ")  ");
                                 timeTwo.setVisibility(View.VISIBLE);
                             } else if (routeTimeCounter == 3) {
-                                timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + " - " + temporaryDepartureTime + ")  ");
+                                timeThree.setText("Time" + 3 + " (" + temporaryArrivalTime + "  -  " + temporaryDepartureTime + ")  ");
                                 timeThree.setVisibility(View.VISIBLE);
                             }
                         } else {
@@ -625,19 +625,19 @@ public class RegisterRoute extends Fragment {
             if (i == 0) {
                 tempTime = timeOne.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +16).replaceAll("\\(", "").replaceAll("\\)","");
-                tempDepartureTime = tempTime.substring(+18, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+19, +29).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             } else if (i == 1) {
                 tempTime = timeTwo.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +16).replaceAll("\\(", "").replaceAll("\\)","");
-                tempDepartureTime = tempTime.substring(+18, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+19, +29).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             } else if (i == 2) {
                 tempTime = timeThree.getText().toString();
                 tempArrivalTime = tempTime.substring(+7, +16).replaceAll("\\(", "").replaceAll("\\)","");
-                tempDepartureTime = tempTime.substring(+18, +27).replaceAll("\\(", "").replaceAll("\\)","");
+                tempDepartureTime = tempTime.substring(+19, +29).replaceAll("\\(", "").replaceAll("\\)","");
                 readyArrivalTime = Helpers.convertTimeFormat12to24(tempArrivalTime);
                 readyDepartureTime = Helpers.convertTimeFormat12to24(tempDepartureTime);
             }
